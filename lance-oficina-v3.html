@@ -741,7 +741,7 @@ const wpLog=[
   {name:'Petre Dinu',    msg:'⚠️ Petre, GPS fuera de zona. ¿Todo bien?',   time:'14:35',ok:false},
 ];
 
-const FB_URL = 'https://lance-a99b4-default-rtdb.firebaseio.com';
+const FB_URL = 'https://lance-a99b4-default-rtdb.europe-west1.firebasedatabase.app';
 
 // ── Leer fichajes en tiempo real ──
 function startFirebaseListener(){
@@ -752,27 +752,52 @@ function startFirebaseListener(){
 }
 
 function loadFirebaseData(){
-  const today = new Date().toISOString().split('T')[0];
   fetch(`${FB_URL}/operarios_activos.json`)
     .then(r=>r.json())
     .then(data=>{
       if(!data) return;
-      // Actualizar estado de operarios con datos reales
       Object.values(data).forEach(op=>{
         if(!op||!op.nombre) return;
-        const w = WORKERS.find(w=>`${w.nombre} ${w.apellidos}`.toLowerCase().includes(op.nombre.toLowerCase()));
-        if(w){
-          w.status = op.activo ? 'in' : 'out';
-          w.arrival = op.tipo==='entrada' ? op.hora : w.arrival;
-          w.dep = op.tipo==='salida' ? op.hora : null;
-          if(op.ciudad) w.ciudad = op.ciudad;
+        // Buscar operario existente
+        let w = WORKERS.find(w=>
+          `${w.nombre} ${w.apellidos}`.toLowerCase().replace(/\s+/g,'_') ===
+          op.nombre.toLowerCase().replace(/\s+/g,'_') ||
+          `${w.nombre} ${w.apellidos}`.toLowerCase().includes(op.nombre.toLowerCase().split('_')[0])
+        );
+        // Si no existe, añadirlo dinámicamente
+        if(!w){
+          const parts = op.nombre.replace(/_/g,' ').split(' ');
+          const newId = Math.max(0,...WORKERS.map(x=>x.id))+1;
+          w = {
+            id: newId,
+            nombre: parts[0]||op.nombre,
+            apellidos: parts.slice(1).join(' ')||'',
+            dni:'', nie:'',
+            obra: op.ciudad||'',
+            pin:'----',
+            status:'pending',
+            arrival:null, dep:null, dist:null, h:0, extras:0
+          };
+          WORKERS.push(w);
         }
+        // Actualizar estado
+        w.status = op.activo ? 'in' : 'out';
+        if(op.tipo==='entrada'){
+          w.arrival = op.hora;
+          w.dep = null;
+        } else if(op.tipo==='salida'){
+          w.dep = op.hora;
+        }
+        if(op.ciudad) w.obra = op.ciudad+', '+( op.provincia||'');
       });
-      // Actualizar KPIs
+      // Actualizar KPIs y vistas
       const enObra = WORKERS.filter(w=>w.status==='in').length;
       const kvIn = document.getElementById('kv-in');
       if(kvIn) kvIn.textContent = enObra;
-      // Mostrar badge live
+      animKPI('kv-total', WORKERS.length);
+      // Refrescar tabla si está visible
+      if(document.getElementById('page-jornada').classList.contains('active')) renderJornada();
+      if(document.getElementById('page-operarios').classList.contains('active')) renderWorkers();
       showFirebaseBadge(Object.keys(data).length);
     })
     .catch(e=>console.log('Firebase read error:',e));
