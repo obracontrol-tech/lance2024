@@ -1250,20 +1250,28 @@ const APP_URL = 'https://obracontrolgps.net/lance-operario-v3.html';
 let lastWorkerAdded = null;
 
 function generarMsgWA(w){
-  return `🏗️ *CONSTRUCCIONES LANCE 2024 SL*\n\nHola ${w.nombre} ${w.apellidos} 👋\n\nTe enviamos tu acceso a *ObraControl GPS*:\n\n📱 Enlace de la app:\n👉 ${APP_URL}\n\n🔐 Tu PIN inicial: *${w.pin}*\n_(Podrás cambiarlo por uno personal al entrar)_\n\n📋 Pasos:\n1️⃣ Abre el enlace\n2️⃣ Elige tu idioma\n3️⃣ Escribe tu nombre\n4️⃣ Crea tu PIN personal\n5️⃣ ¡Ficha tu entrada!\n\n📍 Obra asignada:\n${w.obra||'Consulta con el encargado'}\n\n_ObraControl GPS · Construcciones Lance 2024 SL_`;
+  const doc = w.dni || w.nie || '';
+  return `🏗️ *CONSTRUCCIONES LANCE 2024 SL*\n\nHola ${w.nombre} ${w.apellidos} 👋\n\nTe enviamos tu acceso a *ObraControl GPS*:\n\n📱 Enlace de la app:\n👉 ${APP_URL}\n\n📄 Tu DNI/NIE: *${doc}*\n🔐 Tu PIN inicial: *${w.pin}*\n_(Podrás cambiarlo por uno personal al entrar)_\n\n📋 Pasos:\n1️⃣ Abre el enlace\n2️⃣ Elige tu idioma\n3️⃣ Introduce tu DNI o NIE\n4️⃣ Introduce el PIN que te hemos dado\n5️⃣ Crea tu PIN personal\n6️⃣ ¡Ficha tu entrada!\n\n📍 Obra asignada:\n${w.obra||'Consulta con el encargado'}\n\n_ObraControl GPS · Construcciones Lance 2024 SL_`;
 }
 
 function sendWaAlta(){
   if(!lastWorkerAdded) return;
   const msg = encodeURIComponent(generarMsgWA(lastWorkerAdded));
-  window.open(`https://wa.me/?text=${msg}`,'_blank');
+  const phone = (lastWorkerAdded.tel||'').replace(/[\s\-\(\)]/g,'');
+  let cleanPhone = phone.replace(/^\+/,'');
+  if(cleanPhone && !cleanPhone.startsWith('34')) cleanPhone = '34'+cleanPhone;
+  const url = cleanPhone ? `https://wa.me/${cleanPhone}?text=${msg}` : `https://wa.me/?text=${msg}`;
+  showToast(`📱 Abriendo WhatsApp...`,'ok');
+  setTimeout(()=>{ window.location.href = url; }, 500);
 }
 
 function sendWaOperario(id){
   const w = WORKERS.find(w=>w.id===id); if(!w) return;
   const msg = encodeURIComponent(generarMsgWA(w));
-  const phone = (w.tel||'').replace(/[\s\-\+]/g,'');
-  const url = phone ? `https://wa.me/34${phone}?text=${msg}` : `https://wa.me/?text=${msg}`;
+  const phone = (w.tel||'').replace(/[\s\-\(\)]/g,'');
+  let cleanPhone = phone.replace(/^\+/,'');
+  if(cleanPhone && !cleanPhone.startsWith('34')) cleanPhone = '34'+cleanPhone;
+  const url = cleanPhone ? `https://wa.me/${cleanPhone}?text=${msg}` : `https://wa.me/?text=${msg}`;
   showToast(`📱 Abriendo WhatsApp para ${w.nombre}`,'ok');
   setTimeout(()=>{ window.location.href = url; }, 500);
 }
@@ -1418,7 +1426,6 @@ function sendResumenWA(){
   window.open(`https://wa.me/${ENCARGADO_WA}?text=${msg}`,'_blank');
   showToast('📱 Abriendo WhatsApp...','ok');
 }
-
 // ── TOAST ──
 function showToast(msg,type='ok'){
   const t=document.getElementById('toast');
