@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="es"><head>
+<html lang="es">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ObraControl — Panel de Oficina · Construcciones Lance 2024 SL</title>
@@ -780,6 +781,15 @@ let WORKERS = [
   {id:52,nombre:'MOHAMED',apellidos:'ISHMY BANGURA',dni:'',nie:'Z1700431T',obra:'',pin:'1043',status:'pending',arrival:null,dep:null,dist:null,h:0,extras:0},
   {id:53,nombre:'AROUNA',apellidos:'OUTTARA',dni:'',nie:'Y9310474L',obra:'',pin:'1044',status:'pending',arrival:null,dep:null,dist:null,h:0,extras:0},
   {id:54,nombre:'BABACAR',apellidos:'DIONE',dni:'',nie:'Z1193232C',obra:'',pin:'1045',status:'pending',arrival:null,dep:null,dist:null,h:0,extras:0},
+  {id:55,nombre:'BABA',apellidos:'FANE',dni:'',nie:'Z1568134E',obra:'',pin:'1046',status:'pending',arrival:null,dep:null,dist:null,h:0,extras:0},
+  {id:56,nombre:'ESPERANZA MACARENA',apellidos:'GATA GATA',dni:'29443169H',nie:'',obra:'',pin:'1047',status:'pending',arrival:null,dep:null,dist:null,h:0,extras:0},
+  {id:57,nombre:'ANTONIO',apellidos:'DIAZ CELADA',dni:'77541275H',nie:'',obra:'',pin:'1048',status:'pending',arrival:null,dep:null,dist:null,h:0,extras:0},
+  {id:58,nombre:'JORGE',apellidos:'GONZALEZ HERNANDEZ',dni:'47393211D',nie:'',obra:'',pin:'1049',status:'pending',arrival:null,dep:null,dist:null,h:0,extras:0},
+  {id:59,nombre:'BASILIO',apellidos:'FLORES PARRA',dni:'47210626K',nie:'',obra:'',pin:'1050',status:'pending',arrival:null,dep:null,dist:null,h:0,extras:0},
+  {id:60,nombre:'JUAN ANTONIO',apellidos:'GOMEZ RAMIREZ',dni:'34357215E',nie:'',obra:'',pin:'1051',status:'pending',arrival:null,dep:null,dist:null,h:0,extras:0},
+  {id:61,nombre:'MANUEL',apellidos:'SANCHEZ LONGARES',dni:'29535990B',nie:'',obra:'',pin:'1052',status:'pending',arrival:null,dep:null,dist:null,h:0,extras:0},
+  {id:62,nombre:'TATARU',apellidos:'DORINA',dni:'',nie:'X8951693R',obra:'',pin:'1053',status:'pending',arrival:null,dep:null,dist:null,h:0,extras:0},
+  {id:63,nombre:'WILINSTON GERMAN',apellidos:'PEREZ SANCLAIR',dni:'',nie:'Z1707702A',obra:'',pin:'1054',status:'pending',arrival:null,dep:null,dist:null,h:0,extras:0},
 ];
 // Reset solo si URL tiene ?reset=1 (uso manual)
 if(new URLSearchParams(window.location.search).get('reset')==='1'){
@@ -1236,7 +1246,7 @@ function resetForm(){
 }
 
 // ── WHATSAPP ALTA ──
-const APP_URL = 'https://pedrosaborrego-ai.github.io/lance2024/lance-operario-v3.html';
+const APP_URL = 'https://obracontrolgps.net/lance-operario-v3.html';
 let lastWorkerAdded = null;
 
 function generarMsgWA(w){
