@@ -439,7 +439,48 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);}
     <div class="lang-btn" onclick="selLang('fr',this)"><div class="lf">🇫🇷</div><div><div class="ln">Français</div><div class="lnat">Français</div></div></div>
     <div class="lang-btn" onclick="selLang('en',this)"><div class="lf">🇬🇧</div><div><div class="ln">English</div><div class="lnat">English</div></div></div>
   </div>
-  <button class="btn-main" onclick="goTo('s-name')">Continuar →</button>
+  <button class="btn-main" onclick="goTo('s-consent')">Continuar →</button>
+</div>
+
+<!-- ══════════════════════════════
+     SCREEN 1.5: CONSENTIMIENTO RGPD
+══════════════════════════════ -->
+<div class="screen hidden" id="s-consent">
+  <div class="logo-wrap" style="margin-bottom:12px;">
+    <svg class="logo-img" style="width:120px;" viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg">
+      <rect x="148" y="60" width="104" height="140" fill="#1B4F8C"/>
+      <rect x="245" y="95" width="70" height="105" fill="none" stroke="#1B4F8C" stroke-width="8"/>
+      <rect x="85" y="115" width="63" height="85" fill="none" stroke="#1B4F8C" stroke-width="8"/>
+      <rect x="170" y="72" width="60" height="55" fill="none" stroke="#EDF2F7" stroke-width="6"/>
+      <line x1="60" y1="200" x2="340" y2="200" stroke="#1B4F8C" stroke-width="7"/>
+      <text x="200" y="232" text-anchor="middle" font-family="Montserrat,Arial" font-size="28" font-weight="400" fill="#1B4F8C" letter-spacing="2">construcciones</text>
+      <text x="200" y="272" text-anchor="middle" font-family="Montserrat,Arial" font-size="56" font-weight="900" fill="#1B4F8C" letter-spacing="4">LANCE</text>
+    </svg>
+  </div>
+
+  <div class="setup-title" id="consent-title">Consentimiento de uso</div>
+  
+  <div id="consent-text" style="width:100%;max-width:310px;background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px;max-height:280px;overflow-y:auto;font-size:12px;color:var(--text);line-height:1.6;">
+    <div style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--blue3);margin-bottom:8px;">PROTECCIÓN DE DATOS — RGPD</div>
+    <div id="consent-body">
+      <strong>Construcciones Lance 2024 SL</strong> informa que esta aplicación recopila los siguientes datos con fines de control de presencia laboral:<br><br>
+      📍 <strong>Ubicación GPS</strong> — Para verificar tu presencia en la zona de obra durante la jornada laboral.<br><br>
+      🕐 <strong>Hora de fichaje</strong> — Para registrar la entrada y salida del puesto de trabajo.<br><br>
+      Estos datos se tratan conforme al <strong>Reglamento General de Protección de Datos (UE) 2016/679</strong> y la <strong>Ley Orgánica 3/2018 (LOPDGDD)</strong>.<br><br>
+      Los datos serán accesibles únicamente por el personal autorizado de la empresa y no serán cedidos a terceros.<br><br>
+      Puedes ejercer tus derechos de acceso, rectificación, supresión y portabilidad contactando con la empresa.
+    </div>
+  </div>
+
+  <div style="width:100%;max-width:310px;display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;">
+    <input type="checkbox" id="consent-check" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:var(--blue2);" onchange="document.getElementById('consent-btn').disabled=!this.checked">
+    <label for="consent-check" id="consent-label" style="font-size:12px;color:var(--text);line-height:1.5;cursor:pointer;">
+      He leído y acepto el tratamiento de mis datos de <strong>ubicación GPS</strong> y <strong>fichaje horario</strong> por parte de Construcciones Lance 2024 SL.
+    </label>
+  </div>
+
+  <button class="btn-main" id="consent-btn" onclick="acceptConsent()" disabled>Aceptar y continuar →</button>
+  <button class="btn-sec" onclick="goTo('s-lang')">← Volver</button>
 </div>
 
 <!-- ══════════════════════════════
@@ -853,6 +894,74 @@ function selLang(l, el){
   el.classList.add('sel');
   document.body.style.direction = l==='ar'?'rtl':'ltr';
   document.getElementById('lt').textContent = t('lang_select');
+  // Actualizar consentimiento en el idioma elegido
+  updateConsent();
+}
+
+// ── CONSENTIMIENTO RGPD MULTIIDIOMA ──
+const CONSENT = {
+  es: {
+    title: 'Consentimiento de uso',
+    body: '<strong>Construcciones Lance 2024 SL</strong> informa que esta aplicación recopila los siguientes datos con fines de control de presencia laboral:<br><br>📍 <strong>Ubicación GPS</strong> — Para verificar tu presencia en la zona de obra durante la jornada laboral.<br><br>🕐 <strong>Hora de fichaje</strong> — Para registrar la entrada y salida del puesto de trabajo.<br><br>Estos datos se tratan conforme al <strong>Reglamento General de Protección de Datos (UE) 2016/679</strong> y la <strong>Ley Orgánica 3/2018 (LOPDGDD)</strong>.<br><br>Los datos serán accesibles únicamente por el personal autorizado de la empresa y no serán cedidos a terceros.<br><br>Puedes ejercer tus derechos de acceso, rectificación, supresión y portabilidad contactando con la empresa.',
+    check: 'He leído y acepto el tratamiento de mis datos de <strong>ubicación GPS</strong> y <strong>fichaje horario</strong> por parte de Construcciones Lance 2024 SL.',
+    btn: 'Aceptar y continuar →',
+    back: '← Volver'
+  },
+  ca: {
+    title: 'Consentiment d\'ús',
+    body: '<strong>Construcciones Lance 2024 SL</strong> informa que aquesta aplicació recopila les següents dades amb fins de control de presència laboral:<br><br>📍 <strong>Ubicació GPS</strong> — Per verificar la teva presència a la zona d\'obra durant la jornada laboral.<br><br>🕐 <strong>Hora de fitxatge</strong> — Per registrar l\'entrada i sortida del lloc de treball.<br><br>Aquestes dades es tracten conforme al <strong>Reglament General de Protecció de Dades (UE) 2016/679</strong> i la <strong>Llei Orgànica 3/2018 (LOPDGDD)</strong>.<br><br>Les dades seran accessibles únicament pel personal autoritzat de l\'empresa i no seran cedides a tercers.<br><br>Pots exercir els teus drets d\'accés, rectificació, supressió i portabilitat contactant amb l\'empresa.',
+    check: 'He llegit i accepto el tractament de les meves dades d\'<strong>ubicació GPS</strong> i <strong>fitxatge horari</strong> per part de Construcciones Lance 2024 SL.',
+    btn: 'Acceptar i continuar →',
+    back: '← Tornar'
+  },
+  ro: {
+    title: 'Consimțământ de utilizare',
+    body: '<strong>Construcciones Lance 2024 SL</strong> informează că această aplicație colectează următoarele date în scopul controlului prezenței la locul de muncă:<br><br>📍 <strong>Localizare GPS</strong> — Pentru a verifica prezența ta în zona șantierului în timpul programului de lucru.<br><br>🕐 <strong>Ora de pontaj</strong> — Pentru a înregistra intrarea și ieșirea de la locul de muncă.<br><br>Aceste date sunt prelucrate conform <strong>Regulamentului General privind Protecția Datelor (UE) 2016/679</strong>.<br><br>Datele vor fi accesibile doar personalului autorizat al companiei și nu vor fi transmise terților.<br><br>Îți poți exercita drepturile de acces, rectificare, ștergere și portabilitate contactând compania.',
+    check: 'Am citit și accept prelucrarea datelor mele de <strong>localizare GPS</strong> și <strong>pontaj</strong> de către Construcciones Lance 2024 SL.',
+    btn: 'Acceptă și continuă →',
+    back: '← Înapoi'
+  },
+  ar: {
+    title: 'موافقة الاستخدام',
+    body: '<strong>Construcciones Lance 2024 SL</strong> تُعلم أن هذا التطبيق يجمع البيانات التالية لأغراض مراقبة الحضور في العمل:<br><br>📍 <strong>موقع GPS</strong> — للتحقق من تواجدك في منطقة العمل خلال ساعات الدوام.<br><br>🕐 <strong>وقت التسجيل</strong> — لتسجيل الدخول والخروج من مكان العمل.<br><br>تتم معالجة هذه البيانات وفقًا <strong>للائحة العامة لحماية البيانات (الاتحاد الأوروبي) 2016/679</strong>.<br><br>ستكون البيانات متاحة فقط للموظفين المصرح لهم في الشركة ولن يتم تسليمها لأطراف ثالثة.<br><br>يمكنك ممارسة حقوقك في الوصول والتصحيح والحذف عن طريق الاتصال بالشركة.',
+    check: 'لقد قرأت وأوافق على معالجة بيانات <strong>موقع GPS</strong> و<strong>تسجيل الحضور</strong> من قبل Construcciones Lance 2024 SL.',
+    btn: 'قبول ومتابعة →',
+    back: '→ رجوع'
+  },
+  fr: {
+    title: 'Consentement d\'utilisation',
+    body: '<strong>Construcciones Lance 2024 SL</strong> informe que cette application collecte les données suivantes à des fins de contrôle de présence au travail :<br><br>📍 <strong>Localisation GPS</strong> — Pour vérifier ta présence dans la zone de chantier pendant les heures de travail.<br><br>🕐 <strong>Heure de pointage</strong> — Pour enregistrer l\'entrée et la sortie du lieu de travail.<br><br>Ces données sont traitées conformément au <strong>Règlement Général sur la Protection des Données (UE) 2016/679</strong>.<br><br>Les données seront accessibles uniquement au personnel autorisé de l\'entreprise et ne seront pas cédées à des tiers.<br><br>Tu peux exercer tes droits d\'accès, de rectification, de suppression et de portabilité en contactant l\'entreprise.',
+    check: 'J\'ai lu et j\'accepte le traitement de mes données de <strong>localisation GPS</strong> et de <strong>pointage horaire</strong> par Construcciones Lance 2024 SL.',
+    btn: 'Accepter et continuer →',
+    back: '← Retour'
+  },
+  en: {
+    title: 'Consent for use',
+    body: '<strong>Construcciones Lance 2024 SL</strong> informs that this application collects the following data for the purpose of workplace attendance control:<br><br>📍 <strong>GPS Location</strong> — To verify your presence in the construction site area during working hours.<br><br>🕐 <strong>Clock-in time</strong> — To record entry and exit from the workplace.<br><br>This data is processed in accordance with the <strong>General Data Protection Regulation (EU) 2016/679</strong>.<br><br>Data will only be accessible to authorised company personnel and will not be shared with third parties.<br><br>You may exercise your rights of access, rectification, erasure and portability by contacting the company.',
+    check: 'I have read and accept the processing of my <strong>GPS location</strong> and <strong>clock-in/out</strong> data by Construcciones Lance 2024 SL.',
+    btn: 'Accept and continue →',
+    back: '← Back'
+  }
+};
+
+function updateConsent(){
+  const c = CONSENT[lang] || CONSENT.es;
+  const title = document.getElementById('consent-title');
+  const body = document.getElementById('consent-body');
+  const label = document.getElementById('consent-label');
+  const btn = document.getElementById('consent-btn');
+  const backBtns = document.querySelectorAll('#s-consent .btn-sec');
+  if(title) title.textContent = c.title;
+  if(body) body.innerHTML = c.body;
+  if(label) label.innerHTML = c.check;
+  if(btn) btn.textContent = c.btn;
+  if(backBtns.length) backBtns[0].textContent = c.back;
+}
+
+function acceptConsent(){
+  localStorage.setItem('lance_consent', 'accepted');
+  localStorage.setItem('lance_consent_date', new Date().toISOString());
+  goTo('s-name');
 }
 function switchLang(l){
   lang=l;
