@@ -237,6 +237,29 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
 <body>
 
 <!-- LOGIN -->
+<!-- PANTALLA BLOQUEADA -->
+<div id="blocked-screen" style="display:none;position:fixed;inset:0;z-index:200;background:linear-gradient(135deg,#0A1628 0%,#1B3A6B 50%,#0A1628 100%);display:none;align-items:center;justify-content:center;padding:24px;">
+  <div style="background:rgba(255,255,255,.97);border-radius:24px;padding:40px 36px;width:100%;max-width:440px;box-shadow:0 32px 80px rgba(0,0,0,.4);text-align:center;">
+    <div style="font-size:64px;margin-bottom:16px;">🔒</div>
+    <div style="font-family:'Montserrat',sans-serif;font-size:22px;font-weight:800;color:#DC2626;margin-bottom:10px;">CONSOLA BLOQUEADA</div>
+    <div style="font-size:13px;color:#4A6080;line-height:1.6;margin-bottom:24px;">
+      La licencia de esta aplicación ha caducado o no está activa.<br><br>
+      Contacte con <strong>ObraControl GPS</strong> para renovar su suscripción.
+    </div>
+    <div style="background:#F4F7FC;border:1px solid #E2EAF4;border-radius:12px;padding:16px;margin-bottom:16px;">
+      <div style="font-size:11px;color:#8FA5C0;margin-bottom:8px;">📞 Contacto:</div>
+      <div style="font-size:14px;font-weight:700;color:#1A2840;">Juan Manuel Pedrosa</div>
+      <div style="font-size:12px;color:#2563AE;">pedrosaborrego@gmail.com</div>
+      <div style="font-size:12px;color:#2563AE;">+34 609 321 585</div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <input id="office-license-input" type="text" placeholder="Clave de licencia" style="width:100%;padding:12px;border:1.5px solid #E2EAF4;border-radius:9px;font-size:14px;text-align:center;text-transform:uppercase;letter-spacing:2px;font-weight:700;outline:none;">
+    </div>
+    <div id="office-license-msg" style="height:18px;font-size:11px;font-weight:700;color:#DC2626;margin-bottom:8px;font-family:'Montserrat',sans-serif;"></div>
+    <button onclick="verifyOfficeLicense()" style="width:100%;padding:12px;background:#E8621A;color:#fff;border:none;border-radius:9px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;">🔑 Activar licencia</button>
+  </div>
+</div>
+
 <div id="login-screen">
   <div class="login-card">
     <svg class="login-logo-svg" viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg">
@@ -757,6 +780,86 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
 <div class="toast" id="toast"></div>
 
 <script>
+// ── SISTEMA DE LICENCIAS — CONSOLA OFICINA ──
+const FB_URL_LICENSE = 'https://lance-a99b4-default-rtdb.europe-west1.firebasedatabase.app';
+
+function checkOfficeLicense(){
+  const savedLicense = localStorage.getItem('lance_office_license');
+  if(!savedLicense){
+    showBlockedScreen();
+    return;
+  }
+  fetch(`${FB_URL_LICENSE}/licencias/${savedLicense}.json`)
+    .then(r=>r.json())
+    .then(data=>{
+      if(!data || !data.activa){
+        showBlockedScreen();
+        return;
+      }
+      if(data.caducidad){
+        const hoy = new Date().toISOString().split('T')[0];
+        if(hoy > data.caducidad){
+          showBlockedScreen();
+          return;
+        }
+      }
+      // Licencia OK — mostrar login normal
+      document.getElementById('blocked-screen').style.display='none';
+      document.getElementById('login-screen').style.display='flex';
+    })
+    .catch(()=>{
+      // Sin conexión — dejar pasar si tiene licencia guardada
+      document.getElementById('blocked-screen').style.display='none';
+      document.getElementById('login-screen').style.display='flex';
+    });
+}
+
+function showBlockedScreen(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('blocked-screen').style.display='flex';
+}
+
+function verifyOfficeLicense(){
+  const input = document.getElementById('office-license-input');
+  const msg = document.getElementById('office-license-msg');
+  const key = (input.value||'').trim().toUpperCase();
+  if(!key){ msg.textContent='Introduce una clave de licencia'; return; }
+  msg.textContent='🔄 Verificando...';
+  msg.style.color='#2563AE';
+  
+  fetch(`${FB_URL_LICENSE}/licencias/${key}.json`)
+    .then(r=>r.json())
+    .then(data=>{
+      if(!data){
+        msg.style.color='#DC2626';
+        msg.textContent='❌ Clave no encontrada';
+        return;
+      }
+      if(!data.activa){
+        msg.style.color='#DC2626';
+        msg.textContent='❌ Licencia desactivada';
+        return;
+      }
+      if(data.caducidad){
+        const hoy = new Date().toISOString().split('T')[0];
+        if(hoy > data.caducidad){
+          msg.style.color='#DC2626';
+          msg.textContent=`❌ Licencia caducada el ${data.caducidad}`;
+          return;
+        }
+      }
+      localStorage.setItem('lance_office_license', key);
+      document.getElementById('blocked-screen').style.display='none';
+      document.getElementById('login-screen').style.display='flex';
+    })
+    .catch(()=>{
+      msg.style.color='#DC2626';
+      msg.textContent='⚠️ Sin conexión';
+    });
+}
+
+// Verificar licencia al cargar
+document.addEventListener('DOMContentLoaded', checkOfficeLicense);
 // ── JORNADA ──
 const JORNADA = {
   'Lunes':    {t1s:'08:00',t1e:'13:00',t2s:'14:00',t2e:'18:00',total:9},
