@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ObraControl Pro — Tablero</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --verde:#0A3D2E;--verde2:#145A40;--verde3:#1E7A55;--verde4:#2AA06E;
+  --verde-light:#E8F5EE;--verde-pale:#F0FAF4;
+  --oro:#C8A84B;--oro2:#E2C36A;--oro3:#F5DFA0;--oro-l:#FDF8EC;
+  --bg:#F2F5F0;--white:#FFFFFF;
+  --border:#D8E8DC;--border2:#C0D8C8;
+  --text:#0D2818;--text2:#3A5A45;--text3:#7A9A85;
+  --red:#C0392B;--red-l:#FDEDEC;
+  --amber:#B7770D;--amber-l:#FEF9E7;
+  --purple:#6B21A8;--purple-l:#F3E8FF;
+  --shadow:0 2px 12px rgba(10,61,46,.08);
+  --shadow-lg:0 8px 32px rgba(10,61,46,.15);
+  --gold-grad:linear-gradient(135deg,#C8A84B,#E2C36A,#C8A84B);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(10,61,46,.04) 1px,transparent 0);background-size:28px 28px;pointer-events:none;z-index:0;}
+
+/* ── BLOQUEADA ── */
+#blocked-screen{position:fixed;inset:0;z-index:300;background:linear-gradient(160deg,#061A10,#0A3D2E,#061A10);display:none;align-items:center;justify-content:center;padding:24px;}
+.blocked-card{background:rgba(255,255,255,.04);border:1px solid rgba(200,168,75,.2);border-radius:24px;padding:36px 28px;width:100%;max-width:420px;text-align:center;backdrop-filter:blur(20px);}
+.lic-input{width:100%;padding:12px;background:rgba(255,255,255,.05);border:1.5px solid rgba(200,168,75,.3);border-radius:10px;color:var(--oro2);font-size:15px;text-align:center;letter-spacing:3px;font-weight:700;outline:none;font-family:'DM Mono',monospace;margin-bottom:8px;}
+.lic-msg{height:16px;font-size:11px;font-weight:700;color:var(--red);margin-bottom:10px;text-align:center;}
+.btn-activar{width:100%;padding:13px;background:var(--gold-grad);color:var(--verde);border:none;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;}
+
+/* ── LOGIN ── */
+#login-screen{position:fixed;inset:0;z-index:200;background:linear-gradient(160deg,#061A10 0%,#0A3D2E 60%,#061A10 100%);display:flex;align-items:center;justify-content:center;padding:24px;}
+#login-screen::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 2px 2px,rgba(200,168,75,.05) 1px,transparent 0);background-size:32px 32px;pointer-events:none;}
+.login-wrap{width:100%;max-width:380px;text-align:center;position:relative;z-index:1;}
+.logo-emblem{width:72px;height:72px;background:var(--gold-grad);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 8px 32px rgba(200,168,75,.3);}
+.logo-name{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:4px;color:var(--oro2);}
+.logo-sub{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:3px;margin-bottom:28px;}
+.login-card{background:rgba(255,255,255,.04);border:1px solid rgba(200,168,75,.15);border-radius:20px;padding:28px 24px;backdrop-filter:blur(20px);}
+.pin-dots{display:flex;gap:14px;justify-content:center;margin-bottom:20px;}
+.pdot{width:14px;height:14px;border-radius:50%;border:2px solid rgba(200,168,75,.3);background:transparent;transition:all .15s;}
+.pdot.on{background:var(--oro2);border-color:var(--oro2);transform:scale(1.2);}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:260px;margin:0 auto;}
+.pk{height:56px;border-radius:12px;background:rgba(255,255,255,.05);border:1.5px solid rgba(200,168,75,.15);font-size:22px;font-weight:700;color:#fff;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;}
+.pk:hover{background:rgba(200,168,75,.1);border-color:var(--oro2);}
+.pk:active{background:var(--gold-grad);color:var(--verde);transform:scale(.92);}
+.pk.del{font-size:15px;color:rgba(255,255,255,.4);}
+.pk.zero{grid-column:2;}
+.pin-err{height:18px;text-align:center;font-size:11px;font-weight:700;color:#F1948A;margin-top:10px;}
+.pin-demo{font-size:11px;color:rgba(255,255,255,.2);margin-top:8px;}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
+.shake{animation:shake .4s ease;}
+
+/* ── APP ── */
+#app{display:none;position:relative;z-index:1;min-height:100vh;}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:230px;background:var(--verde);display:flex;flex-direction:column;z-index:50;box-shadow:4px 0 24px rgba(10,61,46,.3);}
+.sb-logo{padding:22px 18px 18px;border-bottom:1px solid rgba(200,168,75,.12);}
+.sb-logo-inner{display:flex;align-items:center;gap:12px;}
+.sb-emblem{width:38px;height:38px;background:var(--gold-grad);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.sb-brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:var(--oro2);line-height:1;}
+.sb-edition{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.3);}
+.sb-nav{flex:1;padding:16px 10px;overflow-y:auto;}
+.sb-lbl{font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(200,168,75,.3);padding:0 8px;margin:14px 0 5px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:all .15s;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);margin-bottom:1px;}
+.nav-item svg{width:15px;height:15px;flex-shrink:0;}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.nav-item.active{background:rgba(200,168,75,.15);color:var(--oro2);font-weight:700;border-left:3px solid var(--oro2);padding-left:7px;}
+.n-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;font-size:9px;font-weight:800;}
+.sb-footer{padding:14px 10px;border-top:1px solid rgba(200,168,75,.1);}
+.sb-user{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.05);}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--gold-grad);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--verde);flex-shrink:0;}
+.sb-name{font-size:11px;font-weight:700;color:#fff;}
+.sb-role{font-size:9px;color:rgba(255,255,255,.4);}
+.sb-logout{margin-top:6px;width:100%;padding:7px;background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:7px;color:rgba(255,255,255,.4);font-size:10px;cursor:pointer;transition:all .15s;}
+.sb-logout:hover{background:rgba(192,57,43,.2);border-color:rgba(192,57,43,.4);color:#F1948A;}
+
+.main-content{margin-left:230px;min-height:100vh;}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;box-shadow:0 1px 0 var(--border);}
+.topbar-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--verde);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.live-pill{display:flex;align-items:center;gap:5px;background:var(--verde-light);border:1px solid rgba(30,122,85,.2);padding:4px 10px;border-radius:20px;font-size:9px;font-weight:700;color:var(--verde3);letter-spacing:1px;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--verde3);animation:lp 2s infinite;}
+@keyframes lp{0%,100%{opacity:1}50%{opacity:.3}}
+.tb-clock{font-family:'DM Mono',sans-serif;font-size:13px;font-weight:700;color:var(--verde2);}
+.tb-date{font-size:10px;color:var(--text3);}
+
+.page{padding:22px 24px;display:none;}
+.page.active{display:block;}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.kpi-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;cursor:pointer;}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+.kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;}
+.kc-gold::after{background:var(--gold-grad);}
+.kc-verde::after{background:linear-gradient(90deg,var(--verde2),var(--verde4));}
+.kc-red::after{background:linear-gradient(90deg,var(--red),#F1948A);}
+.kc-purple::after{background:linear-gradient(90deg,var(--purple),#A855F7);}
+.kpi-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.kpi-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--text3);}
+.kpi-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.kc-gold .kpi-icon{background:var(--oro-l);}
+.kc-verde .kpi-icon{background:var(--verde-light);}
+.kc-red .kpi-icon{background:var(--red-l);}
+.kc-purple .kpi-icon{background:var(--purple-l);}
+.kpi-val{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:-1px;line-height:1;}
+.kc-gold .kpi-val{color:var(--oro);}
+.kc-verde .kpi-val{color:var(--verde3);}
+.kc-red .kpi-val{color:var(--red);}
+.kc-purple .kpi-val{color:var(--purple);}
+.kpi-sub{font-size:10px;color:var(--text3);margin-top:3px;}
+
+/* CARD */
+.card{background:var(--white);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px;}
+.card-hdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1.5px;color:var(--verde);display:flex;align-items:center;gap:8px;}
+.card-body{padding:18px;}
+.row-2{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:18px;}
+.row-2-eq{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl thead th{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);padding:9px 14px;border-bottom:1px solid var(--border);text-align:left;background:var(--verde-pale);}
+.tbl tbody td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;}
+.tbl tbody tr:last-child td{border-bottom:none;}
+.tbl tbody tr:hover td{background:var(--verde-pale);}
+.pill{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;font-size:9px;font-weight:700;}
+.p-in{background:var(--verde-light);color:var(--verde3);}
+.p-out{background:var(--red-l);color:var(--red);}
+.p-pend{background:var(--amber-l);color:var(--amber);}
+
+/* FORM */
+.form-g{margin-bottom:12px;}
+.form-lbl{display:block;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin-bottom:5px;}
+.form-ctrl{width:100%;background:var(--bg);border:1.5px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.form-ctrl:focus{border-color:var(--verde3);background:var(--white);}
+textarea.form-ctrl{resize:vertical;min-height:80px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.btn-primary{width:100%;padding:11px;background:linear-gradient(135deg,var(--verde2),var(--verde3));color:#fff;border:none;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;box-shadow:0 4px 12px rgba(10,61,46,.2);transition:all .15s;}
+.btn-primary:hover{transform:translateY(-1px);}
+.btn-gold{width:100%;padding:11px;background:var(--gold-grad);color:var(--verde);border:none;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;margin-top:8px;}
+.btn-secondary{width:100%;padding:10px;background:transparent;border:1.5px solid var(--border);border-radius:8px;font-size:12px;color:var(--text2);cursor:pointer;margin-top:6px;}
+.btn-danger{padding:5px 10px;background:var(--red-l);border:1px solid rgba(192,57,43,.2);color:var(--red);border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;transition:all .12s;}
+.btn-danger:hover{background:var(--red);color:#fff;}
+.btn-edit{padding:5px 10px;background:var(--verde-light);border:1px solid var(--border2);color:var(--verde3);border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;transition:all .12s;}
+.btn-edit:hover{background:var(--verde3);color:#fff;}
+
+/* SEARCH */
+.search-wrap{position:relative;margin-bottom:14px;}
+.search-inp{width:100%;padding:9px 12px 9px 36px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;color:var(--text);background:var(--white);outline:none;transition:border-color .2s;}
+.search-inp:focus{border-color:var(--verde3);}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;}
+
+/* CHAT IA */
+.chat-msg-bot{background:var(--verde-light);border-radius:12px 12px 12px 0;padding:10px 14px;margin-bottom:8px;max-width:88%;font-size:13px;color:var(--text);}
+.chat-msg-user{background:var(--verde2);color:#fff;border-radius:12px 12px 0 12px;padding:10px 14px;margin-bottom:8px;max-width:88%;margin-left:auto;font-size:13px;}
+.quick-btn{padding:5px 12px;background:var(--bg);border:1px solid var(--border);border-radius:20px;font-size:11px;cursor:pointer;color:var(--text2);transition:all .12s;}
+.quick-btn:hover{border-color:var(--verde3);color:var(--verde3);}
+
+/* WA ALTA */
+.wa-box{background:var(--verde-light);border:1px solid rgba(30,122,85,.2);border-radius:10px;padding:12px;margin-top:12px;display:none;}
+.wa-preview{font-size:11px;color:var(--text2);line-height:1.6;white-space:pre-wrap;background:var(--white);border-radius:7px;padding:10px;margin-bottom:10px;border:1px solid var(--border);}
+.btn-wa{width:100%;padding:10px;background:#25d366;border:none;border-radius:8px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;border-radius:10px;font-size:12px;font-weight:700;display:none;z-index:500;animation:tIn .3s ease;box-shadow:var(--shadow-lg);}
+.toast.show{display:flex;align-items:center;gap:6px;}
+.toast.ok{background:var(--verde-light);border:1px solid rgba(30,122,85,.3);color:var(--verde2);}
+.toast.err{background:var(--red-l);border:1px solid rgba(192,57,43,.3);color:var(--red);}
+.toast.inf{background:var(--oro-l);border:1px solid rgba(200,168,75,.3);color:var(--amber);}
+@keyframes tIn{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+@media(max-width:900px){.sidebar{display:none;}.main-content{margin-left:0;}.kpi-grid,.row-2,.row-2-eq{grid-template-columns:1fr 1fr;}.page{padding:14px;}}
+</style>
+</head>
+<body>
+
+<!-- BLOQUEADA -->
+<div id="blocked-screen">
+  <div class="blocked-card">
+    <div style="font-size:56px;margin-bottom:16px;">🔒</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--oro2);margin-bottom:8px;">ACCESO BLOQUEADO</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:20px;line-height:1.6;">La licencia no está activa.<br>Contacta con ObraControl Pro.</div>
+    <div style="background:rgba(200,168,75,.08);border:1px solid rgba(200,168,75,.2);border-radius:10px;padding:12px;margin-bottom:16px;font-size:12px;color:rgba(255,255,255,.5);">
+      📧 <strong style="color:var(--oro2);">info@obracontrolgps.net</strong><br>
+      📞 <strong style="color:var(--oro2);">+34 609 321 585</strong>
+    </div>
+    <input class="lic-input" id="lic-input" type="text" placeholder="CLAVE DE LICENCIA" maxlength="20">
+    <div class="lic-msg" id="lic-msg"></div>
+    <button class="btn-activar" onclick="activarLicencia()">🔑 ACTIVAR LICENCIA</button>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-wrap">
+    <div class="logo-emblem">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+        <rect x="9" y="4" width="22" height="28" rx="2" fill="rgba(10,61,46,.8)"/>
+        <rect x="25" y="9" width="12" height="20" rx="1.5" fill="none" stroke="rgba(10,61,46,.8)" stroke-width="2"/>
+        <rect x="3" y="13" width="10" height="16" rx="1.5" fill="none" stroke="rgba(10,61,46,.8)" stroke-width="2"/>
+        <line x1="0" y1="32" x2="40" y2="32" stroke="rgba(10,61,46,.8)" stroke-width="2.5"/>
+      </svg>
+    </div>
+    <div class="logo-name">ObraControl Pro</div>
+    <div class="logo-sub">Panel de Oficina · Encargado</div>
+    <div class="login-card">
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(200,168,75,.6);margin-bottom:16px;">🏢 ACCESO RESTRINGIDO</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:#fff;margin-bottom:4px;">Introduce tu PIN</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.3);margin-bottom:20px;">Solo personal autorizado</div>
+      <div class="pin-dots">
+        <div class="pdot" id="pd0"></div><div class="pdot" id="pd1"></div>
+        <div class="pdot" id="pd2"></div><div class="pdot" id="pd3"></div>
+      </div>
+      <div class="pin-pad" id="pin-pad">
+        <div class="pk" onclick="pk('1')">1</div><div class="pk" onclick="pk('2')">2</div><div class="pk" onclick="pk('3')">3</div>
+        <div class="pk" onclick="pk('4')">4</div><div class="pk" onclick="pk('5')">5</div><div class="pk" onclick="pk('6')">6</div>
+        <div class="pk" onclick="pk('7')">7</div><div class="pk" onclick="pk('8')">8</div><div class="pk" onclick="pk('9')">9</div>
+        <div class="pk del" onclick="pkDel()">⌫</div><div class="pk zero" onclick="pk('0')">0</div>
+      </div>
+      <div class="pin-err" id="pin-err"></div>
+      <div class="pin-demo">Demo: PIN <strong style="color:rgba(200,168,75,.5)">0000</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-inner">
+        <div class="sb-emblem">🏗️</div>
+        <div>
+          <div class="sb-brand">ObraControl</div>
+          <div class="sb-edition">PRO · OFICINA</div>
+        </div>
+      </div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-lbl">Principal</div>
+      <div class="nav-item active" onclick="showPage('tablero')" id="ni-tablero">
+        <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+        Tablero
+      </div>
+      <div class="nav-item" onclick="showPage('operarios')" id="ni-operarios">
+        <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 16 16"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+        Operarios
+      </div>
+      <div class="sb-lbl">Control</div>
+      <div class="nav-item" onclick="showPage('jornada')" id="ni-jornada">
+        <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 1v2m6-2v2M2 6h12"/></svg>
+        Jornada
+      </div>
+      <div class="nav-item" onclick="showPage('alertas')" id="ni-alertas">
+        <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 16 16"><path d="M8 1C5.8 1 4 2.8 4 5v5l-1 1.5h10L12 10V5c0-2.2-1.8-4-4-4z"/><path d="M6.5 13.5a1.5 1.5 0 003 0"/></svg>
+        Alertas <span class="n-badge" id="alert-count" style="display:none">0</span>
+      </div>
+      <div class="sb-lbl">Gestión</div>
+      <div class="nav-item" onclick="showPage('tareas')" id="ni-tareas">
+        <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4"/></svg>
+        Tareas
+      </div>
+      <div class="nav-item" onclick="showPage('alta')" id="ni-alta">
+        <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 16 16"><circle cx="6" cy="4" r="2.5"/><path d="M1 13c0-2.5 2.2-4.5 5-4.5"/><path d="M10 9v4m-2-2h4"/></svg>
+        Alta operarios
+      </div>
+      <div class="nav-item" onclick="showPage('asistente')" id="ni-asistente">
+        <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M6 6.5c0-1.1.9-2 2-2s2 .9 2 2c0 .8-.5 1.5-1.2 1.8L8 9v1"/><circle cx="8" cy="11.5" r=".5" fill="currentColor"/></svg>
+        Asistente IA
+      </div>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-avatar">OP</div>
+        <div>
+          <div class="sb-name">ObraControl Pro</div>
+          <div class="sb-role">Encargado · Demo</div>
+        </div>
+      </div>
+      <button class="sb-logout" onclick="logout()">↩ Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">TABLERO</div>
+      <div class="topbar-right">
+        <div class="live-pill"><div class="live-dot"></div>EN VIVO</div>
+        <div><div class="tb-clock" id="clock">--:--:--</div><div class="tb-date" id="tb-date"></div></div>
+      </div>
+    </div>
+
+    <!-- TABLERO -->
+    <div class="page active" id="page-tablero">
+      <div class="kpi-grid">
+        <div class="kpi-card kc-gold" onclick="showPage('operarios')">
+          <div class="kpi-header"><span class="kpi-label">Plantilla</span><div class="kpi-icon">👷</div></div>
+          <div class="kpi-val" id="kv-total">0</div>
+          <div class="kpi-sub">Operarios registrados</div>
+        </div>
+        <div class="kpi-card kc-verde" onclick="showPage('jornada')">
+          <div class="kpi-header"><span class="kpi-label">En obra</span><div class="kpi-icon">📍</div></div>
+          <div class="kpi-val" id="kv-in">0</div>
+          <div class="kpi-sub">Fichados ahora</div>
+        </div>
+        <div class="kpi-card kc-red" onclick="showPage('alertas')">
+          <div class="kpi-header"><span class="kpi-label">Alertas</span><div class="kpi-icon">🚨</div></div>
+          <div class="kpi-val" id="kv-alerts">0</div>
+          <div class="kpi-sub">Sin resolver</div>
+        </div>
+        <div class="kpi-card kc-purple" onclick="showPage('tareas')">
+          <div class="kpi-header"><span class="kpi-label">Tareas</span><div class="kpi-icon">📋</div></div>
+          <div class="kpi-val" id="kv-tareas">0</div>
+          <div class="kpi-sub">Pendientes hoy</div>
+        </div>
+      </div>
+
+      <!-- Quick access -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
+        <button onclick="showPage('jornada')" style="padding:14px 8px;background:var(--white);border:1.5px solid var(--border);border-radius:12px;cursor:pointer;text-align:center;transition:all .15s;box-shadow:var(--shadow);" onmouseover="this.style.borderColor='var(--oro)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="font-size:22px;margin-bottom:4px;">📅</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--verde);">JORNADA</div>
+        </button>
+        <button onclick="showPage('operarios')" style="padding:14px 8px;background:var(--white);border:1.5px solid var(--border);border-radius:12px;cursor:pointer;text-align:center;transition:all .15s;box-shadow:var(--shadow);" onmouseover="this.style.borderColor='var(--oro)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="font-size:22px;margin-bottom:4px;">👷</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--verde);">OPERARIOS</div>
+        </button>
+        <button onclick="showPage('tareas')" style="padding:14px 8px;background:var(--white);border:1.5px solid var(--border);border-radius:12px;cursor:pointer;text-align:center;transition:all .15s;box-shadow:var(--shadow);" onmouseover="this.style.borderColor='var(--oro)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="font-size:22px;margin-bottom:4px;">📋</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--verde);">TAREAS</div>
+        </button>
+        <button onclick="showPage('alta')" style="padding:14px 8px;background:var(--white);border:1.5px solid var(--border);border-radius:12px;cursor:pointer;text-align:center;transition:all .15s;box-shadow:var(--shadow);" onmouseover="this.style.borderColor='var(--oro)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="font-size:22px;margin-bottom:4px;">➕</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--verde);">ALTA</div>
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">🔴 Alertas activas</div><button onclick="showPage('alertas')" style="font-size:10px;color:var(--verde3);background:none;border:none;cursor:pointer;font-weight:700;">Ver todas →</button></div>
+        <div style="padding:24px;text-align:center;color:var(--text3);font-size:12px;">✅ Sin alertas activas</div>
+      </div>
+    </div>
+
+    <!-- OPERARIOS -->
+    <div class="page" id="page-operarios">
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">👷 Operarios registrados</div><span id="op-count" style="font-size:10px;color:var(--text3)"></span></div>
+        <div style="padding:14px 18px 0;">
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input class="search-inp" id="op-search" placeholder="Buscar nombre, DNI o NIE..." oninput="renderWorkers()">
+          </div>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>#</th><th>Nombre</th><th>DNI/NIE</th><th>Obra</th><th>PIN</th><th>Estado</th><th>Acción</th></tr></thead>
+          <tbody id="op-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- JORNADA -->
+    <div class="page" id="page-jornada">
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">📅 Resumen de jornada</div><span id="jornada-date" style="font-size:10px;color:var(--text3)"></span></div>
+        <table class="tbl">
+          <thead><tr><th>Operario</th><th>Entrada</th><th>Salida</th><th>Horas</th><th>Estado</th></tr></thead>
+          <tbody id="jornada-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ALERTAS -->
+    <div class="page" id="page-alertas">
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">🚨 Centro de alertas</div></div>
+        <div style="padding:32px;text-align:center;color:var(--text3);font-size:13px;">✅ Sin alertas activas hoy.</div>
+      </div>
+    </div>
+
+    <!-- TAREAS -->
+    <div class="page" id="page-tareas">
+      <div class="row-2-eq">
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">📤 Enviar tarea</div></div>
+          <div class="card-body">
+            <div class="form-g"><label class="form-lbl">Destinatario</label><select class="form-ctrl" id="task-to"><option value="all">Todos los operarios</option></select></div>
+            <div class="form-g"><label class="form-lbl">Prioridad</label><select class="form-ctrl" id="task-prio"><option>🟡 Normal</option><option>🔴 Urgente</option><option>🔵 Informativa</option></select></div>
+            <div class="form-g"><label class="form-lbl">Descripción</label><textarea class="form-ctrl" id="task-msg" placeholder="Describe el trabajo..."></textarea></div>
+            <button class="btn-primary" onclick="sendTask()">ENVIAR TAREA →</button>
+          </div>
+        </div>
+        <div class="card"><div class="card-hdr"><div class="card-title">Tareas enviadas</div></div><div id="task-log" style="max-height:380px;overflow-y:auto;"></div></div>
+      </div>
+    </div>
+
+    <!-- ALTA -->
+    <div class="page" id="page-alta">
+      <div class="row-2">
+        <div class="card">
+          <div class="card-hdr"><div class="card-title" id="alta-title">➕ Alta de operario</div></div>
+          <div class="card-body">
+            <input type="hidden" id="edit-id">
+            <div class="form-row">
+              <div class="form-g"><label class="form-lbl">Nombre</label><input class="form-ctrl" id="g-nombre" placeholder="Nombre"></div>
+              <div class="form-g"><label class="form-lbl">Apellidos</label><input class="form-ctrl" id="g-apellidos" placeholder="Apellidos"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-g"><label class="form-lbl">DNI</label><input class="form-ctrl" id="g-dni" placeholder="12345678A" maxlength="9"></div>
+              <div class="form-g"><label class="form-lbl">NIE</label><input class="form-ctrl" id="g-nie" placeholder="X1234567A" maxlength="9"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-g"><label class="form-lbl">📱 WhatsApp</label><input class="form-ctrl" id="g-tel" placeholder="+34 612 345 678" type="tel"></div>
+              <div class="form-g"><label class="form-lbl">Obra asignada</label><input class="form-ctrl" id="g-obra" placeholder="Dirección y CP"></div>
+            </div>
+            <div class="form-g">
+              <label class="form-lbl">PIN (4 dígitos)</label>
+              <div style="display:flex;gap:6px;">
+                <input class="form-ctrl" id="g-pin" maxlength="4" placeholder="••••" style="letter-spacing:4px;font-family:'DM Mono';font-size:16px;font-weight:700;flex:1;">
+                <button onclick="genPin()" style="padding:9px 12px;background:var(--verde-light);border:1px solid var(--border2);border-radius:8px;cursor:pointer;font-size:14px;">🔄</button>
+              </div>
+            </div>
+            <button class="btn-primary" onclick="saveWorker()" id="g-btn">+ DAR DE ALTA</button>
+            <button class="btn-secondary" onclick="resetForm()">Limpiar</button>
+            <div class="wa-box" id="wa-box">
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--verde3);margin-bottom:8px;">✅ OPERARIO DADO DE ALTA</div>
+              <div class="wa-preview" id="wa-preview"></div>
+              <button class="btn-wa" onclick="sendWaAlta()">📱 ENVIAR POR WHATSAPP</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Lista operarios</div><span id="g-count" style="font-size:10px;color:var(--text3)"></span></div>
+          <div style="padding:10px 14px 0;">
+            <div class="search-wrap">
+              <span class="search-icon">🔍</span>
+              <input class="search-inp" id="g-search" placeholder="Buscar..." oninput="renderGestion()">
+            </div>
+          </div>
+          <div id="gestion-list" style="max-height:460px;overflow-y:auto;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ASISTENTE -->
+    <div class="page" id="page-asistente">
+      <div style="max-width:680px;margin:0 auto;">
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">🤖 Asistente IA</div><span style="font-size:10px;color:var(--text3)">ObraControl Pro</span></div>
+          <div style="padding:14px;max-height:380px;overflow-y:auto;" id="chat-msgs">
+            <div class="chat-msg-bot">👋 Hola! Soy tu asistente de <strong>ObraControl Pro</strong>.<br><br>Puedo decirte quién ha fichado, cuántos están en obra, resúmenes del día y más.</div>
+          </div>
+          <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;">
+            <input class="form-ctrl" id="chat-input" placeholder="Pregunta algo..." onkeydown="if(event.key==='Enter')sendChat()" style="flex:1;">
+            <button onclick="sendChat()" style="padding:9px 14px;background:var(--gold-grad);color:var(--verde);border:none;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;cursor:pointer;">ENVIAR</button>
+          </div>
+          <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="quick-btn" onclick="quickChat('¿Quién no ha fichado?')">¿Quién no fichó?</button>
+            <button class="quick-btn" onclick="quickChat('¿Cuántos están en obra?')">¿Cuántos en obra?</button>
+            <button class="quick-btn" onclick="quickChat('Resumen del día')">Resumen del día</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const FB_URL = 'https://obracontroldemo-default-rtdb.europe-west1.firebasedatabase.app';
+const DEMO_CLAVE = 'BA49159567EFC254';
+const PIN_OFICINA = '0000';
+
+// ── LICENCIA ──
+function checkLicencia(){
+  const saved = localStorage.getItem('ocp_lic_oficina');
+  if(saved === DEMO_CLAVE){ showLogin(); return; }
+  fetch(`${FB_URL}/licencias.json`).then(r=>r.json()).then(data=>{
+    if(data && Object.values(data).find(l=>l.activa)) showLogin();
+    else showBlocked();
+  }).catch(()=>showBlocked());
+}
+function showBlocked(){ document.getElementById('blocked-screen').style.display='flex'; document.getElementById('login-screen').style.display='none'; }
+function showLogin(){ document.getElementById('blocked-screen').style.display='none'; document.getElementById('login-screen').style.display='flex'; }
+function activarLicencia(){
+  const val=(document.getElementById('lic-input').value||'').trim().toUpperCase();
+  const msg=document.getElementById('lic-msg');
+  if(val===DEMO_CLAVE){ localStorage.setItem('ocp_lic_oficina',val); showLogin(); return; }
+  msg.textContent='❌ Clave no válida';
+}
+
+// ── PIN ──
+const PIN=PIN_OFICINA; let pinVal='';
+function pk(d){ if(pinVal.length>=4)return; pinVal+=d; updDots(); if(pinVal.length===4) setTimeout(checkPin,200); }
+function pkDel(){ pinVal=pinVal.slice(0,-1); updDots(); document.getElementById('pin-err').textContent=''; }
+function updDots(){ for(let i=0;i<4;i++) document.getElementById('pd'+i).classList.toggle('on',i<pinVal.length); }
+function checkPin(){
+  if(pinVal===PIN){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    initApp();
+  } else {
+    document.getElementById('pin-err').textContent='PIN incorrecto';
+    document.getElementById('pin-pad').classList.add('shake');
+    setTimeout(()=>document.getElementById('pin-pad').classList.remove('shake'),450);
+    pinVal=''; updDots();
+  }
+}
+function logout(){ pinVal=''; updDots(); document.getElementById('app').style.display='none'; document.getElementById('login-screen').style.display='flex'; }
+
+// ── CLOCK ──
+function tick(){
+  const n=new Date();
+  document.getElementById('clock').textContent=n.toLocaleTimeString('es-ES');
+  document.getElementById('tb-date').textContent=n.toLocaleDateString('es-ES',{weekday:'long',day:'2-digit',month:'long'});
+}
+setInterval(tick,1000); tick();
+
+// ── DATA ──
+let WORKERS=[];
+try{ const s=localStorage.getItem('ocp_workers'); if(s) WORKERS=JSON.parse(s); }catch(e){}
+function saveW(){ try{ localStorage.setItem('ocp_workers',JSON.stringify(WORKERS)); }catch(e){} }
+
+function initApp(){
+  loadFromFirebase();
+  animKPI('kv-total',WORKERS.length);
+  animKPI('kv-in',WORKERS.filter(w=>w.status==='in').length);
+  animKPI('kv-alerts',0);
+  loadTareas();
+  document.getElementById('jornada-date').textContent=new Date().toLocaleDateString('es-ES',{weekday:'long',day:'2-digit',month:'long'});
+  setInterval(loadFromFirebase,8000);
+}
+
+function loadFromFirebase(){
+  fetch(`${FB_URL}/operarios_activos.json`).then(r=>r.json()).then(data=>{
+    if(!data) return;
+    Object.entries(data).forEach(([key,op])=>{
+      if(!op||!op.nombre) return;
+      let w = WORKERS.find(x=>`${x.nombre}_${x.apellidos}`.toLowerCase().replace(/\s+/g,'_')===key);
+      if(!w){
+        const parts=(op.nombre||'').split(' ');
+        w={id:WORKERS.length+1,nombre:parts[0]||op.nombre,apellidos:parts.slice(1).join(' ')||'',dni:op.doc||'',nie:'',obra:op.ciudad||'',pin:'----',status:'pending',arrival:null,dep:null,h:0};
+        WORKERS.push(w);
+      }
+      w.status=op.activo?'in':'out';
+      if(op.tipo==='entrada') w.arrival=op.hora;
+      if(op.tipo==='salida'){ w.dep=op.hora; }
+      if(op.hora&&op.tipo==='entrada'){
+        const [eh,em]=op.hora.split(':').map(Number);
+        const now=new Date();
+        const mins=(now.getHours()*60+now.getMinutes())-(eh*60+em);
+        w.h=mins>0?(mins/60).toFixed(1):0;
+      }
+    });
+    animKPI('kv-total',WORKERS.length);
+    animKPI('kv-in',WORKERS.filter(w=>w.status==='in').length);
+    saveW();
+    if(document.getElementById('page-operarios').classList.contains('active')) renderWorkers();
+    if(document.getElementById('page-jornada').classList.contains('active')) renderJornada();
+  }).catch(()=>{});
+}
+
+// ── KPI ──
+function animKPI(id,target,dur=1200){
+  const el=document.getElementById(id); if(!el)return;
+  const start=performance.now();
+  (function s(now){ const p=Math.min((now-start)/dur,1),e=1-Math.pow(1-p,4);
+    el.textContent=Math.round(e*target); if(p<1) requestAnimationFrame(s); })(performance.now());
+}
+
+// ── PAGES ──
+const TITLES={tablero:'TABLERO',operarios:'OPERARIOS',jornada:'JORNADA',alertas:'ALERTAS',tareas:'TAREAS',alta:'ALTA OPERARIOS',asistente:'ASISTENTE IA'};
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('ni-'+name).classList.add('active');
+  document.getElementById('topbar-title').textContent=TITLES[name]||name;
+  if(name==='operarios') renderWorkers();
+  if(name==='jornada') renderJornada();
+  if(name==='alta'){ renderGestion(); genPin(); }
+  if(name==='tareas') loadTareas();
+}
+
+// ── WORKERS ──
+function renderWorkers(){
+  const tb=document.getElementById('op-tbody'); if(!tb)return;
+  const q=(document.getElementById('op-search')?.value||'').toLowerCase();
+  const filtered=WORKERS.filter(w=>`${w.nombre} ${w.apellidos} ${w.dni} ${w.nie}`.toLowerCase().includes(q));
+  document.getElementById('op-count').textContent=filtered.length+' operarios';
+  const sb={in:'<span class="pill p-in">✅ En obra</span>',out:'<span class="pill p-out">🔴 Fuera</span>',pending:'<span class="pill p-pend">⏳ Sin fichar</span>'};
+  tb.innerHTML=filtered.map((w,i)=>`<tr>
+    <td style="font-weight:700;color:var(--text3)">${i+1}</td>
+    <td><div style="font-weight:600">${w.nombre} ${w.apellidos}</div></td>
+    <td style="font-size:11px">${w.dni||w.nie||'—'}</td>
+    <td style="font-size:11px;color:var(--text3)">${(w.obra||'').split(',')[0]||'—'}</td>
+    <td><span style="font-family:'DM Mono';font-weight:800;font-size:15px;color:var(--verde3);letter-spacing:3px">${w.pin}</span></td>
+    <td>${sb[w.status]||'—'}</td>
+    <td><button class="btn-edit" onclick="editWorker(${w.id})">✏️</button> <button class="btn-danger" onclick="deleteWorker(${w.id})">🗑️</button></td>
+  </tr>`).join('');
+}
+
+function renderJornada(){
+  const tb=document.getElementById('jornada-tbody'); if(!tb)return;
+  tb.innerHTML=WORKERS.map(w=>{
+    const st=w.status==='in'?'<span class="pill p-in">✅ En obra</span>':w.status==='out'?'<span class="pill p-out">Salida</span>':'<span class="pill p-pend">Sin fichar</span>';
+    return`<tr>
+      <td><div style="font-weight:600">${w.nombre} ${w.apellidos}</div><div style="font-size:10px;color:var(--text3)">${w.obra||''}</div></td>
+      <td style="font-weight:600;color:${w.arrival?'var(--verde3)':'var(--red)'}">${w.arrival||'—'}</td>
+      <td style="color:var(--text3)">${w.dep||'—'}</td>
+      <td><span style="font-family:'Bebas Neue';font-size:16px;color:var(--verde2)">${w.h}h</span></td>
+      <td>${st}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── ALTA ──
+let lastAdded=null;
+function saveWorker(){
+  const id=document.getElementById('edit-id').value;
+  const nombre=document.getElementById('g-nombre').value.trim();
+  const apellidos=document.getElementById('g-apellidos').value.trim();
+  const dni=document.getElementById('g-dni').value.trim().toUpperCase();
+  const nie=document.getElementById('g-nie').value.trim().toUpperCase();
+  const tel=document.getElementById('g-tel').value.trim();
+  const obra=document.getElementById('g-obra').value;
+  const pin=document.getElementById('g-pin').value.trim();
+  if(!nombre||!apellidos){ showToast('Introduce nombre y apellidos','err'); return; }
+  if(!dni&&!nie){ showToast('DNI o NIE obligatorio','err'); return; }
+  if(pin.length!==4||isNaN(pin)){ showToast('PIN de 4 dígitos','err'); return; }
+  if(id){
+    const w=WORKERS.find(w=>w.id==id);
+    if(w) Object.assign(w,{nombre,apellidos,dni,nie,tel,obra,pin});
+    showToast('✅ Operario actualizado','ok');
+    document.getElementById('wa-box').style.display='none';
+  } else {
+    const newId=Math.max(0,...WORKERS.map(w=>w.id))+1;
+    const nw={id:newId,nombre,apellidos,dni,nie,tel,obra,pin,status:'pending',arrival:null,dep:null,h:0};
+    WORKERS.push(nw); lastAdded=nw;
+    const doc=(dni||nie).replace(/[^A-Z0-9]/g,'');
+    fetch(`${FB_URL}/operarios_registro/${doc}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre,apellidos,dni,nie,pin,obra,activo:true})}).catch(()=>{});
+    document.getElementById('wa-preview').textContent=genMsgWA(nw);
+    document.getElementById('wa-box').style.display='block';
+    showToast(`✅ ${nombre} ${apellidos} dado de alta`,'ok');
+    animKPI('kv-total',WORKERS.length);
+  }
+  saveW(); resetForm(); renderGestion(); renderWorkers();
+}
+
+function genPin(){
+  const used=WORKERS.map(w=>w.pin);
+  let p; do{ p=String(Math.floor(1000+Math.random()*9000)); }while(used.includes(p));
+  document.getElementById('g-pin').value=p;
+}
+
+const APP_URL='https://bufeteimpagosojuridicos-byte.github.io/pedrosaborrego-ai/ocp-operario.html';
+
+function genMsgWA(w){
+  return `🏗️ *OBRACONTROL PRO*\n\nHola ${w.nombre} ${w.apellidos} 👋\n\nTu acceso a la app:\n\n📱 ${APP_URL}\n\n📄 DNI/NIE: *${w.dni||w.nie}*\n🔐 PIN: *${w.pin}*\n\n📍 Obra: ${w.obra||'Consulta encargado'}\n\n_ObraControl Pro_`;
+}
+
+function sendWaAlta(){
+  if(!lastAdded) return;
+  const phone=(lastAdded.tel||'').replace(/[\s\-\(\)]/g,'').replace(/^\+/,'');
+  const url=phone?`https://wa.me/${phone}?text=${encodeURIComponent(genMsgWA(lastAdded))}`:  `https://wa.me/?text=${encodeURIComponent(genMsgWA(lastAdded))}`;
+  window.open(url,'_blank');
+}
+
+function editWorker(id){
+  const w=WORKERS.find(w=>w.id===id); if(!w)return;
+  document.getElementById('edit-id').value=id;
+  document.getElementById('g-nombre').value=w.nombre;
+  document.getElementById('g-apellidos').value=w.apellidos;
+  document.getElementById('g-dni').value=w.dni||'';
+  document.getElementById('g-nie').value=w.nie||'';
+  document.getElementById('g-tel').value=w.tel||'';
+  document.getElementById('g-obra').value=w.obra||'';
+  document.getElementById('g-pin').value=w.pin;
+  document.getElementById('g-btn').textContent='💾 GUARDAR CAMBIOS';
+  document.getElementById('alta-title').textContent='✏️ Editar operario';
+  showPage('alta');
+}
+
+function deleteWorker(id){
+  const w=WORKERS.find(w=>w.id===id); if(!w)return;
+  if(!confirm(`¿Eliminar a ${w.nombre} ${w.apellidos}?`)) return;
+  WORKERS=WORKERS.filter(w=>w.id!==id);
+  saveW(); renderGestion(); renderWorkers();
+  animKPI('kv-total',WORKERS.length);
+  showToast(`🗑️ ${w.nombre} eliminado`,'err');
+}
+
+function resetForm(){
+  document.getElementById('edit-id').value='';
+  ['g-nombre','g-apellidos','g-dni','g-nie','g-tel','g-obra'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  genPin();
+  document.getElementById('g-btn').textContent='+ DAR DE ALTA';
+  document.getElementById('alta-title').textContent='➕ Alta de operario';
+  document.getElementById('wa-box').style.display='none';
+  lastAdded=null;
+}
+
+function renderGestion(){
+  const list=document.getElementById('gestion-list'); if(!list)return;
+  const q=(document.getElementById('g-search')?.value||'').toLowerCase();
+  const filtered=WORKERS.filter(w=>`${w.nombre} ${w.apellidos} ${w.dni} ${w.nie}`.toLowerCase().includes(q));
+  document.getElementById('g-count').textContent=WORKERS.length+' operarios';
+  list.innerHTML=filtered.map(w=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);">
+      <div style="width:34px;height:34px;border-radius:50%;background:var(--verde-light);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-weight:800;font-size:12px;color:var(--verde3);flex-shrink:0;">${(w.nombre[0]||'')+(w.apellidos[0]||'')}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:13px">${w.nombre} ${w.apellidos}</div>
+        <div style="font-size:10px;color:var(--text3)">${w.dni||w.nie||'—'} · PIN: <strong style="color:var(--verde3)">${w.pin}</strong></div>
+      </div>
+      <div style="display:flex;gap:4px;">
+        <button class="btn-edit" onclick="editWorker(${w.id})">✏️</button>
+        <button class="btn-danger" onclick="deleteWorker(${w.id})">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── TAREAS ──
+function loadTareas(){
+  fetch(`${FB_URL}/tareas.json`).then(r=>r.json()).then(data=>{
+    const log=document.getElementById('task-log'); if(!log)return;
+    if(!data){ log.innerHTML='<div style="padding:24px;text-align:center;color:var(--text3);font-size:12px">Sin tareas enviadas.</div>'; return; }
+    const all=Object.values(data).sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+    animKPI('kv-tareas',all.filter(t=>!t.completada).length);
+    log.innerHTML=all.map(t=>`<div style="display:flex;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);">
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600">${t.to||'Todos'}</div>
+        <div style="font-size:11px;color:var(--text3)">${(t.msg||'').slice(0,50)}${(t.msg||'').length>50?'...':''}</div>
+        <div style="font-size:9px;color:${t.completada?'var(--verde3)':'var(--amber)'};margin-top:2px;">${t.completada?'✅ Completada':'⏳ Pendiente'}</div>
+      </div>
+      <div style="font-size:10px;color:var(--text3)">${t.time||''}</div>
+    </div>`).join('');
+    // Actualizar selector
+    const sel=document.getElementById('task-to');
+    if(sel){
+      sel.innerHTML='<option value="all">Todos los operarios</option>';
+      WORKERS.forEach(w=>{ sel.innerHTML+=`<option>${w.nombre} ${w.apellidos}</option>`; });
+    }
+  }).catch(()=>{});
+}
+
+function sendTask(){
+  const to=document.getElementById('task-to');
+  const prio=document.getElementById('task-prio');
+  const msg=document.getElementById('task-msg').value.trim();
+  if(!msg){ showToast('Escribe la descripción','err'); return; }
+  const now=new Date();
+  const data={to:to.options[to.selectedIndex].text,msg,prioridad:prio.options[prio.selectedIndex].text,time:now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}),fecha:now.toISOString().split('T')[0],timestamp:now.getTime(),completada:false};
+  fetch(`${FB_URL}/tareas/tarea_${now.getTime()}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+    .then(()=>{ showToast('✅ Tarea enviada','ok'); document.getElementById('task-msg').value=''; loadTareas(); })
+    .catch(()=>showToast('⚠️ Error','err'));
+}
+
+// ── CHAT IA ──
+function quickChat(msg){ document.getElementById('chat-input').value=msg; sendChat(); }
+function sendChat(){
+  const input=document.getElementById('chat-input');
+  const msg=input.value.trim(); if(!msg)return;
+  input.value='';
+  addMsg(msg,'user');
+  setTimeout(()=>addMsg(responder(msg),'bot'),600);
+}
+function addMsg(txt,who){
+  const msgs=document.getElementById('chat-msgs'); if(!msgs)return;
+  const div=document.createElement('div');
+  div.className=who==='user'?'chat-msg-user':'chat-msg-bot';
+  div.innerHTML=txt;
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+function responder(msg){
+  const q=msg.toLowerCase();
+  const enObra=WORKERS.filter(w=>w.status==='in');
+  const sinFichar=WORKERS.filter(w=>w.status==='pending');
+  if(q.includes('no ha fichado')||q.includes('sin fichar'))
+    return sinFichar.length?`❌ <strong>${sinFichar.length} sin fichar:</strong><br>${sinFichar.map(w=>`• ${w.nombre} ${w.apellidos}`).join('<br>')}`:' ✅ Todos han fichado';
+  if(q.includes('cuántos')||q.includes('obra'))
+    return `📍 <strong>${enObra.length} en obra</strong>:<br>${enObra.map(w=>`• ${w.nombre} ${w.apellidos}`).join('<br>')}`;
+  if(q.includes('resumen'))
+    return `📊 <strong>Resumen:</strong><br>Total: ${WORKERS.length}<br>En obra: ${enObra.length}<br>Sin fichar: ${sinFichar.length}`;
+  return 'Prueba: "¿Quién no fichó?", "¿Cuántos en obra?", "Resumen"';
+}
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg,tipo){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast show ${tipo}`;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+document.addEventListener('DOMContentLoaded', checkLicencia);
+</script>
+</body>
+</html>
