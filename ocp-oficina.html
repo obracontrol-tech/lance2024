@@ -510,8 +510,7 @@ try {
   var sw = localStorage.getItem('ocp_workers_v2');
   if (sw) {
     var arr = JSON.parse(sw);
-    if (arr.length <= 20) WORKERS = arr;
-    else localStorage.removeItem('ocp_workers_v2');
+    if (Array.isArray(arr)) WORKERS = arr;
   }
 } catch(e) {}
 
@@ -747,10 +746,11 @@ function saveWorker() {
     var nw = {id:newId, nombre:nom, apellidos:ape, dni:dni, nie:nie, tel:tel, obra:obra, pin:pin, cat:cat, status:'pending', arrival:null, dep:null, h:0};
     WORKERS.push(nw);
     lastAdded = nw;
+    saveW(); // Guardar INMEDIATAMENTE al añadir
     var doc = (dni||nie).replace(/[^A-Z0-9]/g,'');
     fetch(FB + '/operarios_registro/' + doc + '.json', {
       method:'PUT', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({nombre:nom, apellidos:ape, dni:dni, nie:nie, pin:pin, obra:obra, cat:cat, activo:true})
+      body: JSON.stringify({nombre:nom, apellidos:ape, dni:dni, nie:nie, tel:tel, pin:pin, obra:obra, cat:cat, activo:true})
     }).catch(function() {});
     document.getElementById('waprev').textContent = buildWAMsg(nw);
     document.getElementById('wabox').style.display = 'block';
@@ -818,12 +818,15 @@ function buildWAMsg(w) {
 
 function sendWaAlta() {
   if (!lastAdded) return;
-  var phone = (lastAdded.tel||'').replace(/[\s\-\(\)]/g,'').replace(/^\+/,'');
-  if (phone && phone.length === 9 && /^[6789]/.test(phone)) phone = '34' + phone;
+  var phone = (lastAdded.tel||'').replace(/[\s\-\(\)\+]/g,'');
+  if (!phone || phone.length < 9) {
+    showToast('Este operario no tiene telefono registrado', 'err');
+    return;
+  }
+  if (/^[6789]/.test(phone) && phone.length === 9) phone = '34' + phone;
   var msg = encodeURIComponent(buildWAMsg(lastAdded));
-  var url = phone ? 'https://wa.me/' + phone + '?text=' + msg : 'https://wa.me/?text=' + msg;
   showToast('Abriendo WhatsApp...', 'ok');
-  setTimeout(function() { window.open(url, '_blank'); }, 300);
+  setTimeout(function() { window.open('https://wa.me/' + phone + '?text=' + msg, '_blank'); }, 300);
 }
 
 function editW(id) {
