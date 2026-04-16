@@ -3,358 +3,301 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ObraControl Pro — Tablero</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>ObraControl Pro — Oficina</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --verde:#0A3D2E;--verde2:#145A40;--verde3:#1E7A55;--verde4:#2AA06E;
-  --verde-light:#E8F5EE;--verde-pale:#F0FAF4;
-  --oro:#C8A84B;--oro2:#E2C36A;--oro3:#F5DFA0;--oro-l:#FDF8EC;
-  --bg:#F2F5F0;--white:#FFFFFF;
+  --verde:#0A3D2E;--verde2:#145A40;--verde3:#1E7A55;
+  --verde-light:#E8F5EE;--bg:#F2F5F0;--white:#fff;
   --border:#D8E8DC;--border2:#C0D8C8;
   --text:#0D2818;--text2:#3A5A45;--text3:#7A9A85;
+  --oro:#C8A84B;--oro2:#E2C36A;--oro-l:#FDF8EC;
   --red:#C0392B;--red-l:#FDEDEC;
   --amber:#B7770D;--amber-l:#FEF9E7;
+  --blue:#1B4F8C;--blue-l:#E8F1FB;
   --purple:#6B21A8;--purple-l:#F3E8FF;
-  --shadow:0 2px 12px rgba(10,61,46,.08);
-  --shadow-lg:0 8px 32px rgba(10,61,46,.15);
-  --gold-grad:linear-gradient(135deg,#C8A84B,#E2C36A,#C8A84B);
+  --gold:linear-gradient(135deg,#C8A84B,#E2C36A,#C8A84B);
+  --shadow:0 2px 8px rgba(10,61,46,.08);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(10,61,46,.04) 1px,transparent 0);background-size:28px 28px;pointer-events:none;z-index:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-/* ── BLOQUEADA ── */
-#blocked-screen{position:fixed;inset:0;z-index:300;background:linear-gradient(160deg,#061A10,#0A3D2E,#061A10);display:none;align-items:center;justify-content:center;padding:24px;}
-.blocked-card{background:rgba(255,255,255,.04);border:1px solid rgba(200,168,75,.2);border-radius:24px;padding:36px 28px;width:100%;max-width:420px;text-align:center;backdrop-filter:blur(20px);}
-.lic-input{width:100%;padding:12px;background:rgba(255,255,255,.05);border:1.5px solid rgba(200,168,75,.3);border-radius:10px;color:var(--oro2);font-size:15px;text-align:center;letter-spacing:3px;font-weight:700;outline:none;font-family:'DM Mono',monospace;margin-bottom:8px;}
-.lic-msg{height:16px;font-size:11px;font-weight:700;color:var(--red);margin-bottom:10px;text-align:center;}
-.btn-activar{width:100%;padding:13px;background:var(--gold-grad);color:var(--verde);border:none;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;}
-
-/* ── LOGIN ── */
-#login-screen{position:fixed;inset:0;z-index:200;background:linear-gradient(160deg,#061A10 0%,#0A3D2E 60%,#061A10 100%);display:flex;align-items:center;justify-content:center;padding:24px;}
-#login-screen::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 2px 2px,rgba(200,168,75,.05) 1px,transparent 0);background-size:32px 32px;pointer-events:none;}
-.login-wrap{width:100%;max-width:380px;text-align:center;position:relative;z-index:1;}
-.logo-emblem{width:72px;height:72px;background:var(--gold-grad);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 8px 32px rgba(200,168,75,.3);}
-.logo-name{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:4px;color:var(--oro2);}
-.logo-sub{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:3px;margin-bottom:28px;}
-.login-card{background:rgba(255,255,255,.04);border:1px solid rgba(200,168,75,.15);border-radius:20px;padding:28px 24px;backdrop-filter:blur(20px);}
-.pin-dots{display:flex;gap:14px;justify-content:center;margin-bottom:20px;}
-.pdot{width:14px;height:14px;border-radius:50%;border:2px solid rgba(200,168,75,.3);background:transparent;transition:all .15s;}
-.pdot.on{background:var(--oro2);border-color:var(--oro2);transform:scale(1.2);}
-.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:260px;margin:0 auto;}
-.pk{height:56px;border-radius:12px;background:rgba(255,255,255,.05);border:1.5px solid rgba(200,168,75,.15);font-size:22px;font-weight:700;color:#fff;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;}
+/* LOGIN */
+#login-screen{position:fixed;inset:0;z-index:100;background:linear-gradient(160deg,#061A10,#0A3D2E,#061A10);display:flex;align-items:center;justify-content:center;padding:24px;}
+.lcard{background:rgba(255,255,255,.05);border:1px solid rgba(200,168,75,.2);border-radius:20px;padding:32px 28px;width:100%;max-width:340px;text-align:center;backdrop-filter:blur(20px);}
+.llogo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:4px;color:var(--oro2);margin-bottom:4px;}
+.lsub{font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.3);margin-bottom:24px;}
+.pdots{display:flex;gap:12px;justify-content:center;margin-bottom:20px;}
+.pdot{width:14px;height:14px;border-radius:50%;border:2px solid rgba(200,168,75,.3);transition:all .15s;}
+.pdot.on{background:var(--oro2);border-color:var(--oro2);}
+.ppad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:0 auto;}
+.pk{height:52px;border-radius:10px;background:rgba(255,255,255,.05);border:1.5px solid rgba(200,168,75,.15);font-size:20px;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;}
 .pk:hover{background:rgba(200,168,75,.1);border-color:var(--oro2);}
-.pk:active{background:var(--gold-grad);color:var(--verde);transform:scale(.92);}
-.pk.del{font-size:15px;color:rgba(255,255,255,.4);}
+.pk:active{background:var(--gold);color:var(--verde);transform:scale(.92);}
+.pk.del{font-size:14px;color:rgba(255,255,255,.4);}
 .pk.zero{grid-column:2;}
-.pin-err{height:18px;text-align:center;font-size:11px;font-weight:700;color:#F1948A;margin-top:10px;}
-.pin-demo{font-size:11px;color:rgba(255,255,255,.2);margin-top:8px;}
-@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
-.shake{animation:shake .4s ease;}
+.perr{height:18px;font-size:11px;font-weight:700;color:#F1948A;margin-top:8px;}
+.pdemo{font-size:11px;color:rgba(255,255,255,.2);margin-top:6px;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.shake{animation:shake .4s;}
 
-/* ── APP ── */
-#app{display:none;position:relative;z-index:1;min-height:100vh;}
-.sidebar{position:fixed;left:0;top:0;bottom:0;width:230px;background:var(--verde);display:flex;flex-direction:column;z-index:50;box-shadow:4px 0 24px rgba(10,61,46,.3);}
-.sb-logo{padding:22px 18px 18px;border-bottom:1px solid rgba(200,168,75,.12);}
-.sb-logo-inner{display:flex;align-items:center;gap:12px;}
-.sb-emblem{width:38px;height:38px;background:var(--gold-grad);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
-.sb-brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:var(--oro2);line-height:1;}
-.sb-edition{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.3);}
-.sb-nav{flex:1;padding:16px 10px;overflow-y:auto;}
-.sb-lbl{font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(200,168,75,.3);padding:0 8px;margin:14px 0 5px;}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:all .15s;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);margin-bottom:1px;}
-.nav-item svg{width:15px;height:15px;flex-shrink:0;}
-.nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
-.nav-item.active{background:rgba(200,168,75,.15);color:var(--oro2);font-weight:700;border-left:3px solid var(--oro2);padding-left:7px;}
-.n-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;font-size:9px;font-weight:800;}
-.sb-footer{padding:14px 10px;border-top:1px solid rgba(200,168,75,.1);}
-.sb-user{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.05);}
-.sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--gold-grad);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--verde);flex-shrink:0;}
+/* APP */
+#app{display:none;min-height:100vh;}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--verde);display:flex;flex-direction:column;z-index:50;}
+.sb-head{padding:20px 16px;border-bottom:1px solid rgba(200,168,75,.1);}
+.sb-brand{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:var(--oro2);}
+.sb-sub{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.3);}
+.sb-nav{flex:1;padding:12px 8px;overflow-y:auto;}
+.sb-lbl{font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(200,168,75,.3);padding:0 8px;margin:12px 0 4px;}
+.ni{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);margin-bottom:1px;transition:all .15s;}
+.ni:hover{background:rgba(255,255,255,.08);color:#fff;}
+.ni.active{background:rgba(200,168,75,.15);color:var(--oro2);font-weight:700;}
+.ni svg{width:14px;height:14px;flex-shrink:0;}
+.sb-foot{padding:12px 8px;border-top:1px solid rgba(200,168,75,.1);}
+.sb-user{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.05);}
+.sb-av{width:30px;height:30px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--verde);}
 .sb-name{font-size:11px;font-weight:700;color:#fff;}
 .sb-role{font-size:9px;color:rgba(255,255,255,.4);}
-.sb-logout{margin-top:6px;width:100%;padding:7px;background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:7px;color:rgba(255,255,255,.4);font-size:10px;cursor:pointer;transition:all .15s;}
-.sb-logout:hover{background:rgba(192,57,43,.2);border-color:rgba(192,57,43,.4);color:#F1948A;}
+.sb-out{margin-top:6px;width:100%;padding:7px;background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:7px;color:rgba(255,255,255,.4);font-size:10px;cursor:pointer;}
+.sb-out:hover{background:rgba(192,57,43,.2);color:#F1948A;}
 
-.main-content{margin-left:230px;min-height:100vh;}
-.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;box-shadow:0 1px 0 var(--border);}
-.topbar-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--verde);}
-.topbar-right{display:flex;align-items:center;gap:10px;}
-.live-pill{display:flex;align-items:center;gap:5px;background:var(--verde-light);border:1px solid rgba(30,122,85,.2);padding:4px 10px;border-radius:20px;font-size:9px;font-weight:700;color:var(--verde3);letter-spacing:1px;}
-.live-dot{width:6px;height:6px;border-radius:50%;background:var(--verde3);animation:lp 2s infinite;}
+.main{margin-left:220px;min-height:100vh;}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 22px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;}
+.tb-title{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;color:var(--verde);}
+.tb-right{display:flex;align-items:center;gap:10px;}
+.live{display:flex;align-items:center;gap:5px;background:var(--verde-light);border:1px solid rgba(30,122,85,.2);padding:4px 10px;border-radius:20px;font-size:9px;font-weight:700;color:var(--verde3);letter-spacing:1px;}
+.livedot{width:6px;height:6px;border-radius:50%;background:var(--verde3);animation:lp 2s infinite;}
 @keyframes lp{0%,100%{opacity:1}50%{opacity:.3}}
-.tb-clock{font-family:'DM Mono',sans-serif;font-size:13px;font-weight:700;color:var(--verde2);}
-.tb-date{font-size:10px;color:var(--text3);}
+.clock{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:var(--verde2);}
 
-.page{padding:22px 24px;display:none;}
+.page{padding:20px 22px;display:none;}
 .page.active{display:block;}
 
-/* KPI */
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
-.kpi-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;cursor:pointer;}
-.kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
-.kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;}
-.kc-gold::after{background:var(--gold-grad);}
-.kc-verde::after{background:linear-gradient(90deg,var(--verde2),var(--verde4));}
-.kc-red::after{background:linear-gradient(90deg,var(--red),#F1948A);}
-.kc-purple::after{background:linear-gradient(90deg,var(--purple),#A855F7);}
-.kpi-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-.kpi-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--text3);}
-.kpi-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;}
-.kc-gold .kpi-icon{background:var(--oro-l);}
-.kc-verde .kpi-icon{background:var(--verde-light);}
-.kc-red .kpi-icon{background:var(--red-l);}
-.kc-purple .kpi-icon{background:var(--purple-l);}
-.kpi-val{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:-1px;line-height:1;}
-.kc-gold .kpi-val{color:var(--oro);}
-.kc-verde .kpi-val{color:var(--verde3);}
-.kc-red .kpi-val{color:var(--red);}
-.kc-purple .kpi-val{color:var(--purple);}
-.kpi-sub{font-size:10px;color:var(--text3);margin-top:3px;}
+/* KPIs */
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;}
+.kcard{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;cursor:pointer;transition:transform .2s;}
+.kcard:hover{transform:translateY(-2px);}
+.kcard::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.k-gold::after{background:var(--gold);}
+.k-verde::after{background:linear-gradient(90deg,var(--verde2),var(--verde3));}
+.k-red::after{background:linear-gradient(90deg,var(--red),#F87171);}
+.k-purple::after{background:linear-gradient(90deg,var(--purple),#A855F7);}
+.klbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--text3);margin-bottom:10px;}
+.kval{font-family:'Bebas Neue',sans-serif;font-size:40px;line-height:1;}
+.k-gold .kval{color:var(--oro);}
+.k-verde .kval{color:var(--verde3);}
+.k-red .kval{color:var(--red);}
+.k-purple .kval{color:var(--purple);}
+.ksub{font-size:10px;color:var(--text3);margin-top:3px;}
 
-/* CARD */
-.card{background:var(--white);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px;}
-.card-hdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.card-title{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1.5px;color:var(--verde);display:flex;align-items:center;gap:8px;}
-.card-body{padding:18px;}
-.row-2{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:18px;}
-.row-2-eq{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+.chdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.ctitle{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px;color:var(--verde);}
+.cbody{padding:16px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.row3{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-bottom:16px;}
 
 /* TABLE */
 .tbl{width:100%;border-collapse:collapse;}
-.tbl thead th{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);padding:9px 14px;border-bottom:1px solid var(--border);text-align:left;background:var(--verde-pale);}
-.tbl tbody td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;}
-.tbl tbody tr:last-child td{border-bottom:none;}
-.tbl tbody tr:hover td{background:var(--verde-pale);}
-.pill{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;font-size:9px;font-weight:700;}
+.tbl th{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;background:var(--bg);}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--verde-light);}
+.pill{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;}
 .p-in{background:var(--verde-light);color:var(--verde3);}
 .p-out{background:var(--red-l);color:var(--red);}
 .p-pend{background:var(--amber-l);color:var(--amber);}
 
 /* FORM */
-.form-g{margin-bottom:12px;}
-.form-lbl{display:block;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin-bottom:5px;}
-.form-ctrl{width:100%;background:var(--bg);border:1.5px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
-.form-ctrl:focus{border-color:var(--verde3);background:var(--white);}
-textarea.form-ctrl{resize:vertical;min-height:80px;}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.btn-primary{width:100%;padding:11px;background:linear-gradient(135deg,var(--verde2),var(--verde3));color:#fff;border:none;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;box-shadow:0 4px 12px rgba(10,61,46,.2);transition:all .15s;}
-.btn-primary:hover{transform:translateY(-1px);}
-.btn-gold{width:100%;padding:11px;background:var(--gold-grad);color:var(--verde);border:none;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;margin-top:8px;}
-.btn-secondary{width:100%;padding:10px;background:transparent;border:1.5px solid var(--border);border-radius:8px;font-size:12px;color:var(--text2);cursor:pointer;margin-top:6px;}
-.btn-danger{padding:5px 10px;background:var(--red-l);border:1px solid rgba(192,57,43,.2);color:var(--red);border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;transition:all .12s;}
-.btn-danger:hover{background:var(--red);color:#fff;}
-.btn-edit{padding:5px 10px;background:var(--verde-light);border:1px solid var(--border2);color:var(--verde3);border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;transition:all .12s;}
-.btn-edit:hover{background:var(--verde3);color:#fff;}
+.flbl{display:block;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin-bottom:5px;}
+.fctrl{width:100%;background:var(--bg);border:1.5px solid var(--border);color:var(--text);padding:9px 11px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.fctrl:focus{border-color:var(--verde3);}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fg{margin-bottom:12px;}
+.btn-p{width:100%;padding:11px;background:linear-gradient(135deg,var(--verde2),var(--verde3));color:#fff;border:none;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;}
+.btn-s{width:100%;padding:10px;background:transparent;border:1.5px solid var(--border);border-radius:8px;font-size:12px;color:var(--text2);cursor:pointer;margin-top:6px;}
+.btn-e{padding:5px 10px;background:var(--verde-light);border:1px solid var(--border2);color:var(--verde3);border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;}
+.btn-d{padding:5px 10px;background:var(--red-l);border:1px solid rgba(192,57,43,.2);color:var(--red);border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;}
+.srch{position:relative;margin-bottom:12px;}
+.srch input{width:100%;padding:8px 12px 8px 32px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;outline:none;}
+.srch input:focus{border-color:var(--verde3);}
+.srch span{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;}
 
-/* SEARCH */
-.search-wrap{position:relative;margin-bottom:14px;}
-.search-inp{width:100%;padding:9px 12px 9px 36px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;color:var(--text);background:var(--white);outline:none;transition:border-color .2s;}
-.search-inp:focus{border-color:var(--verde3);}
-.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;}
+/* WA box */
+.wabox{display:none;background:var(--verde-light);border:1px solid rgba(30,122,85,.2);border-radius:10px;padding:12px;margin-top:12px;}
+.waprev{font-size:11px;color:var(--text2);white-space:pre-wrap;background:var(--white);border-radius:7px;padding:10px;margin-bottom:8px;border:1px solid var(--border);}
+.btn-wa{width:100%;padding:10px;background:#25d366;border:none;border-radius:8px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;cursor:pointer;}
 
-/* CHAT IA */
-.chat-msg-bot{background:var(--verde-light);border-radius:12px 12px 12px 0;padding:10px 14px;margin-bottom:8px;max-width:88%;font-size:13px;color:var(--text);}
-.chat-msg-user{background:var(--verde2);color:#fff;border-radius:12px 12px 0 12px;padding:10px 14px;margin-bottom:8px;max-width:88%;margin-left:auto;font-size:13px;}
-.quick-btn{padding:5px 12px;background:var(--bg);border:1px solid var(--border);border-radius:20px;font-size:11px;cursor:pointer;color:var(--text2);transition:all .12s;}
-.quick-btn:hover{border-color:var(--verde3);color:var(--verde3);}
-
-/* WA ALTA */
-.wa-box{background:var(--verde-light);border:1px solid rgba(30,122,85,.2);border-radius:10px;padding:12px;margin-top:12px;display:none;}
-.wa-preview{font-size:11px;color:var(--text2);line-height:1.6;white-space:pre-wrap;background:var(--white);border-radius:7px;padding:10px;margin-bottom:10px;border:1px solid var(--border);}
-.btn-wa{width:100%;padding:10px;background:#25d366;border:none;border-radius:8px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;}
+/* CHAT */
+.cmsg-bot{background:var(--verde-light);border-radius:12px 12px 12px 0;padding:10px 14px;margin-bottom:8px;max-width:88%;font-size:13px;}
+.cmsg-user{background:var(--verde2);color:#fff;border-radius:12px 12px 0 12px;padding:10px 14px;margin-bottom:8px;max-width:88%;margin-left:auto;font-size:13px;}
+.qbtn{padding:5px 12px;background:var(--bg);border:1px solid var(--border);border-radius:20px;font-size:11px;cursor:pointer;color:var(--text2);}
+.qbtn:hover{border-color:var(--verde3);color:var(--verde3);}
 
 /* TOAST */
-.toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;border-radius:10px;font-size:12px;font-weight:700;display:none;z-index:500;animation:tIn .3s ease;box-shadow:var(--shadow-lg);}
+.toast{position:fixed;bottom:18px;right:18px;padding:10px 16px;border-radius:10px;font-size:12px;font-weight:700;display:none;z-index:500;}
 .toast.show{display:flex;align-items:center;gap:6px;}
 .toast.ok{background:var(--verde-light);border:1px solid rgba(30,122,85,.3);color:var(--verde2);}
 .toast.err{background:var(--red-l);border:1px solid rgba(192,57,43,.3);color:var(--red);}
 .toast.inf{background:var(--oro-l);border:1px solid rgba(200,168,75,.3);color:var(--amber);}
-@keyframes tIn{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
 
-@media(max-width:900px){.sidebar{display:none;}.main-content{margin-left:0;}.kpi-grid,.row-2,.row-2-eq{grid-template-columns:1fr 1fr;}.page{padding:14px;}}
+/* Categoria btns */
+.catbtn{flex:1;padding:10px 4px;background:var(--white);border:2px solid var(--border);border-radius:8px;cursor:pointer;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--text3);transition:all .15s;}
+
+@media(max-width:900px){.sidebar{display:none;}.main{margin-left:0;}.kgrid,.row2,.row3{grid-template-columns:1fr 1fr;}.page{padding:12px;}}
 </style>
 </head>
 <body>
 
-<!-- BLOQUEADA -->
-<div id="blocked-screen">
-  <div class="blocked-card">
-    <div style="font-size:56px;margin-bottom:16px;">🔒</div>
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--oro2);margin-bottom:8px;">ACCESO BLOQUEADO</div>
-    <div style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:20px;line-height:1.6;">La licencia no está activa.<br>Contacta con ObraControl Pro.</div>
-    <div style="background:rgba(200,168,75,.08);border:1px solid rgba(200,168,75,.2);border-radius:10px;padding:12px;margin-bottom:16px;font-size:12px;color:rgba(255,255,255,.5);">
-      📧 <strong style="color:var(--oro2);">info@obracontrolgps.net</strong><br>
-      📞 <strong style="color:var(--oro2);">+34 609 321 585</strong>
-    </div>
-    <input class="lic-input" id="lic-input" type="text" placeholder="CLAVE DE LICENCIA" maxlength="20">
-    <div class="lic-msg" id="lic-msg"></div>
-    <button class="btn-activar" onclick="activarLicencia()">🔑 ACTIVAR LICENCIA</button>
-  </div>
-</div>
-
 <!-- LOGIN -->
 <div id="login-screen">
-  <div class="login-wrap">
-    <div class="logo-emblem">
-      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
-        <rect x="9" y="4" width="22" height="28" rx="2" fill="rgba(10,61,46,.8)"/>
-        <rect x="25" y="9" width="12" height="20" rx="1.5" fill="none" stroke="rgba(10,61,46,.8)" stroke-width="2"/>
-        <rect x="3" y="13" width="10" height="16" rx="1.5" fill="none" stroke="rgba(10,61,46,.8)" stroke-width="2"/>
-        <line x1="0" y1="32" x2="40" y2="32" stroke="rgba(10,61,46,.8)" stroke-width="2.5"/>
-      </svg>
+  <div class="lcard">
+    <div style="font-size:36px;margin-bottom:8px;">🏗️</div>
+    <div class="llogo">ObraControl Pro</div>
+    <div class="lsub">PANEL DE OFICINA</div>
+    <div class="pdots">
+      <div class="pdot" id="d0"></div>
+      <div class="pdot" id="d1"></div>
+      <div class="pdot" id="d2"></div>
+      <div class="pdot" id="d3"></div>
     </div>
-    <div class="logo-name">ObraControl Pro</div>
-    <div class="logo-sub">Panel de Oficina · Encargado</div>
-    <div class="login-card">
-      <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(200,168,75,.6);margin-bottom:16px;">🏢 ACCESO RESTRINGIDO</div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:#fff;margin-bottom:4px;">Introduce tu PIN</div>
-      <div style="font-size:11px;color:rgba(255,255,255,.3);margin-bottom:20px;">Solo personal autorizado</div>
-      <div class="pin-dots">
-        <div class="pdot" id="pd0"></div><div class="pdot" id="pd1"></div>
-        <div class="pdot" id="pd2"></div><div class="pdot" id="pd3"></div>
-      </div>
-      <div class="pin-pad" id="pin-pad">
-        <div class="pk" onclick="pk('1')">1</div><div class="pk" onclick="pk('2')">2</div><div class="pk" onclick="pk('3')">3</div>
-        <div class="pk" onclick="pk('4')">4</div><div class="pk" onclick="pk('5')">5</div><div class="pk" onclick="pk('6')">6</div>
-        <div class="pk" onclick="pk('7')">7</div><div class="pk" onclick="pk('8')">8</div><div class="pk" onclick="pk('9')">9</div>
-        <div class="pk del" onclick="pkDel()">⌫</div><div class="pk zero" onclick="pk('0')">0</div>
-      </div>
-      <div class="pin-err" id="pin-err"></div>
-      <div class="pin-demo">Demo: PIN <strong style="color:rgba(200,168,75,.5)">0000</strong></div>
+    <div class="ppad" id="ppad">
+      <div class="pk" onclick="pk('1')">1</div>
+      <div class="pk" onclick="pk('2')">2</div>
+      <div class="pk" onclick="pk('3')">3</div>
+      <div class="pk" onclick="pk('4')">4</div>
+      <div class="pk" onclick="pk('5')">5</div>
+      <div class="pk" onclick="pk('6')">6</div>
+      <div class="pk" onclick="pk('7')">7</div>
+      <div class="pk" onclick="pk('8')">8</div>
+      <div class="pk" onclick="pk('9')">9</div>
+      <div class="pk del" onclick="pkDel()">&#9003;</div>
+      <div class="pk zero" onclick="pk('0')">0</div>
     </div>
+    <div class="perr" id="perr"></div>
+    <div class="pdemo">PIN: <strong style="color:rgba(200,168,75,.5)">0000</strong></div>
   </div>
 </div>
 
 <!-- APP -->
 <div id="app">
   <aside class="sidebar">
-    <div class="sb-logo">
-      <div class="sb-logo-inner">
-        <div class="sb-emblem">🏗️</div>
-        <div>
-          <div class="sb-brand">ObraControl</div>
-          <div class="sb-edition">PRO · OFICINA</div>
-        </div>
-      </div>
+    <div class="sb-head">
+      <div class="sb-brand">ObraControl Pro</div>
+      <div class="sb-sub">PANEL DE OFICINA</div>
     </div>
     <nav class="sb-nav">
       <div class="sb-lbl">Principal</div>
-      <div class="nav-item active" onclick="showPage('tablero')" id="ni-tablero">
+      <div class="ni active" onclick="showPage('tablero')" id="ni-tablero">
         <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
         Tablero
       </div>
-      <div class="nav-item" onclick="showPage('operarios')" id="ni-operarios">
+      <div class="ni" onclick="showPage('operarios')" id="ni-operarios">
         <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 16 16"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
         Operarios
       </div>
       <div class="sb-lbl">Control</div>
-      <div class="nav-item" onclick="showPage('jornada')" id="ni-jornada">
+      <div class="ni" onclick="showPage('jornada')" id="ni-jornada">
         <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 1v2m6-2v2M2 6h12"/></svg>
         Jornada
       </div>
-      <div class="nav-item" onclick="showPage('alertas')" id="ni-alertas">
+      <div class="ni" onclick="showPage('alertas')" id="ni-alertas">
         <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 16 16"><path d="M8 1C5.8 1 4 2.8 4 5v5l-1 1.5h10L12 10V5c0-2.2-1.8-4-4-4z"/><path d="M6.5 13.5a1.5 1.5 0 003 0"/></svg>
-        Alertas <span class="n-badge" id="alert-count" style="display:none">0</span>
+        Alertas
       </div>
-      <div class="sb-lbl">Gestión</div>
-      <div class="nav-item" onclick="showPage('tareas')" id="ni-tareas">
+      <div class="sb-lbl">Gestion</div>
+      <div class="ni" onclick="showPage('tareas')" id="ni-tareas">
         <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4"/></svg>
         Tareas
       </div>
-      <div class="nav-item" onclick="showPage('alta')" id="ni-alta">
+      <div class="ni" onclick="showPage('alta')" id="ni-alta">
         <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 16 16"><circle cx="6" cy="4" r="2.5"/><path d="M1 13c0-2.5 2.2-4.5 5-4.5"/><path d="M10 9v4m-2-2h4"/></svg>
         Alta operarios
       </div>
-      <div class="nav-item" onclick="showPage('asistente')" id="ni-asistente">
+      <div class="ni" onclick="showPage('asistente')" id="ni-asistente">
         <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M6 6.5c0-1.1.9-2 2-2s2 .9 2 2c0 .8-.5 1.5-1.2 1.8L8 9v1"/><circle cx="8" cy="11.5" r=".5" fill="currentColor"/></svg>
         Asistente IA
       </div>
     </nav>
-    <div class="sb-footer">
+    <div class="sb-foot">
       <div class="sb-user">
-        <div class="sb-avatar">OP</div>
+        <div class="sb-av">OP</div>
         <div>
           <div class="sb-name">ObraControl Pro</div>
-          <div class="sb-role">Encargado · Demo</div>
+          <div class="sb-role">Encargado</div>
         </div>
       </div>
-      <button class="sb-logout" onclick="logout()">↩ Cerrar sesión</button>
+      <button class="sb-out" onclick="logout()">Cerrar sesion</button>
     </div>
   </aside>
 
-  <div class="main-content">
+  <div class="main">
     <div class="topbar">
-      <div class="topbar-title" id="topbar-title">TABLERO</div>
-      <div class="topbar-right">
-        <div class="live-pill"><div class="live-dot"></div>EN VIVO</div>
-        <div><div class="tb-clock" id="clock">--:--:--</div><div class="tb-date" id="tb-date"></div></div>
+      <div class="tb-title" id="tb-title">TABLERO</div>
+      <div class="tb-right">
+        <div class="live"><div class="livedot"></div>EN VIVO</div>
+        <div class="clock" id="clock">--:--:--</div>
       </div>
     </div>
 
     <!-- TABLERO -->
     <div class="page active" id="page-tablero">
-      <div class="kpi-grid">
-        <div class="kpi-card kc-gold" onclick="showPage('operarios')">
-          <div class="kpi-header"><span class="kpi-label">Plantilla</span><div class="kpi-icon">👷</div></div>
-          <div class="kpi-val" id="kv-total">0</div>
-          <div class="kpi-sub">Operarios registrados</div>
+      <div class="kgrid">
+        <div class="kcard k-gold" onclick="showPage('operarios')">
+          <div class="klbl">Plantilla</div>
+          <div class="kval" id="kv-total">0</div>
+          <div class="ksub">Operarios registrados</div>
         </div>
-        <div class="kpi-card kc-verde" onclick="showPage('jornada')">
-          <div class="kpi-header"><span class="kpi-label">En obra</span><div class="kpi-icon">📍</div></div>
-          <div class="kpi-val" id="kv-in">0</div>
-          <div class="kpi-sub">Fichados ahora</div>
+        <div class="kcard k-verde" onclick="showPage('jornada')">
+          <div class="klbl">En obra</div>
+          <div class="kval" id="kv-in">0</div>
+          <div class="ksub">Fichados ahora</div>
         </div>
-        <div class="kpi-card kc-red" onclick="showPage('alertas')">
-          <div class="kpi-header"><span class="kpi-label">Alertas</span><div class="kpi-icon">🚨</div></div>
-          <div class="kpi-val" id="kv-alerts">0</div>
-          <div class="kpi-sub">Sin resolver</div>
+        <div class="kcard k-red" onclick="showPage('alertas')">
+          <div class="klbl">Alertas</div>
+          <div class="kval" id="kv-alerts">0</div>
+          <div class="ksub">Sin resolver</div>
         </div>
-        <div class="kpi-card kc-purple" onclick="showPage('tareas')">
-          <div class="kpi-header"><span class="kpi-label">Tareas</span><div class="kpi-icon">📋</div></div>
-          <div class="kpi-val" id="kv-tareas">0</div>
-          <div class="kpi-sub">Pendientes hoy</div>
+        <div class="kcard k-purple" onclick="showPage('tareas')">
+          <div class="klbl">Tareas</div>
+          <div class="kval" id="kv-tareas">0</div>
+          <div class="ksub">Pendientes hoy</div>
         </div>
       </div>
-
-      <!-- Quick access -->
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
-        <button onclick="showPage('jornada')" style="padding:14px 8px;background:var(--white);border:1.5px solid var(--border);border-radius:12px;cursor:pointer;text-align:center;transition:all .15s;box-shadow:var(--shadow);" onmouseover="this.style.borderColor='var(--oro)'" onmouseout="this.style.borderColor='var(--border)'">
-          <div style="font-size:22px;margin-bottom:4px;">📅</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--verde);">JORNADA</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
+        <button onclick="showPage('jornada')" style="padding:14px 8px;background:var(--white);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;text-align:center;">
+          <div style="font-size:22px;margin-bottom:4px;">&#128197;</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:1px;color:var(--verde);">JORNADA</div>
         </button>
-        <button onclick="showPage('operarios')" style="padding:14px 8px;background:var(--white);border:1.5px solid var(--border);border-radius:12px;cursor:pointer;text-align:center;transition:all .15s;box-shadow:var(--shadow);" onmouseover="this.style.borderColor='var(--oro)'" onmouseout="this.style.borderColor='var(--border)'">
-          <div style="font-size:22px;margin-bottom:4px;">👷</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--verde);">OPERARIOS</div>
+        <button onclick="showPage('operarios')" style="padding:14px 8px;background:var(--white);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;text-align:center;">
+          <div style="font-size:22px;margin-bottom:4px;">&#128119;</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:1px;color:var(--verde);">OPERARIOS</div>
         </button>
-        <button onclick="showPage('tareas')" style="padding:14px 8px;background:var(--white);border:1.5px solid var(--border);border-radius:12px;cursor:pointer;text-align:center;transition:all .15s;box-shadow:var(--shadow);" onmouseover="this.style.borderColor='var(--oro)'" onmouseout="this.style.borderColor='var(--border)'">
-          <div style="font-size:22px;margin-bottom:4px;">📋</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--verde);">TAREAS</div>
+        <button onclick="showPage('tareas')" style="padding:14px 8px;background:var(--white);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;text-align:center;">
+          <div style="font-size:22px;margin-bottom:4px;">&#128203;</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:1px;color:var(--verde);">TAREAS</div>
         </button>
-        <button onclick="showPage('alta')" style="padding:14px 8px;background:var(--white);border:1.5px solid var(--border);border-radius:12px;cursor:pointer;text-align:center;transition:all .15s;box-shadow:var(--shadow);" onmouseover="this.style.borderColor='var(--oro)'" onmouseout="this.style.borderColor='var(--border)'">
-          <div style="font-size:22px;margin-bottom:4px;">➕</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--verde);">ALTA</div>
+        <button onclick="showPage('alta')" style="padding:14px 8px;background:var(--white);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;text-align:center;">
+          <div style="font-size:22px;margin-bottom:4px;">&#10133;</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:1px;color:var(--verde);">ALTA</div>
         </button>
       </div>
-
       <div class="card">
-        <div class="card-hdr"><div class="card-title">🔴 Alertas activas</div><button onclick="showPage('alertas')" style="font-size:10px;color:var(--verde3);background:none;border:none;cursor:pointer;font-weight:700;">Ver todas →</button></div>
-        <div style="padding:24px;text-align:center;color:var(--text3);font-size:12px;">✅ Sin alertas activas</div>
+        <div class="chdr"><div class="ctitle">Alertas activas</div></div>
+        <div style="padding:24px;text-align:center;color:var(--text3);font-size:12px;">Sin alertas activas</div>
       </div>
     </div>
 
     <!-- OPERARIOS -->
     <div class="page" id="page-operarios">
       <div class="card">
-        <div class="card-hdr"><div class="card-title">👷 Operarios registrados</div><span id="op-count" style="font-size:10px;color:var(--text3)"></span></div>
-        <div style="padding:14px 18px 0;">
-          <div class="search-wrap">
-            <span class="search-icon">🔍</span>
-            <input class="search-inp" id="op-search" placeholder="Buscar nombre, DNI o NIE..." oninput="renderWorkers()">
-          </div>
+        <div class="chdr"><div class="ctitle">Operarios registrados</div><span id="op-cnt" style="font-size:10px;color:var(--text3)"></span></div>
+        <div style="padding:12px 14px 0;">
+          <div class="srch"><span>&#128269;</span><input id="op-srch" placeholder="Buscar..." oninput="renderOps()"></div>
         </div>
         <table class="tbl">
-          <thead><tr><th>#</th><th>Nombre</th><th>DNI/NIE</th><th>Obra</th><th>PIN</th><th>Estado</th><th>Acción</th></tr></thead>
+          <thead><tr><th>#</th><th>Nombre</th><th>DNI/NIE</th><th>Categoria</th><th>Obra</th><th>PIN</th><th>Estado</th><th>Accion</th></tr></thead>
           <tbody id="op-tbody"></tbody>
         </table>
       </div>
@@ -363,10 +306,10 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
     <!-- JORNADA -->
     <div class="page" id="page-jornada">
       <div class="card">
-        <div class="card-hdr"><div class="card-title">📅 Resumen de jornada</div><span id="jornada-date" style="font-size:10px;color:var(--text3)"></span></div>
+        <div class="chdr"><div class="ctitle">Resumen de jornada</div><span id="jor-date" style="font-size:10px;color:var(--text3)"></span></div>
         <table class="tbl">
-          <thead><tr><th>Operario</th><th>Entrada</th><th>Salida</th><th>Horas</th><th>Estado</th></tr></thead>
-          <tbody id="jornada-tbody"></tbody>
+          <thead><tr><th>Operario</th><th>Categoria</th><th>Entrada</th><th>Salida</th><th>Horas</th><th>Estado</th></tr></thead>
+          <tbody id="jor-tbody"></tbody>
         </table>
       </div>
     </div>
@@ -374,106 +317,97 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
     <!-- ALERTAS -->
     <div class="page" id="page-alertas">
       <div class="card">
-        <div class="card-hdr"><div class="card-title">🚨 Centro de alertas</div></div>
-        <div style="padding:32px;text-align:center;color:var(--text3);font-size:13px;">✅ Sin alertas activas hoy.</div>
+        <div class="chdr"><div class="ctitle">Centro de alertas</div></div>
+        <div style="padding:32px;text-align:center;color:var(--text3);">Sin alertas activas hoy.</div>
       </div>
     </div>
 
     <!-- TAREAS -->
     <div class="page" id="page-tareas">
-      <div class="row-2-eq">
+      <div class="row2">
         <div class="card">
-          <div class="card-hdr"><div class="card-title">📤 Enviar tarea</div></div>
-          <div class="card-body">
-            <div class="form-g"><label class="form-lbl">Destinatario</label><select class="form-ctrl" id="task-to"><option value="all">Todos los operarios</option></select></div>
-            <div class="form-g"><label class="form-lbl">Prioridad</label><select class="form-ctrl" id="task-prio"><option>🟡 Normal</option><option>🔴 Urgente</option><option>🔵 Informativa</option></select></div>
-            <div class="form-g"><label class="form-lbl">Descripción</label><textarea class="form-ctrl" id="task-msg" placeholder="Describe el trabajo..."></textarea></div>
-            <button class="btn-primary" onclick="sendTask()">ENVIAR TAREA →</button>
+          <div class="chdr"><div class="ctitle">Enviar tarea</div></div>
+          <div class="cbody">
+            <div class="fg"><label class="flbl">Destinatario</label><select class="fctrl" id="task-to"><option value="all">Todos los operarios</option></select></div>
+            <div class="fg"><label class="flbl">Prioridad</label><select class="fctrl" id="task-prio"><option>Normal</option><option>Urgente</option><option>Informativa</option></select></div>
+            <div class="fg"><label class="flbl">Descripcion</label><textarea class="fctrl" id="task-msg" placeholder="Describe el trabajo..." style="min-height:80px;resize:vertical;"></textarea></div>
+            <button class="btn-p" onclick="sendTask()">ENVIAR TAREA</button>
           </div>
         </div>
-        <div class="card"><div class="card-hdr"><div class="card-title">Tareas enviadas</div></div><div id="task-log" style="max-height:380px;overflow-y:auto;"></div></div>
+        <div class="card"><div class="chdr"><div class="ctitle">Tareas enviadas</div></div><div id="task-log" style="max-height:380px;overflow-y:auto;"></div></div>
       </div>
     </div>
 
-    <!-- ALTA -->
+    <!-- ALTA OPERARIOS -->
     <div class="page" id="page-alta">
-      <div class="row-2">
+      <div class="row3">
         <div class="card">
-          <div class="card-hdr"><div class="card-title" id="alta-title">➕ Alta de operario</div></div>
-          <div class="card-body">
-            <input type="hidden" id="edit-id">
-            <div class="form-row">
-              <div class="form-g"><label class="form-lbl">Nombre</label><input class="form-ctrl" id="g-nombre" placeholder="Nombre"></div>
-              <div class="form-g"><label class="form-lbl">Apellidos</label><input class="form-ctrl" id="g-apellidos" placeholder="Apellidos"></div>
+          <div class="chdr"><div class="ctitle" id="alta-title">Alta de operario</div></div>
+          <div class="cbody">
+            <input type="hidden" id="eid">
+            <div class="frow">
+              <div class="fg"><label class="flbl">Nombre</label><input class="fctrl" id="g-nom" placeholder="Nombre"></div>
+              <div class="fg"><label class="flbl">Apellidos</label><input class="fctrl" id="g-ape" placeholder="Apellidos"></div>
             </div>
-            <div class="form-row">
-              <div class="form-g"><label class="form-lbl">DNI</label><input class="form-ctrl" id="g-dni" placeholder="12345678A" maxlength="9"></div>
-              <div class="form-g"><label class="form-lbl">NIE</label><input class="form-ctrl" id="g-nie" placeholder="X1234567A" maxlength="9"></div>
+            <div class="frow">
+              <div class="fg"><label class="flbl">DNI</label><input class="fctrl" id="g-dni" placeholder="12345678A" maxlength="9"></div>
+              <div class="fg"><label class="flbl">NIE</label><input class="fctrl" id="g-nie" placeholder="X1234567A" maxlength="9"></div>
             </div>
-            <div class="form-row">
-              <div class="form-g"><label class="form-lbl">📱 WhatsApp</label><input class="form-ctrl" id="g-tel" placeholder="+34 612 345 678" type="tel"></div>
-              <div class="form-g"><label class="form-lbl">Obra asignada</label><input class="form-ctrl" id="g-obra" placeholder="Dirección y CP"></div>
+            <div class="frow">
+              <div class="fg"><label class="flbl">WhatsApp</label><input class="fctrl" id="g-tel" placeholder="+34 612 345 678" type="tel"></div>
+              <div class="fg"><label class="flbl">Obra asignada</label><input class="fctrl" id="g-obra" placeholder="Direccion y CP"></div>
             </div>
-            <div class="form-g">
-              <label class="form-lbl">👷 Categoría profesional</label>
+            <div class="fg">
+              <label class="flbl">Categoria profesional</label>
               <div style="display:flex;gap:8px;">
-                <button type="button" id="cat-peon" onclick="selectCategoria('peon')" style="flex:1;padding:10px 6px;background:var(--verde-light);border:2px solid var(--verde3);border-radius:9px;cursor:pointer;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--verde2);">
-                  🧱<br>PEÓN
-                </button>
-                <button type="button" id="cat-oficial" onclick="selectCategoria('oficial')" style="flex:1;padding:10px 6px;background:var(--white);border:2px solid var(--border);border-radius:9px;cursor:pointer;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--text3);">
-                  🔧<br>OFICIAL
-                </button>
-                <button type="button" id="cat-encargado" onclick="selectCategoria('encargado')" style="flex:1;padding:10px 6px;background:var(--white);border:2px solid var(--border);border-radius:9px;cursor:pointer;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--text3);">
-                  👔<br>ENCARGADO
-                </button>
+                <button type="button" class="catbtn" id="cb-peon" onclick="selCat('peon')">&#129522;<br>PEON</button>
+                <button type="button" class="catbtn" id="cb-oficial" onclick="selCat('oficial')">&#128295;<br>OFICIAL</button>
+                <button type="button" class="catbtn" id="cb-encargado" onclick="selCat('encargado')">&#128084;<br>ENCARGADO</button>
               </div>
-              <input type="hidden" id="g-categoria" value="peon">
+              <input type="hidden" id="g-cat" value="peon">
             </div>
-            <div class="form-g">
-              <label class="form-lbl">PIN (4 dígitos)</label>
+            <div class="fg">
+              <label class="flbl">PIN (4 digitos)</label>
               <div style="display:flex;gap:6px;">
-                <input class="form-ctrl" id="g-pin" maxlength="4" placeholder="••••" style="letter-spacing:4px;font-family:'DM Mono';font-size:16px;font-weight:700;flex:1;">
-                <button onclick="genPin()" style="padding:9px 12px;background:var(--verde-light);border:1px solid var(--border2);border-radius:8px;cursor:pointer;font-size:14px;">🔄</button>
+                <input class="fctrl" id="g-pin" maxlength="4" placeholder="****" style="letter-spacing:4px;font-size:16px;font-weight:700;flex:1;">
+                <button onclick="genPin()" type="button" style="padding:9px 12px;background:var(--verde-light);border:1px solid var(--border2);border-radius:8px;cursor:pointer;">&#128260;</button>
               </div>
             </div>
-            <button class="btn-primary" onclick="saveWorker()" id="g-btn">+ DAR DE ALTA</button>
-            <button class="btn-secondary" onclick="resetForm()">Limpiar</button>
-            <div class="wa-box" id="wa-box">
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--verde3);margin-bottom:8px;">✅ OPERARIO DADO DE ALTA</div>
-              <div class="wa-preview" id="wa-preview"></div>
-              <button class="btn-wa" onclick="sendWaAlta()">📱 ENVIAR POR WHATSAPP</button>
+            <button class="btn-p" onclick="saveWorker()" id="g-btn">+ DAR DE ALTA</button>
+            <button class="btn-s" onclick="resetForm()">Limpiar</button>
+            <div class="wabox" id="wabox">
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--verde3);margin-bottom:8px;">OPERARIO DADO DE ALTA</div>
+              <div class="waprev" id="waprev"></div>
+              <button class="btn-wa" onclick="sendWaAlta()">ENVIAR POR WHATSAPP</button>
             </div>
           </div>
         </div>
         <div class="card">
-          <div class="card-hdr"><div class="card-title">Lista operarios</div><span id="g-count" style="font-size:10px;color:var(--text3)"></span></div>
-          <div style="padding:10px 14px 0;">
-            <div class="search-wrap">
-              <span class="search-icon">🔍</span>
-              <input class="search-inp" id="g-search" placeholder="Buscar..." oninput="renderGestion()">
-            </div>
+          <div class="chdr"><div class="ctitle">Lista operarios</div><span id="g-cnt" style="font-size:10px;color:var(--text3)"></span></div>
+          <div style="padding:10px 12px 0;">
+            <div class="srch"><span>&#128269;</span><input id="g-srch" placeholder="Buscar..." oninput="renderGestion()"></div>
           </div>
-          <div id="gestion-list" style="max-height:460px;overflow-y:auto;"></div>
+          <div id="g-list" style="max-height:460px;overflow-y:auto;"></div>
         </div>
       </div>
     </div>
 
     <!-- ASISTENTE -->
     <div class="page" id="page-asistente">
-      <div style="max-width:680px;margin:0 auto;">
+      <div style="max-width:660px;margin:0 auto;">
         <div class="card">
-          <div class="card-hdr"><div class="card-title">🤖 Asistente IA</div><span style="font-size:10px;color:var(--text3)">ObraControl Pro</span></div>
-          <div style="padding:14px;max-height:380px;overflow-y:auto;" id="chat-msgs">
-            <div class="chat-msg-bot">👋 Hola! Soy tu asistente de <strong>ObraControl Pro</strong>.<br><br>Puedo decirte quién ha fichado, cuántos están en obra, resúmenes del día y más.</div>
+          <div class="chdr"><div class="ctitle">Asistente IA</div></div>
+          <div style="padding:14px;max-height:360px;overflow-y:auto;" id="chat-msgs">
+            <div class="cmsg-bot">Hola! Soy tu asistente. Preguntame sobre operarios, jornada o tareas.</div>
           </div>
           <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;">
-            <input class="form-ctrl" id="chat-input" placeholder="Pregunta algo..." onkeydown="if(event.key==='Enter')sendChat()" style="flex:1;">
-            <button onclick="sendChat()" style="padding:9px 14px;background:var(--gold-grad);color:var(--verde);border:none;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;cursor:pointer;">ENVIAR</button>
+            <input class="fctrl" id="chat-in" placeholder="Escribe..." onkeydown="if(event.key==='Enter')sendChat()" style="flex:1;">
+            <button onclick="sendChat()" style="padding:9px 14px;background:var(--gold);color:var(--verde);border:none;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;cursor:pointer;">ENVIAR</button>
           </div>
-          <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;">
-            <button class="quick-btn" onclick="quickChat('¿Quién no ha fichado?')">¿Quién no fichó?</button>
-            <button class="quick-btn" onclick="quickChat('¿Cuántos están en obra?')">¿Cuántos en obra?</button>
-            <button class="quick-btn" onclick="quickChat('Resumen del día')">Resumen del día</button>
+          <div style="padding:8px 14px;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="qbtn" onclick="qchat('Quien no ha fichado')">Sin fichar</button>
+            <button class="qbtn" onclick="qchat('Cuantos en obra')">En obra</button>
+            <button class="qbtn" onclick="qchat('Resumen del dia')">Resumen</button>
           </div>
         </div>
       </div>
@@ -485,211 +419,209 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
 <div class="toast" id="toast"></div>
 
 <script>
-const FB_URL = 'https://obracontroldemo-default-rtdb.europe-west1.firebasedatabase.app';
-const DEMO_CLAVE = 'BA49159567EFC254';
-const PIN_OFICINA = '0000';
+var FB = 'https://obracontroldemo-default-rtdb.europe-west1.firebasedatabase.app';
+var CLAVE = 'BA49159567EFC254';
+var PIN = '0000';
+var APP_URL = 'https://obracontrol-tech.github.io/lance2024/ocp-operario.html';
+var WORKERS = [];
 
-// -- LICENCIA --
-function checkLicencia(){
-  const saved = localStorage.getItem('ocp_lic_oficina');
-  if(saved === DEMO_CLAVE){ showLogin(); return; }
-  fetch(`${FB_URL}/licencias.json`).then(r=>r.json()).then(data=>{
-    if(data && Object.values(data).find(l=>l.activa)) showLogin();
-    else showBlocked();
-  }).catch(()=>showBlocked());
-}
-function showBlocked(){ document.getElementById('blocked-screen').style.display='flex'; document.getElementById('login-screen').style.display='none'; }
-function showLogin(){ document.getElementById('blocked-screen').style.display='none'; document.getElementById('login-screen').style.display='flex'; }
-function activarLicencia(){
-  const val=(document.getElementById('lic-input').value||'').trim().toUpperCase();
-  const msg=document.getElementById('lic-msg');
-  if(val===DEMO_CLAVE){ localStorage.setItem('ocp_lic_oficina',val); showLogin(); return; }
-  msg.textContent='❌ Clave no válida';
+// Cargar workers del localStorage
+try {
+  var sw = localStorage.getItem('ocp_workers_v2');
+  if (sw) {
+    var arr = JSON.parse(sw);
+    if (arr.length <= 20) WORKERS = arr;
+    else localStorage.removeItem('ocp_workers_v2');
+  }
+} catch(e) {}
+
+function saveW() {
+  try { localStorage.setItem('ocp_workers_v2', JSON.stringify(WORKERS)); } catch(e) {}
 }
 
-// -- PIN --
-const PIN=PIN_OFICINA; let pinVal='';
-function pk(d){ if(pinVal.length>=4)return; pinVal+=d; updDots(); if(pinVal.length===4) setTimeout(checkPin,200); }
-function pkDel(){ pinVal=pinVal.slice(0,-1); updDots(); document.getElementById('pin-err').textContent=''; }
-function updDots(){ for(let i=0;i<4;i++) document.getElementById('pd'+i).classList.toggle('on',i<pinVal.length); }
-function checkPin(){
-  if(pinVal===PIN){
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app').style.display='block';
+// PIN LOGIN
+var pinVal = '';
+function pk(d) {
+  if (pinVal.length >= 4) return;
+  pinVal += d;
+  updDots();
+  if (pinVal.length === 4) setTimeout(checkPin, 200);
+}
+function pkDel() {
+  pinVal = pinVal.slice(0, -1);
+  updDots();
+  document.getElementById('perr').textContent = '';
+}
+function updDots() {
+  for (var i = 0; i < 4; i++) {
+    var el = document.getElementById('d' + i);
+    if (el) el.className = i < pinVal.length ? 'pdot on' : 'pdot';
+  }
+}
+function checkPin() {
+  if (pinVal === PIN) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
     initApp();
   } else {
-    document.getElementById('pin-err').textContent='PIN incorrecto';
-    document.getElementById('pin-pad').classList.add('shake');
-    setTimeout(()=>document.getElementById('pin-pad').classList.remove('shake'),450);
-    pinVal=''; updDots();
+    document.getElementById('perr').textContent = 'PIN incorrecto';
+    var pp = document.getElementById('ppad');
+    pp.classList.add('shake');
+    setTimeout(function() { pp.classList.remove('shake'); }, 450);
+    pinVal = '';
+    updDots();
   }
 }
-function logout(){ pinVal=''; updDots(); document.getElementById('app').style.display='none'; document.getElementById('login-screen').style.display='flex'; }
-
-// -- CLOCK --
-function tick(){
-  const n=new Date();
-  document.getElementById('clock').textContent=n.toLocaleTimeString('es-ES');
-  document.getElementById('tb-date').textContent=n.toLocaleDateString('es-ES',{weekday:'long',day:'2-digit',month:'long'});
+function logout() {
+  pinVal = '';
+  updDots();
+  document.getElementById('perr').textContent = '';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
 }
-setInterval(tick,1000); tick();
 
-// -- DATA --
-let WORKERS=[];
-// Limpiar operarios de Lance si los hay mezclados
-try{
-  const s=localStorage.getItem('ocp_workers');
-  if(s){
-    const arr = JSON.parse(s);
-    // Solo conservar si son pocos (demo) — si hay más de 20 son de Lance, limpiar
-    if(arr.length > 20){
-      localStorage.removeItem('ocp_workers');
-      WORKERS = [];
-    } else {
-      WORKERS = arr;
-    }
-  }
-}catch(e){}
-function saveW(){ try{ localStorage.setItem('ocp_workers',JSON.stringify(WORKERS)); }catch(e){} }
+// CLOCK
+function tick() {
+  var n = new Date();
+  var el = document.getElementById('clock');
+  if (el) el.textContent = n.toLocaleTimeString('es-ES');
+}
+setInterval(tick, 1000);
+tick();
 
-function initApp(){
-  loadFromFirebase();
-  animKPI('kv-total',WORKERS.length);
-  animKPI('kv-in',WORKERS.filter(w=>w.status==='in').length);
-  animKPI('kv-alerts',0);
+// INIT
+function initApp() {
+  animKPI('kv-total', WORKERS.length);
+  animKPI('kv-in', WORKERS.filter(function(w) { return w.status === 'in'; }).length);
+  animKPI('kv-alerts', 0);
+  document.getElementById('jor-date').textContent = new Date().toLocaleDateString('es-ES', {weekday:'long', day:'2-digit', month:'long'});
   loadTareas();
-  document.getElementById('jornada-date').textContent=new Date().toLocaleDateString('es-ES',{weekday:'long',day:'2-digit',month:'long'});
-  setInterval(loadFromFirebase, 30000); // cada 30 seg
+  selCat('peon');
+  genPin();
+  setInterval(loadFirebase, 30000);
+  loadFirebase();
 }
 
-function loadFromFirebase(){
-  fetch(`${FB_URL}/operarios_activos.json`).then(r=>r.json()).then(data=>{
-    if(!data){ animKPI('kv-total',WORKERS.length); return; }
-    // Solo actualizar estados — NO añadir nuevos operarios automáticamente
-    Object.entries(data).forEach(([key,op])=>{
-      if(!op||!op.nombre) return;
-      let w = WORKERS.find(x=>`${x.nombre}_${x.apellidos}`.toLowerCase().replace(/\s+/g,'_')===key);
-      if(!w) return; // No añadir desconocidos automáticamente
-      w.status=op.activo?'in':'out';
-      if(op.tipo==='entrada') w.arrival=op.hora;
-      if(op.tipo==='salida'){ w.dep=op.hora; }
-      if(op.hora&&op.tipo==='entrada'){
-        const [eh,em]=op.hora.split(':').map(Number);
-        const now=new Date();
-        const mins=(now.getHours()*60+now.getMinutes())-(eh*60+em);
-        w.h=mins>0?(mins/60).toFixed(1):0;
-      }
-    });
-    animKPI('kv-total',WORKERS.length);
-    animKPI('kv-in',WORKERS.filter(w=>w.status==='in').length);
-    saveW();
-    if(document.getElementById('page-operarios').classList.contains('active')) renderWorkers();
-    if(document.getElementById('page-jornada').classList.contains('active')) renderJornada();
-  }).catch(()=>{});
+// FIREBASE
+function loadFirebase() {
+  fetch(FB + '/operarios_activos.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data) return;
+      Object.keys(data).forEach(function(key) {
+        var op = data[key];
+        if (!op || !op.nombre) return;
+        var w = WORKERS.find(function(x) {
+          return (x.nombre + '_' + x.apellidos).toLowerCase().replace(/\s+/g,'_') === key;
+        });
+        if (!w) return;
+        w.status = op.activo ? 'in' : 'out';
+        if (op.tipo === 'entrada') w.arrival = op.hora;
+        if (op.tipo === 'salida') w.dep = op.hora;
+        if (op.hora && op.tipo === 'entrada') {
+          var parts = op.hora.split(':');
+          var eh = parseInt(parts[0]), em = parseInt(parts[1]);
+          var now = new Date();
+          var mins = (now.getHours() * 60 + now.getMinutes()) - (eh * 60 + em);
+          w.h = mins > 0 ? (mins / 60).toFixed(1) : 0;
+        }
+      });
+      animKPI('kv-total', WORKERS.length);
+      animKPI('kv-in', WORKERS.filter(function(w) { return w.status === 'in'; }).length);
+      saveW();
+      if (document.getElementById('page-operarios').classList.contains('active')) renderOps();
+      if (document.getElementById('page-jornada').classList.contains('active')) renderJornada();
+    }).catch(function() {});
 }
 
-// -- KPI --
-function animKPI(id,target,dur=1200){
-  const el=document.getElementById(id); if(!el)return;
-  const start=performance.now();
-  (function s(now){ const p=Math.min((now-start)/dur,1),e=1-Math.pow(1-p,4);
-    el.textContent=Math.round(e*target); if(p<1) requestAnimationFrame(s); })(performance.now());
+// KPI ANIM
+function animKPI(id, target) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var start = performance.now();
+  var dur = 1000;
+  function step(now) {
+    var p = Math.min((now - start) / dur, 1);
+    var e = 1 - Math.pow(1 - p, 4);
+    el.textContent = Math.round(e * target);
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 }
 
-// -- PAGES --
-const TITLES={tablero:'TABLERO',operarios:'OPERARIOS',jornada:'JORNADA',alertas:'ALERTAS',tareas:'TAREAS',alta:'ALTA OPERARIOS',asistente:'ASISTENTE IA'};
-function showPage(name){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  document.getElementById('ni-'+name).classList.add('active');
-  document.getElementById('topbar-title').textContent=TITLES[name]||name;
-  if(name==='operarios') renderWorkers();
-  if(name==='jornada') renderJornada();
-  if(name==='alta'){ renderGestion(); genPin(); }
-  if(name==='tareas') loadTareas();
+// PAGES
+var TITLES = {tablero:'TABLERO', operarios:'OPERARIOS', jornada:'JORNADA', alertas:'ALERTAS', tareas:'TAREAS', alta:'ALTA OPERARIOS', asistente:'ASISTENTE IA'};
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.ni').forEach(function(n) { n.classList.remove('active'); });
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('ni-' + name).classList.add('active');
+  document.getElementById('tb-title').textContent = TITLES[name] || name;
+  if (name === 'operarios') renderOps();
+  if (name === 'jornada') renderJornada();
+  if (name === 'alta') { renderGestion(); genPin(); selCat('peon'); }
+  if (name === 'tareas') { loadTareas(); updateTaskSel(); }
 }
 
-// -- WORKERS --
-function renderWorkers(){
-  const tb=document.getElementById('op-tbody'); if(!tb)return;
-  const q=(document.getElementById('op-search')?.value||'').toLowerCase();
-  const filtered=WORKERS.filter(w=>`${w.nombre} ${w.apellidos} ${w.dni} ${w.nie}`.toLowerCase().includes(q));
-  document.getElementById('op-count').textContent=filtered.length+' operarios';
-  const sb={in:'<span class="pill p-in">✅ En obra</span>',out:'<span class="pill p-out">🔴 Fuera</span>',pending:'<span class="pill p-pend">⏳ Sin fichar</span>'};
-  tb.innerHTML=filtered.map((w,i)=>`<tr>
-    <td style="font-weight:700;color:var(--text3)">${i+1}</td>
-    <td><div style="font-weight:600">${w.nombre} ${w.apellidos}</div><div style="font-size:10px;color:var(--text3)">${w.categoria==='encargado'?'👔 Encargado':w.categoria==='oficial'?'🔧 Oficial':'🧱 Peón'}</div></td>
-    <td style="font-size:11px">${w.dni||w.nie||'—'}</td>
-    <td style="font-size:11px;color:var(--text3)">${(w.obra||'').split(',')[0]||'—'}</td>
-    <td><span style="font-family:'DM Mono';font-weight:800;font-size:15px;color:var(--verde3);letter-spacing:3px">${w.pin}</span></td>
-    <td>${sb[w.status]||'—'}</td>
-    <td><button class="btn-edit" onclick="editWorker(${w.id})">✏️</button> <button class="btn-danger" onclick="deleteWorker(${w.id})">🗑️</button></td>
-  </tr>`).join('');
-}
-
-function renderJornada(){
-  const tb=document.getElementById('jornada-tbody'); if(!tb)return;
-  tb.innerHTML=WORKERS.map(w=>{
-    const st=w.status==='in'?'<span class="pill p-in">✅ En obra</span>':w.status==='out'?'<span class="pill p-out">Salida</span>':'<span class="pill p-pend">Sin fichar</span>';
-    return`<tr>
-      <td><div style="font-weight:600">${w.nombre} ${w.apellidos}</div><div style="font-size:10px;color:var(--text3)">${w.obra||''}</div></td>
-      <td style="font-weight:600;color:${w.arrival?'var(--verde3)':'var(--red)'}">${w.arrival||'—'}</td>
-      <td style="color:var(--text3)">${w.dep||'—'}</td>
-      <td><span style="font-family:'Bebas Neue';font-size:16px;color:var(--verde2)">${w.h}h</span></td>
-      <td>${st}</td>
-    </tr>`;
+// OPERARIOS TABLE
+function renderOps() {
+  var tb = document.getElementById('op-tbody');
+  if (!tb) return;
+  var q = (document.getElementById('op-srch') ? document.getElementById('op-srch').value : '').toLowerCase();
+  var f = WORKERS.filter(function(w) {
+    return (w.nombre + ' ' + w.apellidos + ' ' + (w.dni||'') + ' ' + (w.nie||'')).toLowerCase().indexOf(q) >= 0;
+  });
+  var cnt = document.getElementById('op-cnt');
+  if (cnt) cnt.textContent = f.length + ' operarios';
+  var catLabel = {peon:'Peon', oficial:'Oficial', encargado:'Encargado'};
+  tb.innerHTML = f.map(function(w, i) {
+    var st = w.status === 'in' ? '<span class="pill p-in">En obra</span>' : w.status === 'out' ? '<span class="pill p-out">Fuera</span>' : '<span class="pill p-pend">Sin fichar</span>';
+    return '<tr>' +
+      '<td style="font-weight:700;color:var(--text3)">' + (i+1) + '</td>' +
+      '<td><div style="font-weight:600">' + w.nombre + ' ' + w.apellidos + '</div></td>' +
+      '<td style="font-size:11px">' + (w.dni||w.nie||'--') + '</td>' +
+      '<td style="font-size:11px;color:var(--text3)">' + (catLabel[w.cat||'peon']||'Peon') + '</td>' +
+      '<td style="font-size:11px;color:var(--text3)">' + ((w.obra||'').split(',')[0]||'--') + '</td>' +
+      '<td style="font-family:monospace;font-weight:800;font-size:15px;color:var(--verde3);letter-spacing:3px">' + w.pin + '</td>' +
+      '<td>' + st + '</td>' +
+      '<td><button class="btn-e" onclick="editW(' + w.id + ')">Editar</button> <button class="btn-d" onclick="delW(' + w.id + ')">Borrar</button></td>' +
+      '</tr>';
   }).join('');
 }
 
-// -- ALTA --
-let lastAdded=null;
-function saveWorker(){
-  const id=document.getElementById('edit-id').value;
-  const nombre=document.getElementById('g-nombre').value.trim();
-  const apellidos=document.getElementById('g-apellidos').value.trim();
-  const dni=document.getElementById('g-dni').value.trim().toUpperCase();
-  const nie=document.getElementById('g-nie').value.trim().toUpperCase();
-  const tel=document.getElementById('g-tel').value.trim();
-  const obra=document.getElementById('g-obra').value;
-  const pin=document.getElementById('g-pin').value.trim();
-  const categoria=document.getElementById('g-categoria').value||'peon';
-  if(!nombre||!apellidos){ showToast('Introduce nombre y apellidos','err'); return; }
-  if(!dni&&!nie){ showToast('DNI o NIE obligatorio','err'); return; }
-  if(pin.length!==4||isNaN(pin)){ showToast('PIN de 4 dígitos','err'); return; }
-  if(id){
-    const w=WORKERS.find(w=>w.id==id);
-    if(w) Object.assign(w,{nombre,apellidos,dni,nie,tel,obra,pin});
-    showToast('✅ Operario actualizado','ok');
-    document.getElementById('wa-box').style.display='none';
-  } else {
-    const newId=Math.max(0,...WORKERS.map(w=>w.id))+1;
-    const nw={id:newId,nombre,apellidos,dni,nie,tel,obra,pin,categoria,status:'pending',arrival:null,dep:null,h:0};
-    WORKERS.push(nw); lastAdded=nw;
-    const doc=(dni||nie).replace(/[^A-Z0-9]/g,'');
-    fetch(`${FB_URL}/operarios_registro/${doc}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre,apellidos,dni,nie,pin,obra,categoria,activo:true})}).catch(()=>{});
-    document.getElementById('wa-preview').textContent=genMsgWA(nw);
-    document.getElementById('wa-box').style.display='block';
-    showToast(`✅ ${nombre} ${apellidos} dado de alta`,'ok');
-    animKPI('kv-total',WORKERS.length);
-  }
-  saveW(); resetForm(); renderGestion(); renderWorkers();
+// JORNADA
+function renderJornada() {
+  var tb = document.getElementById('jor-tbody');
+  if (!tb) return;
+  var catLabel = {peon:'Peon', oficial:'Oficial', encargado:'Encargado'};
+  tb.innerHTML = WORKERS.map(function(w) {
+    var st = w.status === 'in' ? '<span class="pill p-in">En obra</span>' : w.status === 'out' ? '<span class="pill p-out">Salio</span>' : '<span class="pill p-pend">Sin fichar</span>';
+    return '<tr>' +
+      '<td><div style="font-weight:600">' + w.nombre + ' ' + w.apellidos + '</div></td>' +
+      '<td style="font-size:11px;color:var(--text3)">' + (catLabel[w.cat||'peon']||'Peon') + '</td>' +
+      '<td style="font-weight:600;color:var(--verde3)">' + (w.arrival||'--') + '</td>' +
+      '<td style="color:var(--text3)">' + (w.dep||'--') + '</td>' +
+      '<td style="font-family:\'Bebas Neue\';font-size:16px;color:var(--verde2)">' + (w.h||0) + 'h</td>' +
+      '<td>' + st + '</td>' +
+      '</tr>';
+  }).join('');
 }
 
-function selectCategoria(cat){
-  const cats = {
-    peon:     {emoji:'🧱', label:'PEÓN',      color:'var(--verde2)', bg:'var(--verde-light)', border:'var(--verde3)'},
-    oficial:  {emoji:'🔧', label:'OFICIAL',   color:'var(--amber)',  bg:'var(--amber-l)',     border:'var(--amber)'},
-    encargado:{emoji:'👔', label:'ENCARGADO', color:'var(--blue2)',  bg:'var(--blue-light)',  border:'var(--blue2)'},
+// CATEGORIA
+function selCat(cat) {
+  document.getElementById('g-cat').value = cat;
+  var styles = {
+    peon:     {bg:'var(--verde-light)', border:'var(--verde3)',  color:'var(--verde2)'},
+    oficial:  {bg:'var(--amber-l)',     border:'var(--amber)',   color:'var(--amber)'},
+    encargado:{bg:'var(--blue-l)',      border:'var(--blue)',    color:'var(--blue)'}
   };
-  document.getElementById('g-categoria').value = cat;
-  ['peon','oficial','encargado'].forEach(c=>{
-    const btn = document.getElementById('cat-'+c);
-    if(!btn) return;
-    if(c===cat){
-      btn.style.background = cats[c].bg;
-      btn.style.borderColor = cats[c].border;
-      btn.style.color = cats[c].color;
+  ['peon','oficial','encargado'].forEach(function(c) {
+    var btn = document.getElementById('cb-' + c);
+    if (!btn) return;
+    if (c === cat) {
+      btn.style.background = styles[c].bg;
+      btn.style.borderColor = styles[c].border;
+      btn.style.color = styles[c].color;
     } else {
       btn.style.background = 'var(--white)';
       btn.style.borderColor = 'var(--border)';
@@ -697,170 +629,244 @@ function selectCategoria(cat){
     }
   });
 }
-  const used=WORKERS.map(w=>w.pin);
-  let p; do{ p=String(Math.floor(1000+Math.random()*9000)); }while(used.includes(p));
-  document.getElementById('g-pin').value=p;
+
+// ALTA OPERARIOS
+var lastAdded = null;
+
+function genPin() {
+  var used = WORKERS.map(function(w) { return w.pin; });
+  var p;
+  do { p = String(Math.floor(1000 + Math.random() * 9000)); } while (used.indexOf(p) >= 0);
+  document.getElementById('g-pin').value = p;
 }
 
-const APP_URL='https://bufeteimpagosojuridicos-byte.github.io/pedrosaborrego-ai/ocp-operario.html';
+function saveWorker() {
+  var id = document.getElementById('eid').value;
+  var nom = document.getElementById('g-nom').value.trim();
+  var ape = document.getElementById('g-ape').value.trim();
+  var dni = document.getElementById('g-dni').value.trim().toUpperCase();
+  var nie = document.getElementById('g-nie').value.trim().toUpperCase();
+  var tel = document.getElementById('g-tel').value.trim();
+  var obra = document.getElementById('g-obra').value.trim();
+  var pin = document.getElementById('g-pin').value.trim();
+  var cat = document.getElementById('g-cat').value || 'peon';
 
-function genMsgWA(w){
+  if (!nom) { showToast('Escribe el nombre', 'err'); return; }
+  if (!ape) { showToast('Escribe los apellidos', 'err'); return; }
+  if (!dni && !nie) { showToast('DNI o NIE obligatorio', 'err'); return; }
+  if (pin.length !== 4 || isNaN(pin)) { showToast('PIN de 4 digitos', 'err'); return; }
+
+  if (id) {
+    var w = WORKERS.find(function(x) { return x.id == id; });
+    if (w) Object.assign(w, {nombre:nom, apellidos:ape, dni:dni, nie:nie, tel:tel, obra:obra, pin:pin, cat:cat});
+    showToast('Operario actualizado', 'ok');
+    document.getElementById('wabox').style.display = 'none';
+  } else {
+    var newId = Math.max.apply(null, [0].concat(WORKERS.map(function(w) { return w.id; }))) + 1;
+    var nw = {id:newId, nombre:nom, apellidos:ape, dni:dni, nie:nie, tel:tel, obra:obra, pin:pin, cat:cat, status:'pending', arrival:null, dep:null, h:0};
+    WORKERS.push(nw);
+    lastAdded = nw;
+    var doc = (dni||nie).replace(/[^A-Z0-9]/g,'');
+    fetch(FB + '/operarios_registro/' + doc + '.json', {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({nombre:nom, apellidos:ape, dni:dni, nie:nie, pin:pin, obra:obra, cat:cat, activo:true})
+    }).catch(function() {});
+    document.getElementById('waprev').textContent = buildWAMsg(nw);
+    document.getElementById('wabox').style.display = 'block';
+    showToast(nom + ' ' + ape + ' dado de alta', 'ok');
+    animKPI('kv-total', WORKERS.length);
+  }
+  saveW();
+  resetForm();
+  renderGestion();
+  renderOps();
+  updateTaskSel();
+}
+
+function buildWAMsg(w) {
   var n = w.nombre + ' ' + w.apellidos;
   var doc = w.dni || w.nie || '';
   var obra = w.obra || 'Consulta con el encargado';
-  return '🏗️ *OBRACONTROL PRO*
-
-Hola ' + n + ' 👋
-
-Tu acceso a la app:
-
-📱 ' + APP_URL + '
-
-📄 DNI/NIE: *' + doc + '*
-🔐 PIN: *' + w.pin + '*
-
-📍 Obra: ' + obra + '
-
-_ObraControl Pro_';
+  return 'OBRACONTROL PRO\n\nHola ' + n + '\n\nTu acceso:\n' + APP_URL + '\n\nDNI/NIE: ' + doc + '\nPIN: ' + w.pin + '\n\nObra: ' + obra;
 }
 
-function sendWaAlta(){
-  if(!lastAdded) return;
-  const phone=(lastAdded.tel||'').replace(/[\s\-\(\)]/g,'').replace(/^\+/,'');
-  const url=phone?`https://wa.me/${phone}?text=${encodeURIComponent(genMsgWA(lastAdded))}`:  `https://wa.me/?text=${encodeURIComponent(genMsgWA(lastAdded))}`;
-  window.open(url,'_blank');
+function sendWaAlta() {
+  if (!lastAdded) return;
+  var phone = (lastAdded.tel||'').replace(/[\s\-\(\)]/g,'').replace(/^\+/,'');
+  if (phone && phone.indexOf('34') !== 0) phone = '34' + phone;
+  var msg = encodeURIComponent(buildWAMsg(lastAdded));
+  var url = phone ? 'https://wa.me/' + phone + '?text=' + msg : 'https://wa.me/?text=' + msg;
+  window.open(url, '_blank');
 }
 
-function editWorker(id){
-  const w=WORKERS.find(w=>w.id===id); if(!w)return;
-  document.getElementById('edit-id').value=id;
-  document.getElementById('g-nombre').value=w.nombre;
-  document.getElementById('g-apellidos').value=w.apellidos;
-  document.getElementById('g-dni').value=w.dni||'';
-  document.getElementById('g-nie').value=w.nie||'';
-  document.getElementById('g-tel').value=w.tel||'';
-  document.getElementById('g-obra').value=w.obra||'';
-  document.getElementById('g-pin').value=w.pin;
-  document.getElementById('g-btn').textContent='💾 GUARDAR CAMBIOS';
-  document.getElementById('alta-title').textContent='✏️ Editar operario';
+function editW(id) {
+  var w = WORKERS.find(function(x) { return x.id === id; });
+  if (!w) return;
+  document.getElementById('eid').value = id;
+  document.getElementById('g-nom').value = w.nombre;
+  document.getElementById('g-ape').value = w.apellidos;
+  document.getElementById('g-dni').value = w.dni||'';
+  document.getElementById('g-nie').value = w.nie||'';
+  document.getElementById('g-tel').value = w.tel||'';
+  document.getElementById('g-obra').value = w.obra||'';
+  document.getElementById('g-pin').value = w.pin;
+  selCat(w.cat||'peon');
+  document.getElementById('g-btn').textContent = 'GUARDAR CAMBIOS';
+  document.getElementById('alta-title').textContent = 'Editar operario';
   showPage('alta');
 }
 
-function deleteWorker(id){
-  const w=WORKERS.find(w=>w.id===id); if(!w)return;
-  if(!confirm(`¿Eliminar a ${w.nombre} ${w.apellidos}?`)) return;
-  WORKERS=WORKERS.filter(w=>w.id!==id);
-  saveW(); renderGestion(); renderWorkers();
-  animKPI('kv-total',WORKERS.length);
-  showToast(`🗑️ ${w.nombre} eliminado`,'err');
+function delW(id) {
+  var w = WORKERS.find(function(x) { return x.id === id; });
+  if (!w) return;
+  if (!confirm('Eliminar a ' + w.nombre + ' ' + w.apellidos + '?')) return;
+  var doc = (w.dni||w.nie||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if (doc) fetch(FB + '/operarios_registro/' + doc + '.json', {method:'DELETE'}).catch(function() {});
+  WORKERS = WORKERS.filter(function(x) { return x.id !== id; });
+  saveW();
+  renderGestion();
+  renderOps();
+  animKPI('kv-total', WORKERS.length);
+  showToast(w.nombre + ' eliminado', 'err');
 }
 
-function resetForm(){
-  document.getElementById('edit-id').value='';
-  ['g-nombre','g-apellidos','g-dni','g-nie','g-tel','g-obra'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+function resetForm() {
+  document.getElementById('eid').value = '';
+  ['g-nom','g-ape','g-dni','g-nie','g-tel','g-obra'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
   genPin();
-  selectCategoria('peon');
-  document.getElementById('g-btn').textContent='+ DAR DE ALTA';
-  document.getElementById('alta-title').textContent='➕ Alta de operario';
-  document.getElementById('wa-box').style.display='none';
-  lastAdded=null;
+  selCat('peon');
+  document.getElementById('g-btn').textContent = '+ DAR DE ALTA';
+  document.getElementById('alta-title').textContent = 'Alta de operario';
+  document.getElementById('wabox').style.display = 'none';
+  lastAdded = null;
 }
 
-function renderGestion(){
-  const list=document.getElementById('gestion-list'); if(!list)return;
-  const q=(document.getElementById('g-search')?.value||'').toLowerCase();
-  const filtered=WORKERS.filter(w=>`${w.nombre} ${w.apellidos} ${w.dni} ${w.nie}`.toLowerCase().includes(q));
-  document.getElementById('g-count').textContent=WORKERS.length+' operarios';
-  list.innerHTML=filtered.map(w=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);">
-      <div style="width:34px;height:34px;border-radius:50%;background:var(--verde-light);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-weight:800;font-size:12px;color:var(--verde3);flex-shrink:0;">${(w.nombre[0]||'')+(w.apellidos[0]||'')}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:600;font-size:13px">${w.nombre} ${w.apellidos}</div>
-        <div style="font-size:10px;color:var(--text3)">${w.dni||w.nie||'—'} · PIN: <strong style="color:var(--verde3)">${w.pin}</strong> · ${w.categoria==='encargado'?'👔 Encargado':w.categoria==='oficial'?'🔧 Oficial':'🧱 Peón'}</div>
-      </div>
-      <div style="display:flex;gap:4px;">
-        <button class="btn-edit" onclick="editWorker(${w.id})">✏️</button>
-        <button class="btn-danger" onclick="deleteWorker(${w.id})">🗑️</button>
-      </div>
-    </div>`).join('');
+function renderGestion() {
+  var list = document.getElementById('g-list');
+  if (!list) return;
+  var q = (document.getElementById('g-srch') ? document.getElementById('g-srch').value : '').toLowerCase();
+  var f = WORKERS.filter(function(w) {
+    return (w.nombre + ' ' + w.apellidos + ' ' + (w.dni||'')).toLowerCase().indexOf(q) >= 0;
+  });
+  var cnt = document.getElementById('g-cnt');
+  if (cnt) cnt.textContent = WORKERS.length + ' operarios';
+  var catLabel = {peon:'Peon', oficial:'Oficial', encargado:'Encargado'};
+  list.innerHTML = f.map(function(w) {
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border);">' +
+      '<div style="width:32px;height:32px;border-radius:50%;background:var(--verde-light);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:var(--verde3);flex-shrink:0;">' + (w.nombre[0]||'') + (w.apellidos[0]||'') + '</div>' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-weight:600;font-size:13px">' + w.nombre + ' ' + w.apellidos + '</div>' +
+        '<div style="font-size:10px;color:var(--text3)">' + (w.dni||w.nie||'--') + ' · PIN: <strong style="color:var(--verde3)">' + w.pin + '</strong> · ' + (catLabel[w.cat||'peon']||'Peon') + '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:4px;">' +
+        '<button class="btn-e" onclick="editW(' + w.id + ')">Editar</button>' +
+        '<button class="btn-d" onclick="delW(' + w.id + ')">Borrar</button>' +
+      '</div>' +
+      '</div>';
+  }).join('');
 }
 
-// -- TAREAS --
-function loadTareas(){
-  fetch(`${FB_URL}/tareas.json`).then(r=>r.json()).then(data=>{
-    const log=document.getElementById('task-log'); if(!log)return;
-    if(!data){ log.innerHTML='<div style="padding:24px;text-align:center;color:var(--text3);font-size:12px">Sin tareas enviadas.</div>'; return; }
-    const all=Object.values(data).sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
-    animKPI('kv-tareas',all.filter(t=>!t.completada).length);
-    log.innerHTML=all.map(t=>`<div style="display:flex;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);">
-      <div style="flex:1">
-        <div style="font-size:12px;font-weight:600">${t.to||'Todos'}</div>
-        <div style="font-size:11px;color:var(--text3)">${(t.msg||'').slice(0,50)}${(t.msg||'').length>50?'...':''}</div>
-        <div style="font-size:9px;color:${t.completada?'var(--verde3)':'var(--amber)'};margin-top:2px;">${t.completada?'✅ Completada':'⏳ Pendiente'}</div>
-      </div>
-      <div style="font-size:10px;color:var(--text3)">${t.time||''}</div>
-    </div>`).join('');
-    // Actualizar selector
-    const sel=document.getElementById('task-to');
-    if(sel){
-      sel.innerHTML='<option value="all">Todos los operarios</option>';
-      WORKERS.forEach(w=>{ sel.innerHTML+=`<option>${w.nombre} ${w.apellidos}</option>`; });
-    }
-  }).catch(()=>{});
+// TAREAS
+function loadTareas() {
+  fetch(FB + '/tareas.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var log = document.getElementById('task-log');
+      if (!log) return;
+      if (!data) { log.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text3);font-size:12px">Sin tareas.</div>'; return; }
+      var arr = Object.values(data).sort(function(a,b) { return (b.timestamp||0) - (a.timestamp||0); });
+      animKPI('kv-tareas', arr.filter(function(t) { return !t.completada; }).length);
+      log.innerHTML = arr.map(function(t) {
+        return '<div style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--border);">' +
+          '<div style="flex:1">' +
+            '<div style="font-size:12px;font-weight:600">' + (t.to||'Todos') + '</div>' +
+            '<div style="font-size:11px;color:var(--text3)">' + (t.msg||'').slice(0,50) + '</div>' +
+            '<div style="font-size:9px;color:' + (t.completada?'var(--verde3)':'var(--amber)') + ';margin-top:2px;">' + (t.completada?'Completada':'Pendiente') + '</div>' +
+          '</div>' +
+          '<div style="font-size:10px;color:var(--text3)">' + (t.time||'') + '</div>' +
+          '</div>';
+      }).join('');
+    }).catch(function() {});
 }
 
-function sendTask(){
-  const to=document.getElementById('task-to');
-  const prio=document.getElementById('task-prio');
-  const msg=document.getElementById('task-msg').value.trim();
-  if(!msg){ showToast('Escribe la descripción','err'); return; }
-  const now=new Date();
-  const data={to:to.options[to.selectedIndex].text,msg,prioridad:prio.options[prio.selectedIndex].text,time:now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}),fecha:now.toISOString().split('T')[0],timestamp:now.getTime(),completada:false};
-  fetch(`${FB_URL}/tareas/tarea_${now.getTime()}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
-    .then(()=>{ showToast('✅ Tarea enviada','ok'); document.getElementById('task-msg').value=''; loadTareas(); })
-    .catch(()=>showToast('⚠️ Error','err'));
+function updateTaskSel() {
+  var sel = document.getElementById('task-to');
+  if (!sel) return;
+  sel.innerHTML = '<option value="all">Todos los operarios</option>';
+  WORKERS.forEach(function(w) {
+    sel.innerHTML += '<option>' + w.nombre + ' ' + w.apellidos + '</option>';
+  });
 }
 
-// -- CHAT IA --
-function quickChat(msg){ document.getElementById('chat-input').value=msg; sendChat(); }
-function sendChat(){
-  const input=document.getElementById('chat-input');
-  const msg=input.value.trim(); if(!msg)return;
-  input.value='';
-  addMsg(msg,'user');
-  setTimeout(()=>addMsg(responder(msg),'bot'),600);
+function sendTask() {
+  var to = document.getElementById('task-to');
+  var prio = document.getElementById('task-prio');
+  var msg = document.getElementById('task-msg').value.trim();
+  if (!msg) { showToast('Escribe la descripcion', 'err'); return; }
+  var now = new Date();
+  var data = {
+    to: to.options[to.selectedIndex].text,
+    msg: msg,
+    prioridad: prio.options[prio.selectedIndex].text,
+    time: now.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'}),
+    fecha: now.toISOString().split('T')[0],
+    timestamp: now.getTime(),
+    completada: false
+  };
+  fetch(FB + '/tareas/tarea_' + now.getTime() + '.json', {
+    method:'PUT', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  }).then(function() {
+    showToast('Tarea enviada', 'ok');
+    document.getElementById('task-msg').value = '';
+    loadTareas();
+  }).catch(function() { showToast('Error al enviar', 'err'); });
 }
-function addMsg(txt,who){
-  const msgs=document.getElementById('chat-msgs'); if(!msgs)return;
-  const div=document.createElement('div');
-  div.className=who==='user'?'chat-msg-user':'chat-msg-bot';
-  div.innerHTML=txt;
+
+// CHAT IA
+function qchat(msg) { document.getElementById('chat-in').value = msg; sendChat(); }
+function sendChat() {
+  var inp = document.getElementById('chat-in');
+  var msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = '';
+  addMsg(msg, 'user');
+  setTimeout(function() { addMsg(responder(msg), 'bot'); }, 500);
+}
+function addMsg(txt, who) {
+  var msgs = document.getElementById('chat-msgs');
+  if (!msgs) return;
+  var div = document.createElement('div');
+  div.className = who === 'user' ? 'cmsg-user' : 'cmsg-bot';
+  div.innerHTML = txt;
   msgs.appendChild(div);
-  msgs.scrollTop=msgs.scrollHeight;
+  msgs.scrollTop = msgs.scrollHeight;
 }
-function responder(msg){
-  const q=msg.toLowerCase();
-  const enObra=WORKERS.filter(w=>w.status==='in');
-  const sinFichar=WORKERS.filter(w=>w.status==='pending');
-  if(q.includes('no ha fichado')||q.includes('sin fichar'))
-    return sinFichar.length?`❌ <strong>${sinFichar.length} sin fichar:</strong><br>${sinFichar.map(w=>`• ${w.nombre} ${w.apellidos}`).join('<br>')}`:' ✅ Todos han fichado';
-  if(q.includes('cuántos')||q.includes('obra'))
-    return `📍 <strong>${enObra.length} en obra</strong>:<br>${enObra.map(w=>`• ${w.nombre} ${w.apellidos}`).join('<br>')}`;
-  if(q.includes('resumen'))
-    return `📊 <strong>Resumen:</strong><br>Total: ${WORKERS.length}<br>En obra: ${enObra.length}<br>Sin fichar: ${sinFichar.length}`;
-  return 'Prueba: "¿Quién no fichó?", "¿Cuántos en obra?", "Resumen"';
+function responder(msg) {
+  var q = msg.toLowerCase();
+  var enObra = WORKERS.filter(function(w) { return w.status === 'in'; });
+  var sinFichar = WORKERS.filter(function(w) { return w.status === 'pending'; });
+  if (q.indexOf('fich') >= 0 || q.indexOf('sin') >= 0)
+    return sinFichar.length ? (sinFichar.length + ' sin fichar: ' + sinFichar.map(function(w) { return w.nombre; }).join(', ')) : 'Todos han fichado';
+  if (q.indexOf('obra') >= 0 || q.indexOf('cuant') >= 0)
+    return enObra.length + ' en obra ahora: ' + enObra.map(function(w) { return w.nombre; }).join(', ');
+  if (q.indexOf('resum') >= 0)
+    return 'Total: ' + WORKERS.length + ' | En obra: ' + enObra.length + ' | Sin fichar: ' + sinFichar.length;
+  return 'Prueba: "Sin fichar", "Cuantos en obra", "Resumen"';
 }
 
-// -- TOAST --
-let toastTimer;
-function showToast(msg,tipo){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className=`toast show ${tipo}`;
+// TOAST
+var toastTimer;
+function showToast(msg, tipo) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + tipo;
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+  toastTimer = setTimeout(function() { t.classList.remove('show'); }, 3000);
 }
-
-document.addEventListener('DOMContentLoaded', checkLicencia);
 </script>
 </body>
 </html>
