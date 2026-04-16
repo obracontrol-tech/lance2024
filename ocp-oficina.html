@@ -521,7 +521,20 @@ setInterval(tick,1000); tick();
 
 // ── DATA ──
 let WORKERS=[];
-try{ const s=localStorage.getItem('ocp_workers'); if(s) WORKERS=JSON.parse(s); }catch(e){}
+// Limpiar operarios de Lance si los hay mezclados
+try{
+  const s=localStorage.getItem('ocp_workers');
+  if(s){
+    const arr = JSON.parse(s);
+    // Solo conservar si son pocos (demo) — si hay más de 20 son de Lance, limpiar
+    if(arr.length > 20){
+      localStorage.removeItem('ocp_workers');
+      WORKERS = [];
+    } else {
+      WORKERS = arr;
+    }
+  }
+}catch(e){}
 function saveW(){ try{ localStorage.setItem('ocp_workers',JSON.stringify(WORKERS)); }catch(e){} }
 
 function initApp(){
@@ -531,20 +544,17 @@ function initApp(){
   animKPI('kv-alerts',0);
   loadTareas();
   document.getElementById('jornada-date').textContent=new Date().toLocaleDateString('es-ES',{weekday:'long',day:'2-digit',month:'long'});
-  setInterval(loadFromFirebase,8000);
+  setInterval(loadFromFirebase, 30000); // cada 30 seg
 }
 
 function loadFromFirebase(){
   fetch(`${FB_URL}/operarios_activos.json`).then(r=>r.json()).then(data=>{
-    if(!data) return;
+    if(!data){ animKPI('kv-total',WORKERS.length); return; }
+    // Solo actualizar estados — NO añadir nuevos operarios automáticamente
     Object.entries(data).forEach(([key,op])=>{
       if(!op||!op.nombre) return;
       let w = WORKERS.find(x=>`${x.nombre}_${x.apellidos}`.toLowerCase().replace(/\s+/g,'_')===key);
-      if(!w){
-        const parts=(op.nombre||'').split(' ');
-        w={id:WORKERS.length+1,nombre:parts[0]||op.nombre,apellidos:parts.slice(1).join(' ')||'',dni:op.doc||'',nie:'',obra:op.ciudad||'',pin:'----',status:'pending',arrival:null,dep:null,h:0};
-        WORKERS.push(w);
-      }
+      if(!w) return; // No añadir desconocidos automáticamente
       w.status=op.activo?'in':'out';
       if(op.tipo==='entrada') w.arrival=op.hora;
       if(op.tipo==='salida'){ w.dep=op.hora; }
