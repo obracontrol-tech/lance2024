@@ -225,16 +225,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <div class="sb-av">OP</div>
         <div style="flex:1;min-width:0;">
           <div class="sb-name">ObraControl Pro</div>
-          <div style="margin-top:4px;">
+          <div style="margin-top:4px;display:flex;gap:4px;">
             <input id="tel-responsable"
               type="tel"
-              placeholder="+34 600 000 000"
+              placeholder="+34 609321585"
               oninput="saveTel()"
               onblur="saveTel()"
               onkeydown="if(event.key==='Enter'){saveTel();this.blur();}"
-              style="width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(200,168,75,.25);border-radius:6px;padding:4px 8px;font-size:10px;color:var(--oro2);outline:none;font-family:'DM Sans',sans-serif;">
+              style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(200,168,75,.25);border-radius:6px;padding:4px 8px;font-size:10px;color:var(--oro2);outline:none;font-family:'DM Sans',sans-serif;">
+            <button onclick="probarWA()" title="Probar WhatsApp" style="background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.3);border-radius:6px;padding:4px 7px;cursor:pointer;font-size:13px;flex-shrink:0;">&#128172;</button>
           </div>
-          <div style="font-size:8px;color:rgba(255,255,255,.25);margin-top:2px;letter-spacing:.5px;">Tel. que recibe alertas</div>
+          <div style="font-size:8px;color:rgba(255,255,255,.25);margin-top:2px;letter-spacing:.5px;">Tel. que recibe alertas · pulsa &#128172; para probar</div>
         </div>
       </div>
       <button class="sb-out" onclick="logout()">Cerrar sesion</button>
@@ -1070,8 +1071,11 @@ function cargarIncidencias() {
 
 function responderOperario(nombre) {
   var tel = getTel();
-  var msg = encodeURIComponent('Hola ' + nombre + ', hemos recibido tu reporte. ');
-  window.open('https://wa.me/' + tel + '?text=' + msg, '_blank');
+  var msg = encodeURIComponent(
+    'OBRACONTROL PRO\n\nHola ' + nombre + ', hemos recibido tu reporte.\n\nEstamos en ello, te respondemos pronto.\n\n_ObraControl Pro_'
+  );
+  var url = 'https://wa.me/' + tel + '?text=' + msg;
+  window.location.href = url;
 }
 
 function resolverInc(btn) {
@@ -1162,6 +1166,14 @@ function loadTel() {
     if (el) el.value = saved;
   }
 }
+function probarWA() {
+  saveTel();
+  var tel = getTel();
+  if (!tel) { showToast('Escribe un telefono primero', 'err'); return; }
+  var msg = encodeURIComponent('OBRACONTROL PRO\n\nPrueba de conexion. El sistema de alertas esta funcionando correctamente.');
+  window.location.href = 'https://wa.me/' + tel + '?text=' + msg;
+}
+
 var toastTimer;
 function showToast(msg, tipo) {
   var t = document.getElementById('toast');
