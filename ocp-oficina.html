@@ -423,12 +423,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <!-- BOTONES RAPIDOS POR CATEGORIA -->
           <div style="padding:10px 14px;border-top:1px solid var(--border);">
             <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin-bottom:8px;">Consultas rapidas:</div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
               <button class="qbtn" onclick="qchat('Quien no ha fichado hoy')">Sin fichar</button>
               <button class="qbtn" onclick="qchat('Cuantos operarios estan en obra')">En obra</button>
               <button class="qbtn" onclick="qchat('Resumen del dia')">Resumen</button>
               <button class="qbtn" onclick="qchat('Quien llego tarde')">Retrasados</button>
               <button class="qbtn" onclick="qchat('Ver incidencias de hoy')">Incidencias</button>
+              <button class="qbtn" style="background:rgba(37,211,102,.1);border-color:rgba(37,211,102,.3);color:#16A34A;font-weight:700;" onclick="enviarResumenWA()">&#128172; Enviar resumen a mi WA</button>
             </div>
             <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin-bottom:8px;">Por gremio:</div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
@@ -1167,6 +1168,29 @@ function loadTel() {
     if (el) el.value = saved;
   }
 }
+function enviarResumenWA() {
+  var tel = getTel();
+  var enObra = WORKERS.filter(function(w) { return w.status === 'in'; });
+  var sinFichar = WORKERS.filter(function(w) { return w.status === 'pending'; });
+  var tarde = WORKERS.filter(function(w) { return w.arrival && w.arrival > '08:15'; });
+  var horas = WORKERS.reduce(function(a,w) { return a + parseFloat(w.h||0); }, 0).toFixed(1);
+  var hoy = new Date().toLocaleDateString('es-ES', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+
+  var msg = 'OBRACONTROL PRO - RESUMEN DEL DIA\n';
+  msg += hoy + '\n\n';
+  msg += 'Total plantilla: ' + WORKERS.length + '\n';
+  msg += 'En obra ahora: ' + enObra.length + '\n';
+  msg += 'Sin fichar: ' + sinFichar.length;
+  if (sinFichar.length) {
+    msg += '\n' + sinFichar.map(function(w) { return '  - ' + w.nombre + ' ' + w.apellidos; }).join('\n');
+  }
+  msg += '\nCon retraso: ' + tarde.length + '\n';
+  msg += 'Horas acumuladas: ' + horas + 'h\n\n';
+  msg += 'ObraControl Pro';
+
+  abrirWA(tel, msg);
+}
+
 function probarWA() {
   saveTel();
   var tel = getTel();
