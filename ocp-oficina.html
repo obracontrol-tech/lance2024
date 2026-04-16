@@ -230,6 +230,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
               type="tel"
               placeholder="+34 600 000 000"
               oninput="saveTel()"
+              onblur="saveTel()"
+              onkeydown="if(event.key==='Enter'){saveTel();this.blur();}"
               style="width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(200,168,75,.25);border-radius:6px;padding:4px 8px;font-size:10px;color:var(--oro2);outline:none;font-family:'DM Sans',sans-serif;">
           </div>
           <div style="font-size:8px;color:rgba(255,255,255,.25);margin-top:2px;letter-spacing:.5px;">Tel. que recibe alertas</div>
@@ -1136,11 +1138,21 @@ function mostrarPorObra() {
 function saveTel() {
   var tel = document.getElementById('tel-responsable').value.trim();
   localStorage.setItem('ocp_tel_responsable', tel);
+  showToast('Telefono guardado: ' + tel, 'ok');
 }
 
 function getTel() {
-  var tel = localStorage.getItem('ocp_tel_responsable') || '34609321585';
-  return tel.replace(/[\s\-\(\)\+]/g,'').replace(/^34/,'34');
+  var tel = localStorage.getItem('ocp_tel_responsable') || '609321585';
+  // Limpiar espacios, guiones, paréntesis
+  tel = tel.replace(/[\s\-\(\)]/g, '');
+  // Quitar el + si lo tiene
+  tel = tel.replace(/^\+/, '');
+  // Si empieza por 6, 7, 8, 9 (móvil español sin prefijo) añadir 34
+  if (/^[6789]/.test(tel) && tel.length === 9) {
+    tel = '34' + tel;
+  }
+  // Si ya empieza por 34 y tiene 11 dígitos, perfecto
+  return tel;
 }
 
 function loadTel() {
