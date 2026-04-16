@@ -51,6 +51,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);max
 .rgpd-card{background:rgba(255,255,255,.06);border:1px solid rgba(200,168,75,.2);border-radius:20px;padding:24px 20px;width:100%;max-width:360px;text-align:center;backdrop-filter:blur(20px);}
 .rgpd-icon{font-size:40px;margin-bottom:10px;}
 .rgpd-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--oro2);margin-bottom:6px;}
+.rgpd-titulo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--oro2);margin-bottom:6px;}
 .rgpd-sub{font-size:11px;color:rgba(255,255,255,.5);margin-bottom:16px;line-height:1.5;}
 .rgpd-item{display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(200,168,75,.15);border-radius:10px;padding:10px 12px;margin-bottom:8px;text-align:left;}
 .rgpd-item-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
@@ -597,11 +598,19 @@ const DEMO_CLAVE = 'BA49159567EFC254';
 
 // ── RGPD ──
 function checkRGPD(){
-  const aceptado = localStorage.getItem('ocp_rgpd');
-  if(aceptado === 'si'){
-    checkLicencia();
+  const savedLang = localStorage.getItem('ocp_lang');
+  const rgpdAceptado = localStorage.getItem('ocp_rgpd');
+  if(!savedLang){
+    // Sin idioma — mostrar selector primero
+    document.getElementById('lang-screen').style.display='flex';
+  } else if(rgpdAceptado !== 'si'){
+    // Tiene idioma pero no aceptó RGPD
+    currentLang = savedLang;
+    applyLang();
+    mostrarRGPD(savedLang);
   } else {
-    document.getElementById('rgpd-screen').style.display='flex';
+    // Todo OK — ir a licencia
+    checkLicencia();
   }
 }
 
@@ -611,12 +620,15 @@ function aceptarRGPD(){
   checkLicencia();
 }
 
-function rechazarRGPD(){
+function rechazarRGPD(lang){
+  const T = RGPD_TEXTOS[lang||currentLang] || RGPD_TEXTOS.es;
+  const dir = (lang||currentLang)==='ar' ? 'rtl' : 'ltr';
   document.getElementById('rgpd-screen').innerHTML=`
-    <div class="rgpd-card" style="text-align:center;">
+    <div class="rgpd-card" style="text-align:center;direction:${dir}">
       <div style="font-size:48px;margin-bottom:12px;">🔒</div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--oro2);margin-bottom:10px;">ACCESO NO DISPONIBLE</div>
-      <div style="font-size:12px;color:rgba(255,255,255,.5);line-height:1.6;">Sin aceptar el tratamiento de datos no es posible usar esta aplicación.<br><br>Contacta con tu encargado si tienes dudas.</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--oro2);margin-bottom:10px;">${T.bloq_titulo}</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.5);line-height:1.6;">${T.bloq_txt}</div>
+      <button onclick="document.getElementById('lang-screen').style.display='flex';document.getElementById('rgpd-screen').style.display='none';localStorage.removeItem('ocp_lang');" style="margin-top:16px;background:transparent;border:1px solid rgba(200,168,75,.3);color:var(--oro2);padding:8px 16px;border-radius:8px;font-size:11px;cursor:pointer;">← Cambiar idioma</button>
     </div>`;
 }
 
@@ -1083,12 +1095,101 @@ const TEXTOS = {
 };
 let currentLang = 'es';
 
+// ── TEXTOS RGPD MULTIIDIOMA ──
+const RGPD_TEXTOS = {
+  es:{
+    titulo:'PRIVACIDAD Y DATOS', sub:'Antes de continuar necesitamos tu consentimiento.',
+    gps_t:'Localización GPS', gps_d:'Usamos tu GPS solo durante el fichaje para confirmar que estás en la obra. No te rastreamos fuera del horario laboral.',
+    datos_t:'Datos personales', datos_d:'Tu DNI/NIE y nombre se usan únicamente para identificarte en el sistema de tu empresa.',
+    camara_t:'Cámara (opcional)', camara_d:'Solo si decides adjuntar foto a una incidencia. Nunca se accede sin tu permiso.',
+    seguridad_t:'Almacenamiento seguro', seguridad_d:'Datos en servidores de Google Firebase en la UE (Bélgica), cumpliendo el RGPD.',
+    legal:'Conforme al Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD). Responsable: tu empresa. Encargado: Construcciones Lance 2024 SL · info@obracontrolgps.net',
+    acepto:'✅ ACEPTO Y CONTINUAR', no_acepto:'No acepto — no puedo usar la app',
+    bloq_titulo:'ACCESO NO DISPONIBLE', bloq_txt:'Sin aceptar los permisos no es posible usar esta aplicación. Contacta con tu encargado.'
+  },
+  ca:{
+    titulo:'PRIVACITAT I DADES', sub:'Abans de continuar necessitem el teu consentiment.',
+    gps_t:'Localització GPS', gps_d:'Usem el teu GPS només durant el fitxatge per confirmar que ets a l\'obra. No et rastregem fora de l\'horari laboral.',
+    datos_t:'Dades personals', datos_d:'El teu DNI/NIE i nom s\'usen únicament per identificar-te al sistema de la teva empresa.',
+    camara_t:'Càmera (opcional)', camara_d:'Només si decideixes adjuntar foto a una incidència. Mai s\'accedeix sense el teu permís.',
+    seguridad_t:'Emmagatzematge segur', seguridad_d:'Dades als servidors de Google Firebase a la UE (Bèlgica), complint el RGPD.',
+    legal:'D\'acord amb el Reglament (UE) 2016/679 (RGPD) i la Llei Orgànica 3/2018 (LOPDGDD). Responsable: la teva empresa. Encarregat: Construccions Lance 2024 SL',
+    acepto:'✅ ACCEPTO I CONTINUO', no_acepto:'No accepto — no puc usar l\'app',
+    bloq_titulo:'ACCÉS NO DISPONIBLE', bloq_txt:'Sense acceptar els permisos no és possible usar aquesta aplicació. Contacta amb el teu encarregat.'
+  },
+  ro:{
+    titulo:'CONFIDENȚIALITATE', sub:'Înainte de a continua avem nevoie de consimțământul tău.',
+    gps_t:'Localizare GPS', gps_d:'Folosim GPS-ul tău doar la pontaj pentru a confirma că ești la șantier. Nu te urmărim în afara programului.',
+    datos_t:'Date personale', datos_d:'CNP-ul și numele tău sunt folosite doar pentru identificare în sistemul companiei tale.',
+    camara_t:'Cameră (opțional)', camara_d:'Doar dacă atașezi o fotografie unui incident. Nu se accesează niciodată fără permisiunea ta.',
+    seguridad_t:'Stocare securizată', seguridad_d:'Date pe serverele Google Firebase în UE (Belgia), conform GDPR.',
+    legal:'Conform Regulamentului (UE) 2016/679 (GDPR). Responsabil: compania ta. Împuternicit: Construcciones Lance 2024 SL',
+    acepto:'✅ ACCEPT ȘI CONTINUU', no_acepto:'Nu accept — nu pot folosi aplicația',
+    bloq_titulo:'ACCES INDISPONIBIL', bloq_txt:'Fără a accepta permisiunile nu poți folosi această aplicație. Contactează șeful tău.'
+  },
+  ar:{
+    titulo:'الخصوصية والبيانات', sub:'قبل المتابعة نحتاج إلى موافقتك.',
+    gps_t:'تحديد الموقع GPS', gps_d:'نستخدم موقعك فقط أثناء تسجيل الحضور للتأكد من وجودك في الموقع. لا نتتبعك خارج ساعات العمل.',
+    datos_t:'البيانات الشخصية', datos_d:'رقم هويتك واسمك يُستخدمان فقط للتعرف عليك في نظام شركتك.',
+    camara_t:'الكاميرا (اختياري)', camara_d:'فقط إذا أردت إرفاق صورة بحادث. لا يتم الوصول إليها أبدًا بدون إذنك.',
+    seguridad_t:'تخزين آمن', seguridad_d:'البيانات على خوادم Google Firebase في الاتحاد الأوروبي، وفقًا للائحة GDPR.',
+    legal:'وفقًا للائحة (EU) 2016/679 (GDPR). المسؤول: شركتك. المعالج: Construcciones Lance 2024 SL',
+    acepto:'✅ أوافق وأكمل', no_acepto:'لا أوافق — لا يمكنني استخدام التطبيق',
+    bloq_titulo:'الوصول غير متاح', bloq_txt:'بدون قبول الأذونات لا يمكن استخدام هذا التطبيق. اتصل بمشرفك.'
+  },
+  fr:{
+    titulo:'CONFIDENTIALITÉ', sub:'Avant de continuer, nous avons besoin de votre consentement.',
+    gps_t:'Localisation GPS', gps_d:'Nous utilisons votre GPS uniquement lors du pointage pour confirmer votre présence sur le chantier. Aucun suivi en dehors des heures de travail.',
+    datos_t:'Données personnelles', datos_d:'Votre CNI et nom sont utilisés uniquement pour vous identifier dans le système de votre entreprise.',
+    camara_t:'Caméra (optionnel)', camara_d:'Uniquement si vous joignez une photo à un incident. Jamais accédée sans votre permission.',
+    seguridad_t:'Stockage sécurisé', seguridad_d:'Données sur les serveurs Google Firebase dans l\'UE (Belgique), conformément au RGPD.',
+    legal:'Conformément au Règlement (UE) 2016/679 (RGPD). Responsable: votre entreprise. Sous-traitant: Construcciones Lance 2024 SL',
+    acepto:'✅ J\'ACCEPTE ET CONTINUE', no_acepto:'Je n\'accepte pas — je ne peux pas utiliser l\'app',
+    bloq_titulo:'ACCÈS INDISPONIBLE', bloq_txt:'Sans accepter les autorisations, l\'application ne peut pas être utilisée. Contactez votre responsable.'
+  },
+  en:{
+    titulo:'PRIVACY & DATA', sub:'Before continuing, we need your consent.',
+    gps_t:'GPS Location', gps_d:'We use your GPS only during clock-in to confirm you are at the work site. We do not track you outside working hours.',
+    datos_t:'Personal data', datos_d:'Your ID and name are used only to identify you in your company\'s system.',
+    camara_t:'Camera (optional)', camara_d:'Only if you attach a photo to an incident. Never accessed without your explicit permission.',
+    seguridad_t:'Secure storage', seguridad_d:'Data stored on Google Firebase servers in the EU (Belgium), compliant with GDPR.',
+    legal:'Pursuant to Regulation (EU) 2016/679 (GDPR) and applicable data protection law. Controller: your company. Processor: Construcciones Lance 2024 SL',
+    acepto:'✅ I ACCEPT & CONTINUE', no_acepto:'I do not accept — I cannot use the app',
+    bloq_titulo:'ACCESS UNAVAILABLE', bloq_txt:'Without accepting the permissions this app cannot be used. Contact your supervisor.'
+  }
+};
+
+function mostrarRGPD(lang){
+  const T = RGPD_TEXTOS[lang] || RGPD_TEXTOS.es;
+  const dir = lang==='ar' ? 'rtl' : 'ltr';
+  document.getElementById('rgpd-screen').innerHTML = `
+    <div class="rgpd-card" style="direction:${dir}">
+      <div class="rgpd-icon">🛡️</div>
+      <div class="rgpd-titulo">${T.titulo}</div>
+      <div class="rgpd-sub">${T.sub}</div>
+      <div class="rgpd-item"><div class="rgpd-item-icon">📍</div><div><div class="rgpd-item-title">${T.gps_t}</div><div class="rgpd-item-text">${T.gps_d}</div></div></div>
+      <div class="rgpd-item"><div class="rgpd-item-icon">👤</div><div><div class="rgpd-item-title">${T.datos_t}</div><div class="rgpd-item-text">${T.datos_d}</div></div></div>
+      <div class="rgpd-item"><div class="rgpd-item-icon">📷</div><div><div class="rgpd-item-title">${T.camara_t}</div><div class="rgpd-item-text">${T.camara_d}</div></div></div>
+      <div class="rgpd-item"><div class="rgpd-item-icon">🔒</div><div><div class="rgpd-item-title">${T.seguridad_t}</div><div class="rgpd-item-text">${T.seguridad_d}</div></div></div>
+      <div class="rgpd-legal">${T.legal}</div>
+      <button class="btn-rgpd-ok" onclick="aceptarRGPD()">${T.acepto}</button>
+      <button class="btn-rgpd-no" onclick="rechazarRGPD('${lang}')">${T.no_acepto}</button>
+    </div>`;
+  document.getElementById('rgpd-screen').style.display='flex';
+}
+
 function selectLang(lang){
   currentLang = lang;
   localStorage.setItem('ocp_lang', lang);
   applyLang();
   document.getElementById('lang-screen').style.display='none';
-  document.getElementById('login-screen').style.display='flex';
+  // Comprobar si ya aceptó RGPD
+  const rgpdAceptado = localStorage.getItem('ocp_rgpd');
+  if(rgpdAceptado === 'si'){
+    checkLicencia();
+  } else {
+    mostrarRGPD(lang);
+  }
 }
 
 function applyLang(){
