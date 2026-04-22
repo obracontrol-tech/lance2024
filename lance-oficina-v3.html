@@ -1062,7 +1062,7 @@ function loadFirebaseData(){
             w.h = mins>0 ? (mins/60).toFixed(1) : 0;
           }
         }
-        if(op.ciudad) w.obra = op.ciudad+', '+(op.provincia||'');
+        if(op.ciudad) w.ciudad_gps = op.ciudad+(op.provincia?', '+op.provincia:'');
       });
       
       // Actualizar KPIs
