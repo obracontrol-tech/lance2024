@@ -160,10 +160,10 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
       <div class="pdot" id="pd2"></div><div class="pdot" id="pd3"></div>
     </div>
     <div class="pin-pad" id="pin-pad">
-      <div class="pk" onclick="pk('1')">1</div><div class="pk" onclick="pk('2')">2</div><div class="pk" onclick="pk('3')">3</div>
-      <div class="pk" onclick="pk('4')">4</div><div class="pk" onclick="pk('5')">5</div><div class="pk" onclick="pk('6')">6</div>
-      <div class="pk" onclick="pk('7')">7</div><div class="pk" onclick="pk('8')">8</div><div class="pk" onclick="pk('9')">9</div>
-      <div class="pk del" onclick="pkDel()">⌫</div><div class="pk zero" onclick="pk('0')">0</div>
+      <div class="pk" onclick="pinKey('1')">1</div><div class="pk" onclick="pinKey('2')">2</div><div class="pk" onclick="pinKey('3')">3</div>
+      <div class="pk" onclick="pinKey('4')">4</div><div class="pk" onclick="pinKey('5')">5</div><div class="pk" onclick="pinKey('6')">6</div>
+      <div class="pk" onclick="pinKey('7')">7</div><div class="pk" onclick="pinKey('8')">8</div><div class="pk" onclick="pinKey('9')">9</div>
+      <div class="pk del" onclick="pinKeyDel()">⌫</div><div class="pk zero" onclick="pinKey('0')">0</div>
     </div>
     <div class="pin-err" id="pin-err"></div>
     <div class="pin-demo">PIN demo: <strong>0000</strong></div>
@@ -401,8 +401,8 @@ function isDeleted(n){return deletedKeys.some(k=>n.toLowerCase().replace(/\s+/g,
 
 // ── PIN ──
 const PIN='0000';let pinVal='';
-function pk(d){if(pinVal.length>=4)return;pinVal+=d;updDots();if(pinVal.length===4)setTimeout(checkPin,200);}
-function pkDel(){pinVal=pinVal.slice(0,-1);updDots();document.getElementById('pin-err').textContent='';}
+function pinKey(d){if(pinVal.length>=4)return;pinVal+=d;updDots();if(pinVal.length===4)setTimeout(checkPin,200);}
+function pinKeyDel(){pinVal=pinVal.slice(0,-1);updDots();document.getElementById('pin-err').textContent='';}
 function updDots(){for(let i=0;i<4;i++)document.getElementById('pd'+i).classList.toggle('on',i<pinVal.length);}
 function checkPin(){
   if(pinVal===PIN){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';initApp();}
