@@ -625,7 +625,7 @@ let entryTime = localStorage.getItem('lance_entry_time') || null;
 let myLat = null, myLng = null;
 let myCity = '', myProvince = '', myCountry = '';
 let myAccuracy = null;
-let changingPin = false;
+let changingPin = false; let workerObraLat = null, workerObraLng = null; const ZONA_RADIO = 500; function calcDist(lat1,lng1,lat2,lng2){const R=6371000;const dLat=(lat2-lat1)*Math.PI/180;const dLng=(lng2-lng1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)));}
 
 const OBRA_LAT = 41.6176, OBRA_LNG = 0.6200, RADIUS = 150;
 
