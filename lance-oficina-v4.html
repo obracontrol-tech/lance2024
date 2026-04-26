@@ -555,6 +555,7 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
           <div class="card-title">📋 Registro de consentimientos RGPD</div>
           <div style="display:flex;gap:8px;">
             <button onclick="cargarConsentimientos()" style="font-size:10px;color:var(--blue2);background:none;border:none;cursor:pointer;font-weight:600;">🔄 Actualizar</button>
+            <button onclick="generarConsentimientosDesdeOperarios()" style="font-size:10px;color:var(--green);background:none;border:none;cursor:pointer;font-weight:600;">🔧 Generar faltantes</button>
             <button onclick="borrarTodosConsentimientos()" style="font-size:10px;color:var(--red);background:none;border:none;cursor:pointer;font-weight:600;">🗑️ Borrar todos</button>
           </div>
         </div>
@@ -1211,6 +1212,52 @@ function cargarConsentimientos(){
         +'</td></tr>';
     }).join('');
   }).catch(()=>{tb.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--red)">Error al cargar.</td></tr>';});
+}
+
+function generarConsentimientosDesdeOperarios(){
+  showToast('⏳ Generando consentimientos...','inf');
+  fetch(`${FB_URL}/operarios_registro.json`).then(r=>r.json()).then(ops=>{
+    if(!ops){showToast('⚠️ No hay operarios en Firebase','err');return;}
+    const entries=Object.entries(ops);
+    let count=0;
+    const promises=entries.map(([key,op])=>{
+      if(!op||!op.nombre)return Promise.resolve();
+      // Comprobar si ya existe consentimiento
+      return fetch(`${FB_URL}/consentimientos/${key}.json`)
+        .then(r=>r.json())
+        .then(existing=>{
+          if(existing&&existing.doc)return; // Ya existe
+          // Crear consentimiento pendiente
+          const cd={
+            doc:key,
+            nombre:(op.nombre||'')+(op.apellidos?' '+op.apellidos:''),
+            fecha:new Date().toISOString().split('T')[0],
+            hora:new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}),
+            timestamp:Date.now(),
+            idioma:op.idioma||'es',
+            rgpd_aceptado:false,
+            gps_aceptado:false,
+            estado:'pendiente_aceptacion',
+            version:'1.0'
+          };
+          count++;
+          return fetch(`${FB_URL}/consentimientos/${key}.json`,{
+            method:'PUT',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify(cd)
+          });
+        }).catch(()=>{
+          // Si no existe, crear
+          const cd={doc:key,nombre:(op.nombre||'')+(op.apellidos?' '+op.apellidos:''),fecha:new Date().toISOString().split('T')[0],hora:new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}),timestamp:Date.now(),idioma:op.idioma||'es',rgpd_aceptado:false,gps_aceptado:false,estado:'pendiente_aceptacion',version:'1.0'};
+          count++;
+          return fetch(`${FB_URL}/consentimientos/${key}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(cd)});
+        });
+    });
+    Promise.all(promises).then(()=>{
+      showToast(`✅ ${count} consentimientos generados`,'ok');
+      setTimeout(()=>cargarConsentimientos(),800);
+    });
+  }).catch(()=>showToast('⚠️ Error al leer operarios','err'));
 }
 
 function borrarConsentimiento(doc){
