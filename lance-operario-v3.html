@@ -411,7 +411,18 @@ function showRGPD(){
   document.getElementById('s-rgpd').style.direction=lang==='ar'?'rtl':'ltr';
   document.getElementById('s-rgpd').style.display='flex';
 }
-function acceptRGPD(){localStorage.setItem('lance_rgpd_accepted','1');document.getElementById('s-rgpd').style.display='none';requestGPSPermission();}
+function acceptRGPD(){
+  localStorage.setItem('lance_rgpd_accepted','1');
+  localStorage.setItem('lance_rgpd_lang',lang);
+  localStorage.setItem('lance_rgpd_fecha',new Date().toISOString().split('T')[0]);
+  localStorage.setItem('lance_rgpd_hora',new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}));
+  document.getElementById('s-rgpd').style.display='none';
+  // Pedir GPS en segundo plano sin bloquear
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(()=>{},()=>{},{enableHighAccuracy:true,timeout:5000,maximumAge:0});
+  }
+  goTo('s-name');
+}
 function rejectRGPD(){const r=RGPD_TX[lang]||RGPD_TX.es;const msg=document.getElementById('rgpd-reject-msg');msg.textContent=r.reject_msg;msg.style.display='block';}
 function requestGPSPermission(){
   if(!navigator.geolocation){showScreen('s-lang');return;}
