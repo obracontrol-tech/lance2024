@@ -840,21 +840,70 @@ function saveWorker(){
   const dni=document.getElementById('g-dni').value.trim().toUpperCase();
   const nie=document.getElementById('g-nie').value.trim().toUpperCase();
   const tel=document.getElementById('g-tel').value.trim();
-  const obra=document.getElementById('g-obra').value;
+  const obra=document.getElementById('g-obra').value.trim();
   const pin=document.getElementById('g-pin').value.trim();
   const status=document.getElementById('g-status').value;
+  const idioma=document.getElementById('g-idioma')?.value||'es';
   if(!nombre){showToast('Escribe el nombre','err');return;}
   if(!apellidos){showToast('Escribe los apellidos','err');return;}
   if(!dni&&!nie){showToast('Introduce DNI o NIE','err');return;}
   if(pin.length!==4||isNaN(pin)){showToast('PIN debe tener 4 dígitos','err');return;}
   const pinDup=WORKERS.find(w=>w.pin===pin&&w.id!=id);
   if(pinDup){showToast(`❌ PIN ${pin} ya asignado a ${pinDup.nombre}`,'err');return;}
-  if(id){const w=WORKERS.find(w=>w.id==id);if(w){Object.assign(w,{nombre,apellidos,dni,nie,tel,obra,pin,status});fbSyncWorker(w);}showToast('✅ Operario actualizado','ok');document.getElementById('wa-generado').style.display='none';}
-  else{const ni=Math.max(0,...WORKERS.map(w=>w.id))+1;const nw={id:ni,nombre,apellidos,dni,nie,tel,obra,pin,status,arrival:null,dep:null,h:0,extras:0,en_zona:null,dist_obra:null};WORKERS.push(nw);lastWorkerAdded=nw;fbSyncWorker(nw);
-        const docKeyC=(nw.dni||nw.nie||'').replace(/[^A-Z0-9]/gi,'').toUpperCase();
-        if(docKeyC){const cdI={doc:docKeyC,nombre:nw.nombre+' '+nw.apellidos,fecha:new Date().toISOString().split('T')[0],hora:new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}),timestamp:Date.now(),idioma:nw.idioma||'es',rgpd_aceptado:false,gps_aceptado:false,estado:'pendiente_aceptacion',version:'1.0'};fetch(`${FB_URL}/consentimientos/${docKeyC}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(cdI)}).catch(()=>{});}const waDiv=document.getElementById('wa-generado');const waPreview=document.getElementById('wa-preview');if(waDiv&&waPreview){waPreview.textContent=generarMsgWA(nw);waDiv.style.display='block';}showToast(`✅ ${nombre} ${apellidos} dado de alta`,'ok');animKPI('kv-total',WORKERS.length);}
-  saveW();resetForm();renderGestionList();renderPinTable();renderWorkers();
+
+  if(id){
+    // ── EDITAR OPERARIO EXISTENTE ──
+    const w=WORKERS.find(w=>w.id==id);
+    if(w){
+      const pinChanged=w.pin!==pin;
+      const obraChanged=w.obra!==obra;
+      Object.assign(w,{nombre,apellidos,dni,nie,tel,obra,pin,status,idioma});
+      // Guardar coordenadas si se geocodificó nueva zona
+      if(_obraLat&&_obraLng){w.obra_lat=_obraLat;w.obra_lng=_obraLng;_obraLat=null;_obraLng=null;}
+      else if(obraChanged){w.obra_lat=null;w.obra_lng=null;}
+      fbSyncWorker(w,pinChanged);
+      if(pinChanged){
+        showToast('🔐 PIN cambiado — el operario deberá crear uno nuevo al abrir la app','inf');
+      } else {
+        showToast('✅ Operario actualizado','ok');
+      }
+    }
+  } else {
+    // ── NUEVO OPERARIO ──
+    const ni=Math.max(0,...WORKERS.map(w=>w.id))+1;
+    const nw={id:ni,nombre,apellidos,dni,nie,tel,obra,pin,status,idioma,
+              arrival:null,dep:null,h:0,extras:0,en_zona:null,dist_obra:null,
+              obra_lat:_obraLat||null,obra_lng:_obraLng||null};
+    _obraLat=null;_obraLng=null;
+    WORKERS.push(nw);
+    lastWorkerAdded=nw;
+    fbSyncWorker(nw,false);
+    // Guardar consentimiento inicial en Firebase
+    const docKeyC=(nw.dni||nw.nie||'').replace(/[^A-Z0-9]/gi,'').toUpperCase();
+    if(docKeyC){
+      const cdI={doc:docKeyC,nombre:nw.nombre+' '+nw.apellidos,
+        fecha:new Date().toISOString().split('T')[0],
+        hora:new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}),
+        timestamp:Date.now(),idioma:nw.idioma||'es',
+        rgpd_aceptado:false,gps_aceptado:false,estado:'pendiente_aceptacion',version:'1.0'};
+      fetch(`${FB_URL}/consentimientos/${docKeyC}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(cdI)}).catch(()=>{});
+    }
+    // Mostrar WhatsApp
+    const waDiv=document.getElementById('wa-generado');
+    const waPreview=document.getElementById('wa-preview');
+    if(waDiv&&waPreview){waPreview.textContent=generarMsgWA(nw);waDiv.style.display='block';}
+    showToast(`✅ ${nombre} ${apellidos} dado de alta`,'ok');
+    animKPI('kv-total',WORKERS.length);
+  }
+
+  saveW();
+  resetForm();
+  renderGestionList();
+  renderPinTable();
+  renderWorkers();
+  updateTaskSelect();
 }
+
 
 function editWorker(id){
   const w=WORKERS.find(w=>w.id===id);if(!w)return;
