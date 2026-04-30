@@ -773,7 +773,23 @@ function updateGeoUI(){
   const locationStr=[myCity,myProvince,myCountry].filter(Boolean).join(', ');
   setGpsBar('ok',`GPS activo · ${myCity||myProvince||'Ubicación detectada'}`);
   document.getElementById('geo-dist').textContent=`📍 ${locationStr}`;
-  // La zona se actualiza en checkZonaObra — llamada desde loadObraInfo
+  // Enviar ubicación a Firebase para que la consola la vea aunque no haya fichado
+  if(workerDoc){
+    const gpsData={
+      ciudad:myCity||'',
+      provincia:myProvince||'',
+      lat:myLat,
+      lng:myLng,
+      nombre:workerName,
+      doc:workerDoc,
+      gps_actualizado:new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})
+    };
+    fetch(`${FB_URL}/operarios_activos/${workerDoc}.json`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(gpsData)
+    }).catch(()=>{});
+  }
 }
 
 function setGpsBar(cls,txt){
