@@ -496,13 +496,25 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
               <input class="form-ctrl" id="obra-cliente" type="text" oninput="capitalizarCampo(this)" placeholder="Ej: Excavaciones Barroso SL">
             </div>
             <div class="form-g">
-              <label class="form-lbl">Dirección completa</label>
-              <div style="display:flex;gap:6px;">
-                <input class="form-ctrl" id="obra-direccion" type="text" placeholder="Ej: Polígon Industrial, Carrer A, 25100 Almacelles" style="flex:1;">
-                <button type="button" onclick="geocodificarObraForm()" id="btn-geo-obra" style="padding:10px 8px;background:var(--blue-light);border:1px solid var(--border2);border-radius:9px;cursor:pointer;font-size:11px;white-space:nowrap;">📍 Zona</button>
-              </div>
-              <div id="geo-obra-result" style="font-size:10px;color:var(--green);margin-top:4px;display:none;"></div>
+              <label class="form-lbl">Dirección (calle y número)</label>
+              <input class="form-ctrl" id="obra-calle" type="text" placeholder="Ej: Polígon Industrial, Carrer A s/n">
             </div>
+            <div class="form-row">
+              <div class="form-g">
+                <label class="form-lbl">Código postal</label>
+                <input class="form-ctrl" id="obra-cp" type="text" maxlength="5" placeholder="25100">
+              </div>
+              <div class="form-g">
+                <label class="form-lbl">Localidad</label>
+                <input class="form-ctrl" id="obra-localidad" type="text" oninput="capitalizarCampo(this)" placeholder="Almacelles">
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
+              <div id="obra-direccion-preview" style="flex:1;font-size:10px;color:var(--text3);font-style:italic;"></div>
+              <button type="button" onclick="geocodificarObraForm()" id="btn-geo-obra" style="padding:10px 12px;background:var(--blue-light);border:1px solid var(--border2);border-radius:9px;cursor:pointer;font-size:11px;white-space:nowrap;">📍 Zona</button>
+            </div>
+            <input type="hidden" id="obra-direccion">
+            <div id="geo-obra-result" style="font-size:10px;color:var(--green);margin-top:2px;display:none;"></div>
             <div class="form-row">
               <div class="form-g">
                 <label class="form-lbl">Radio zona (metros)</label>
@@ -845,6 +857,23 @@ function initApp(){
     document.getElementById('jornada-date').textContent=new Date().toLocaleDateString('es-ES',{weekday:'long',day:'2-digit',month:'long'});
     startFirebaseListener();
     cargarObras();
+    // Preview dirección obra en tiempo real
+    ['obra-calle','obra-cp','obra-localidad'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.addEventListener('input',()=>{
+        const c=document.getElementById('obra-calle')?.value||'';
+        const p=document.getElementById('obra-cp')?.value||'';
+        const l=document.getElementById('obra-localidad')?.value||'';
+        const prev=document.getElementById('obra-direccion-preview');
+        const hidden=document.getElementById('obra-direccion');
+        const full=[c,p,l].filter(Boolean).join(', ');
+        if(prev)prev.textContent=full?`📋 ${full}`:'';
+        if(hidden)hidden.value=full;
+        // Reset geocodificación si cambia la dirección
+        const btn=document.getElementById('btn-geo-obra');
+        if(btn&&btn.textContent==='✅ OK'){btn.textContent='📍 Zona';_obraFormLat=null;_obraFormLng=null;}
+      });
+    });
   },1500);
 }
 
@@ -1603,30 +1632,42 @@ function seleccionarObraEnAlta(){
 }
 
 function geocodificarObraForm(){
-  const dir=document.getElementById('obra-direccion')?.value.trim();
-  if(!dir){showToast('Escribe la dirección primero','err');return;}
+  const calle=(document.getElementById('obra-calle')?.value||'').trim();
+  const cp=(document.getElementById('obra-cp')?.value||'').trim();
+  const localidad=(document.getElementById('obra-localidad')?.value||'').trim();
+  if(!localidad&&!cp){showToast('Introduce al menos la localidad o código postal','err');return;}
+  // Combinar dirección completa
+  const dirCompleta=[calle,cp,localidad].filter(Boolean).join(', ');
+  // Guardar en campo hidden
+  const hiddenDir=document.getElementById('obra-direccion');
+  if(hiddenDir)hiddenDir.value=dirCompleta;
   const btn=document.getElementById('btn-geo-obra');
   const res=document.getElementById('geo-obra-result');
   if(btn)btn.textContent='⏳...';
-  fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(dir+', España')+'&format=json&limit=1')
+  // Geocodificar con más precisión: CP + localidad primero
+  const query=cp&&localidad?`${cp} ${localidad}, España`:`${dirCompleta}, España`;
+  fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(query)+'&format=json&limit=1')
     .then(r=>r.json()).then(data=>{
       if(data&&data[0]){
         _obraFormLat=parseFloat(data[0].lat);
         _obraFormLng=parseFloat(data[0].lon);
         if(btn)btn.textContent='✅ OK';
-        if(res){res.textContent='📍 '+_obraFormLat.toFixed(4)+', '+_obraFormLng.toFixed(4);res.style.display='block';}
-        showToast('✅ Zona geocodificada','ok');
+        if(res){res.textContent=`📍 ${_obraFormLat.toFixed(4)}, ${_obraFormLng.toFixed(4)} · ${data[0].display_name?.split(',').slice(0,2).join(',')||''}`;res.style.display='block';}
+        showToast('✅ Zona geocodificada correctamente','ok');
       } else {
         if(btn)btn.textContent='❌';
-        showToast('⚠️ Dirección no encontrada','err');
+        showToast('⚠️ Dirección no encontrada — prueba solo con CP y localidad','err');
       }
-    }).catch(()=>{if(btn)btn.textContent='📍 Zona';showToast('⚠️ Error','err');});
+    }).catch(()=>{if(btn)btn.textContent='📍 Zona';showToast('⚠️ Error de red','err');});
 }
 
 function saveObra(){
   const nombre=document.getElementById('obra-nombre')?.value.trim();
   const cliente=document.getElementById('obra-cliente')?.value.trim();
-  const direccion=document.getElementById('obra-direccion')?.value.trim();
+  const calle=(document.getElementById('obra-calle')?.value||'').trim();
+  const cp=(document.getElementById('obra-cp')?.value||'').trim();
+  const localidad=(document.getElementById('obra-localidad')?.value||'').trim();
+  const direccion=[calle,cp,localidad].filter(Boolean).join(', ')||document.getElementById('obra-direccion')?.value.trim()||'';
   const radio=parseInt(document.getElementById('obra-radio')?.value)||500;
   const estado=document.getElementById('obra-estado')?.value||'activa';
   const editId=document.getElementById('obra-edit-id')?.value;
@@ -1648,6 +1689,14 @@ function editObra(id){
   document.getElementById('obra-edit-id').value=id;
   document.getElementById('obra-nombre').value=o.nombre||'';
   document.getElementById('obra-cliente').value=o.cliente||'';
+  // Intentar separar dirección guardada en sus partes
+  const partesDirEdit=(o.direccion||'').split(',').map(s=>s.trim());
+  const calleEdit=partesDirEdit.slice(0,-2).join(', ')||partesDirEdit[0]||'';
+  const cpEdit=partesDirEdit.find(p=>/^\d{5}$/.test(p))||'';
+  const localidadEdit=partesDirEdit[partesDirEdit.length-1]||'';
+  if(document.getElementById('obra-calle'))document.getElementById('obra-calle').value=calleEdit;
+  if(document.getElementById('obra-cp'))document.getElementById('obra-cp').value=cpEdit;
+  if(document.getElementById('obra-localidad'))document.getElementById('obra-localidad').value=localidadEdit;
   document.getElementById('obra-direccion').value=o.direccion||'';
   document.getElementById('obra-radio').value=o.radio||500;
   document.getElementById('obra-estado').value=o.estado||'activa';
@@ -1674,7 +1723,7 @@ function deleteObra(id){
 
 function resetObraForm(){
   document.getElementById('obra-edit-id').value='';
-  ['obra-nombre','obra-cliente','obra-direccion'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['obra-nombre','obra-cliente','obra-calle','obra-cp','obra-localidad','obra-direccion'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('obra-radio').value=500;
   document.getElementById('obra-estado').value='activa';
   document.getElementById('obra-form-title').textContent='🏗️ Nueva obra';
