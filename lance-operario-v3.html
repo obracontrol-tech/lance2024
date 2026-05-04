@@ -633,6 +633,13 @@ function checkPin(){
       const displayName=workerName.split(' ').slice(0,2).join(' ');
       document.getElementById('worker-badge').textContent='👷 '+displayName;
       goTo('s-app');applyAppLang();renderTasks();startClock();startGPS();
+          // Resetear botón a verde mientras se consulta Firebase
+          const btn0=document.getElementById('checkin-btn');
+          const lbl0=document.getElementById('cb-label');
+          const ico0=document.getElementById('cb-icon');
+          if(btn0){btn0.classList.remove('in');btn0.style.borderColor='var(--green)';btn0.style.background='rgba(22,163,74,.07)';}
+          if(lbl0)lbl0.innerHTML=t('checkin').replace('\n','<br>');
+          if(ico0)ico0.textContent='🟢';
       // ✅ BUG1 FIX: restaurar estado real buscando por DNI en todos los activos
       fetch(`${FB_URL}/operarios_activos.json`)
         .then(r=>r.json())
@@ -658,8 +665,24 @@ function checkPin(){
             const uf=document.getElementById('ultimo-fichaje');
             const uft=document.getElementById('ultimo-fichaje-txt');
             if(uf&&uft){uf.style.display='block';uft.textContent=`✅ Entrada · ${data.hora||'—'} · ${data.ciudad||'Obra'}`;}
+          } else {
+            // Sin entrada activa — asegurar botón en estado VERDE (entrada)
+            isIn=false;
+            const btn=document.getElementById('checkin-btn');
+            const lbl=document.getElementById('cb-label');
+            const ico=document.getElementById('cb-icon');
+            const st=document.getElementById('checkin-status');
+            if(btn){btn.classList.remove('in');btn.style.borderColor='var(--green)';btn.style.background='rgba(22,163,74,.07)';}
+            if(lbl)lbl.innerHTML=t('checkin').replace('\n','<br>');
+            if(ico)ico.textContent='🟢';
+            if(st)st.textContent='';
           }
-        }).catch(()=>{});
+        }).catch(()=>{
+          // Sin red — resetear a verde por seguridad
+          isIn=false;
+          const btn=document.getElementById('checkin-btn');
+          if(btn){btn.classList.remove('in');btn.style.borderColor='var(--green)';btn.style.background='rgba(22,163,74,.07)';}
+        });
     } else {
       document.getElementById('pin-err').textContent=t('pin_err');
       document.getElementById('login-pad').classList.add('shake');
