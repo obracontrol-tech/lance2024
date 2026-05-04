@@ -496,25 +496,18 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
               <input class="form-ctrl" id="obra-cliente" type="text" oninput="capitalizarCampo(this)" placeholder="Ej: Excavaciones Barroso SL">
             </div>
             <div class="form-g">
-              <label class="form-lbl">Dirección (calle y número)</label>
-              <input class="form-ctrl" id="obra-calle" type="text" placeholder="Ej: Polígon Industrial, Carrer A s/n">
+              <label class="form-lbl">Descripción / Referencia</label>
+              <input class="form-ctrl" id="obra-direccion" type="text" placeholder="Ej: Nave Polígono Industrial, Almacelles">
             </div>
-            <div class="form-row">
-              <div class="form-g">
-                <label class="form-lbl">Código postal</label>
-                <input class="form-ctrl" id="obra-cp" type="text" maxlength="5" placeholder="25100">
+            <div class="form-g">
+              <label class="form-lbl">📍 Coordenadas GPS <span style="font-weight:400;color:var(--text3)">(copia desde Google Maps)</span></label>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input class="form-ctrl" id="obra-coords" type="text" placeholder="37.3201432, -5.4067291" oninput="parsearCoordsObra(this.value)" style="flex:1;font-family:'Montserrat',sans-serif;letter-spacing:0.5px;">
+                <button type="button" onclick="abrirGoogleMaps()" style="padding:10px 10px;background:var(--blue-light);border:1px solid var(--border2);border-radius:9px;cursor:pointer;font-size:11px;white-space:nowrap;">🌍 Maps</button>
               </div>
-              <div class="form-g">
-                <label class="form-lbl">Localidad</label>
-                <input class="form-ctrl" id="obra-localidad" type="text" oninput="capitalizarCampo(this)" placeholder="Almacelles">
-              </div>
+              <div id="geo-obra-result" style="font-size:10px;margin-top:5px;display:none;"></div>
+              <div style="font-size:10px;color:var(--text3);margin-top:4px;">💡 En Google Maps: manten pulsado en el punto de la obra → copia las coordenadas → pégalas aquí</div>
             </div>
-            <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
-              <div id="obra-direccion-preview" style="flex:1;font-size:10px;color:var(--text3);font-style:italic;"></div>
-              <button type="button" onclick="geocodificarObraForm()" id="btn-geo-obra" style="padding:10px 12px;background:var(--blue-light);border:1px solid var(--border2);border-radius:9px;cursor:pointer;font-size:11px;white-space:nowrap;">📍 Zona</button>
-            </div>
-            <input type="hidden" id="obra-direccion">
-            <div id="geo-obra-result" style="font-size:10px;color:var(--green);margin-top:2px;display:none;"></div>
             <div class="form-row">
               <div class="form-g">
                 <label class="form-lbl">Radio zona (metros)</label>
@@ -860,23 +853,7 @@ function initApp(){
     document.getElementById('jornada-date').textContent=new Date().toLocaleDateString('es-ES',{weekday:'long',day:'2-digit',month:'long'});
     startFirebaseListener();
     cargarObras();
-    // Preview dirección obra en tiempo real
-    ['obra-calle','obra-cp','obra-localidad'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el)el.addEventListener('input',()=>{
-        const c=document.getElementById('obra-calle')?.value||'';
-        const p=document.getElementById('obra-cp')?.value||'';
-        const l=document.getElementById('obra-localidad')?.value||'';
-        const prev=document.getElementById('obra-direccion-preview');
-        const hidden=document.getElementById('obra-direccion');
-        const full=[c,p,l].filter(Boolean).join(', ');
-        if(prev)prev.textContent=full?`📋 ${full}`:'';
-        if(hidden)hidden.value=full;
-        // Reset geocodificación si cambia la dirección
-        const btn=document.getElementById('btn-geo-obra');
-        if(btn&&btn.textContent==='✅ OK'){btn.textContent='📍 Zona';_obraFormLat=null;_obraFormLng=null;}
-      });
-    });
+    // Coordenadas directas desde Google Maps — sin geocodificación
   },1500);
 }
 
@@ -1640,6 +1617,41 @@ function seleccionarObraEnAlta(){
   }
 }
 
+function parsearCoordsObra(val){
+  if(!val)return;
+  // Acepta formatos: "37.3201, -5.4067" o "37.3201,-5.4067" o "37°19'12.5N 5°24'24.2W"
+  const clean=val.replace(/[°'"NnSsEeWwOo]/g,' ').trim();
+  const parts=clean.split(/[\s,;]+/).filter(p=>p&&!isNaN(parseFloat(p)));
+  if(parts.length>=2){
+    const lat=parseFloat(parts[0]);
+    const lng=parseFloat(parts[1]);
+    if(lat>=-90&&lat<=90&&lng>=-180&&lng<=180){
+      _obraFormLat=lat;
+      _obraFormLng=lng;
+      const res=document.getElementById('geo-obra-result');
+      if(res){
+        res.textContent='✅ Coordenadas válidas · '+lat.toFixed(5)+', '+lng.toFixed(5);
+        res.style.color='var(--green)';
+        res.style.display='block';
+      }
+      // Actualizar botón
+      const btn=document.getElementById('btn-geo-obra');
+      if(btn)btn.textContent='✅ OK';
+    } else {
+      _obraFormLat=null;_obraFormLng=null;
+      const res=document.getElementById('geo-obra-result');
+      if(res){res.textContent='⚠️ Coordenadas fuera de rango';res.style.color='var(--red)';res.style.display='block';}
+    }
+  } else if(val.length>3){
+    const res=document.getElementById('geo-obra-result');
+    if(res){res.textContent='⚠️ Formato: 37.3201432, -5.4067291';res.style.color='var(--amber)';res.style.display='block';}
+  }
+}
+
+function abrirGoogleMaps(){
+  window.open('https://maps.google.com','_blank');
+}
+
 function geocodificarObraForm(){
   const calle=(document.getElementById('obra-calle')?.value||'').trim();
   const cp=(document.getElementById('obra-cp')?.value||'').trim();
@@ -1673,10 +1685,7 @@ function geocodificarObraForm(){
 function saveObra(){
   const nombre=document.getElementById('obra-nombre')?.value.trim();
   const cliente=document.getElementById('obra-cliente')?.value.trim();
-  const calle=(document.getElementById('obra-calle')?.value||'').trim();
-  const cp=(document.getElementById('obra-cp')?.value||'').trim();
-  const localidad=(document.getElementById('obra-localidad')?.value||'').trim();
-  const direccion=[calle,cp,localidad].filter(Boolean).join(', ')||document.getElementById('obra-direccion')?.value.trim()||'';
+  const direccion=(document.getElementById('obra-direccion')?.value||'').trim();
   const radio=parseInt(document.getElementById('obra-radio')?.value)||500;
   const estado=document.getElementById('obra-estado')?.value||'activa';
   const editId=document.getElementById('obra-edit-id')?.value;
@@ -1698,15 +1707,14 @@ function editObra(id){
   document.getElementById('obra-edit-id').value=id;
   document.getElementById('obra-nombre').value=o.nombre||'';
   document.getElementById('obra-cliente').value=o.cliente||'';
-  // Intentar separar dirección guardada en sus partes
-  const partesDirEdit=(o.direccion||'').split(',').map(s=>s.trim());
-  const calleEdit=partesDirEdit.slice(0,-2).join(', ')||partesDirEdit[0]||'';
-  const cpEdit=partesDirEdit.find(p=>/^\d{5}$/.test(p))||'';
-  const localidadEdit=partesDirEdit[partesDirEdit.length-1]||'';
-  if(document.getElementById('obra-calle'))document.getElementById('obra-calle').value=calleEdit;
-  if(document.getElementById('obra-cp'))document.getElementById('obra-cp').value=cpEdit;
-  if(document.getElementById('obra-localidad'))document.getElementById('obra-localidad').value=localidadEdit;
   document.getElementById('obra-direccion').value=o.direccion||'';
+  // Mostrar coordenadas si las tiene
+  const coordsEl=document.getElementById('obra-coords');
+  if(coordsEl&&o.lat&&o.lng){
+    coordsEl.value=o.lat.toFixed(7)+', '+o.lng.toFixed(7);
+    const res=document.getElementById('geo-obra-result');
+    if(res){res.textContent='✅ Coordenadas cargadas · Radio '+( o.radio||500)+'m';res.style.color='var(--green)';res.style.display='block';}
+  }
   document.getElementById('obra-radio').value=o.radio||500;
   document.getElementById('obra-estado').value=o.estado||'activa';
   document.getElementById('obra-form-title').textContent='✏️ Editar obra';
@@ -1732,7 +1740,7 @@ function deleteObra(id){
 
 function resetObraForm(){
   document.getElementById('obra-edit-id').value='';
-  ['obra-nombre','obra-cliente','obra-calle','obra-cp','obra-localidad','obra-direccion'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['obra-nombre','obra-cliente','obra-direccion','obra-coords'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('obra-radio').value=500;
   document.getElementById('obra-estado').value='activa';
   document.getElementById('obra-form-title').textContent='🏗️ Nueva obra';
