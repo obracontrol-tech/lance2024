@@ -853,6 +853,9 @@ function initApp(){
     document.getElementById('jornada-date').textContent=new Date().toLocaleDateString('es-ES',{weekday:'long',day:'2-digit',month:'long'});
     startFirebaseListener();
     cargarObras();
+    // Comprobar horario cada 5 minutos
+    setTimeout(checkHorarioAlertas, 8000);
+    setInterval(checkHorarioAlertas, 5 * 60 * 1000);
     // Coordenadas directas desde Google Maps — sin geocodificación
   },1500);
 }
@@ -1777,6 +1780,113 @@ function asignarObraRapida(obraId){
     showToast(`✅ ${w.nombre} asignado a "${o.nombre}"`,'ok');
   }
   saveW();renderWorkers();
+}
+
+// ══════════════════════════════════════
+// ALERTAS DE HORARIO — Sin fichar
+// ══════════════════════════════════════
+let _horarioAlertasGeneradas = {};
+
+function checkHorarioAlertas(){
+  const ahora = new Date();
+  const hoy = DAYS_CAP[ahora.getDay()];
+  const jor = JORNADA[hoy];
+  if(!jor) return; // Fin de semana — sin alertas
+
+  const hh = ahora.getHours();
+  const mm = ahora.getMinutes();
+  const minActual = hh * 60 + mm;
+
+  // Hora de entrada: 08:00 → alerta a partir de 08:15
+  const [h1e, m1e] = jor.t1s.split(':').map(Number);
+  const minEntrada = h1e * 60 + m1e + 15;
+
+  // Hora de salida: fin de jornada + 15min
+  const horaFinStr = jor.t2e || jor.t1e;
+  const [hFin, mFin] = horaFinStr.split(':').map(Number);
+  const minSalida = hFin * 60 + mFin + 15;
+
+  // Comprobar operarios sin fichar entrada
+  if(minActual >= minEntrada){
+    const sinEntrada = WORKERS.filter(w => w.status === 'pending');
+    sinEntrada.forEach(w => {
+      const key = 'entrada_' + (w.dni||w.nie||w.id) + '_' + ahora.toISOString().split('T')[0];
+      if(!_horarioAlertasGeneradas[key]){
+        _horarioAlertasGeneradas[key] = true;
+        addHorarioAlerta(w, 'entrada', jor.t1s);
+      }
+    });
+  }
+
+  // Comprobar operarios sin fichar salida
+  if(minActual >= minSalida){
+    const sinSalida = WORKERS.filter(w => w.status === 'in' && w.arrival && !w.dep);
+    sinSalida.forEach(w => {
+      const key = 'salida_' + (w.dni||w.nie||w.id) + '_' + ahora.toISOString().split('T')[0];
+      if(!_horarioAlertasGeneradas[key]){
+        _horarioAlertasGeneradas[key] = true;
+        addHorarioAlerta(w, 'salida', horaFinStr);
+      }
+    });
+  }
+}
+
+function addHorarioAlerta(w, tipo, horaEsperada){
+  const list = document.getElementById('alerts-list');
+  if(!list) return;
+  const empty = list.querySelector('[style*="padding:32px"]');
+  if(empty) empty.remove();
+
+  // Actualizar badge y contador
+  const hdr = document.getElementById('alertas-hdr-status');
+  if(hdr){hdr.textContent='⚠️ Alertas activas';hdr.style.color='var(--red)';}
+  const cnt = document.getElementById('alert-count');
+  const kv = document.getElementById('kv-alerts');
+  if(cnt){cnt.style.display='inline';cnt.textContent=parseInt(cnt.textContent||0)+1;}
+  if(kv)kv.textContent=parseInt(kv.textContent||0)+1;
+
+  const id = 'al_horario_' + Date.now();
+  const icono = tipo==='entrada' ? '⏰' : '🔴';
+  const msg = tipo==='entrada'
+    ? `No ha fichado entrada — debía entrar a las ${horaEsperada}`
+    : `No ha fichado salida — debía salir a las ${horaEsperada}`;
+
+  const div = document.createElement('div');
+  div.className = 'alert-item ai-warn';
+  div.id = id;
+  div.innerHTML = `
+    <div class="al-icon">${icono}</div>
+    <div style="flex:1">
+      <div class="al-name">${w.nombre} ${w.apellidos}</div>
+      <div class="al-desc">${msg}</div>
+      <div class="al-time">${new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})} · Detectado por control horario</div>
+      <div class="al-actions">
+        <span class="badge b-warn">${tipo==='entrada'?'SIN ENTRADA':'SIN SALIDA'}</span>
+        <button onclick="fichajeManualDesdeAlerta('${(w.dni||w.nie||'').replace(/[^A-Z0-9]/gi,'').toUpperCase()}','${tipo}')" class="btn-edit" style="font-size:10px;">✏️ Fichar ahora</button>
+        <button class="btn-resolve" onclick="resolveAlert('${id}')">✓ Resolver</button>
+      </div>
+    </div>`;
+  list.insertBefore(div, list.firstChild);
+
+  // Preview en dashboard
+  const preview = document.getElementById('dashboard-alerts-preview');
+  if(preview) preview.innerHTML += `<div style="padding:8px 12px;text-align:left;color:var(--amber);font-size:12px;font-weight:600;">${icono} ${w.nombre} ${w.apellidos} — ${msg}</div>`;
+}
+
+function fichajeManualDesdeAlerta(docKey, tipo){
+  // Ir a Resumen Jornada y abrir el panel de fichaje manual
+  showPage('jornada');
+  setTimeout(()=>{
+    mostrarFichajeManual();
+    const selW = document.getElementById('fm-worker');
+    const selT = document.getElementById('fm-tipo');
+    if(selW) selW.value = docKey;
+    if(selT) selT.value = tipo;
+    const now = new Date();
+    const hEl = document.getElementById('fm-hora');
+    if(hEl) hEl.value = now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+    showToast('✏️ Completa el fichaje manual y pulsa Guardar','inf');
+  }, 300);
 }
 
 let toastTimer;
