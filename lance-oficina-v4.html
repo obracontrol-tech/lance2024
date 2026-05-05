@@ -1733,16 +1733,37 @@ function renderJornada(){
   const tb=document.getElementById('jornada-tbody');if(!tb)return;
   // ✅ MEJORA 1: Corte por día + orden de llegada
   // Fichados hoy = tienen arrival o dep (status in/out). Sin fichar = status pending
-  const fichadosHoy=WORKERS.filter(w=>!w.inactivo&&w.status!=='pending'&&(w.arrival||w.dep));
-  const sinFicharHoy=WORKERS.filter(w=>!w.inactivo&&(w.status==='pending'||(!w.arrival&&!w.dep)));
-  // Ordenar fichados por hora de entrada (primero quien llegó antes)
+  const hoyJornada=new Date().toISOString().split('T')[0];
+  // ✅ FIX DEFINITIVO P1: solo son "de hoy" los que tienen _fechaFichaje===hoy O no tienen fecha (recién dados de alta)
+  const fichadosHoy=WORKERS.filter(w=>{
+    if(w.inactivo)return false;
+    if(!w._fechaFichaje)return false; // sin ningún fichaje → al grupo pendientes
+    return w._fechaFichaje===hoyJornada && (w.arrival||w.dep);
+  });
+  const sinFicharHoy=WORKERS.filter(w=>{
+    if(w.inactivo)return false;
+    // Sin fichaje de hoy: sin fecha, fecha anterior, o status pending
+    return !w._fechaFichaje || w._fechaFichaje!==hoyJornada;
+  });
+  // Ordenar fichados de hoy por hora de entrada (primero quien llegó antes)
   fichadosHoy.sort((a,b)=>(a.arrival||a.dep||'99:99').localeCompare(b.arrival||b.dep||'99:99'));
+  // Ordenar pendientes: primero los que tienen fichaje reciente (fecha más reciente primero), luego los sin fichaje
+  sinFicharHoy.sort((a,b)=>{
+    if(a._fechaFichaje&&!b._fechaFichaje)return -1;
+    if(!a._fechaFichaje&&b._fechaFichaje)return 1;
+    if(a._fechaFichaje&&b._fechaFichaje)return b._fechaFichaje.localeCompare(a._fechaFichaje);
+    return (a.nombre||'').localeCompare(b.nombre||'');
+  });
   const todosOrdenados=[...fichadosHoy,...sinFicharHoy];
-  const sepIdx=fichadosHoy.length; // índice donde empieza el bloque "sin fichar"
+  const sepIdx=fichadosHoy.length;
   tb.innerHTML=todosOrdenados.map((w,idx)=>{
     // Separador visual antes del primer operario sin fichar
+    const hayFichajesAnteriores=sinFicharHoy.some(w=>w._fechaFichaje&&w._fechaFichaje!==hoyJornada);
+    const textoSep=hayFichajesAnteriores
+      ?'⏳ Sin fichar hoy · Los siguientes tienen fichajes de días anteriores'
+      :'⏳ Pendientes de fichar hoy';
     const separador=(idx===sepIdx&&sinFicharHoy.length>0&&fichadosHoy.length>0)
-      ?`<tr><td colspan="6" style="padding:6px 14px;background:var(--bg);border-bottom:1px solid var(--border);font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);">⏳ Pendientes de fichar</td></tr>`
+      ?`<tr><td colspan="6" style="padding:6px 14px;background:var(--bg);border-bottom:1px solid var(--border);font-family:'Montserrat';font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);">${textoSep}</td></tr>`
       :'';
     const ciudad=w.ciudad_gps?w.ciudad_gps.split(',')[0]:'';
     const distOk=(w.dist_obra||0)<100000;
@@ -1766,11 +1787,15 @@ function renderJornada(){
     const hoyCheck=new Date().toISOString().split('T')[0];
     const fechaFichaje=w._fechaFichaje||null;
     const esAnterior=fechaFichaje&&fechaFichaje!==hoyCheck;
-    const fechaBadge=esAnterior?`<span style="display:inline-block;margin-left:6px;font-size:9px;background:#FEF3C7;color:#92400E;border-radius:3px;padding:1px 5px;font-weight:700;">📅 ${fechaFichaje}</span>`:'';;
+    const fechaFmt=esAnterior?new Date(fechaFichaje+'T12:00:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
+    const ultimoFichaje=w.dep?`Salida ${w.dep}`:w.arrival?`Entrada ${w.arrival}`:'';
+    const fechaBadge=esAnterior
+      ?`<span style="display:inline-block;margin-left:6px;font-size:9px;background:#FEF3C7;color:#92400E;border-radius:3px;padding:1px 6px;font-weight:700;" title="Último fichaje: ${fechaFmt} ${ultimoFichaje}">📅 Últ. fichaje: ${fechaFmt}</span>`
+      :'';;
     return separador+`<tr>
       <td><div style="font-weight:600">${numOrden}${w.nombre} ${w.apellidos}${fechaBadge}</div>${ubicacion}</td>
-      <td style="font-weight:600">${w.arrival||'—'}</td>
-      <td style="color:var(--red)">${w.dep||'—'}</td>
+      <td style="font-weight:600">${esAnterior?'—':w.arrival||'—'}</td>
+      <td style="color:var(--red)">${esAnterior?'—':w.dep||'—'}</td>
       <td style="font-family:'Montserrat';font-weight:800;color:var(--blue2)">${(+w.h).toLocaleString('es-ES')}h</td>
       <td>${zonaCell}</td>
       <td>${estadoLabel}${w.manual?'<div style="font-size:9px;color:var(--orange);margin-top:2px;">✏️ Manual</div>':''}</td>
