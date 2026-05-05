@@ -914,6 +914,9 @@ function showPage(name){
   document.getElementById('page-'+name).classList.add('active');
   document.getElementById('ni-'+name).classList.add('active');
   document.getElementById('topbar-title').textContent=TITLES[name]||name;
+  // ✅ Scroll al top siempre al cambiar de página
+  window.scrollTo({top:0,behavior:'instant'});
+  document.querySelector('.main-content')&&(document.querySelector('.main-content').scrollTop=0);
   if(name==='operarios')renderWorkers();
   if(name==='jornada')renderJornada();
   if(name==='horas')renderHours();
