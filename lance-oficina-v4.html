@@ -280,6 +280,10 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
         Asistente IA
       </div>
       <div class="nav-item" onclick="showPage('consentimientos')" id="ni-consentimientos">📋 Consentimientos</div>
+      <div class="nav-item" onclick="showPage('informes')" id="ni-informes">
+        <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 16 16"><rect x="3" y="1" width="10" height="14" rx="1.5"/><path d="M5 5h6M5 8h6M5 11h4"/></svg>
+        Informes de jornada
+      </div>
     </nav>
     <div class="sb-footer">
       <div class="sb-user">
@@ -353,8 +357,9 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
     <div class="page" id="page-jornada">
       <div class="card">
         <div class="card-hdr"><div class="card-title">📅 Resumen de jornada — Hoy</div>
-          <div style="display:flex;align-items:center;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <button onclick="mostrarFichajeManual()" style="font-size:10px;background:var(--orange-l);border:1px solid rgba(232,98,26,.3);color:var(--orange);padding:5px 10px;border-radius:7px;cursor:pointer;font-weight:700;font-family:'Montserrat',sans-serif;">✏️ Fichaje manual</button>
+            <button onclick="showPage('informes')" style="font-size:10px;background:var(--blue-light);border:1px solid var(--border2);color:var(--blue2);padding:5px 10px;border-radius:7px;cursor:pointer;font-weight:700;font-family:'Montserrat',sans-serif;">🖨️ Informe</button>
             <span id="jornada-date" style="font-size:10px;color:var(--text3)"></span></div></div>
         <div id="fichaje-manual-panel" style="display:none;background:var(--orange-l);border:1px solid rgba(232,98,26,.25);border-radius:12px;padding:16px;margin-bottom:16px;">
           <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--orange);margin-bottom:12px;">✏️ FICHAJE MANUAL — Añadir/modificar hora</div>
@@ -457,6 +462,7 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
               <option value="mes" selected>Este mes</option>
             </select>
             <button onclick="renderHours()" style="padding:5px 10px;background:var(--blue-light);border:1px solid var(--border2);border-radius:7px;font-size:11px;cursor:pointer;">🔄 Actualizar</button>
+            <button onclick="showPage('informes')" style="padding:5px 10px;background:var(--blue-light);border:1px solid var(--border2);border-radius:7px;font-size:11px;cursor:pointer;font-weight:700;color:var(--blue2);">🖨️ Informe</button>
           </div>
         </div>
         <div id="horas-resumen" style="display:flex;gap:10px;padding:12px 16px;flex-wrap:wrap;border-bottom:1px solid var(--border);"></div>
@@ -697,6 +703,62 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
       </div>
     </div>
 
+    <!-- INFORMES DE JORNADA -->
+    <div class="page" id="page-informes">
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-hdr">
+          <div class="card-title">📄 Informes de jornada</div>
+          <div style="font-size:10px;color:var(--text3);">Cumplimiento RD 8/2019 — Registro de jornada</div>
+        </div>
+        <div class="card-body">
+          <!-- Controles -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end;margin-bottom:16px;">
+            <div>
+              <label class="form-lbl">Tipo de informe</label>
+              <select class="form-ctrl" id="inf-tipo" onchange="onChangeTipoInforme()">
+                <option value="diario">📅 Diario</option>
+                <option value="semanal">📆 Semanal</option>
+                <option value="mensual">🗓️ Mensual</option>
+              </select>
+            </div>
+            <div id="inf-ctrl-fecha">
+              <label class="form-lbl">Fecha</label>
+              <input class="form-ctrl" type="date" id="inf-fecha">
+            </div>
+            <div id="inf-ctrl-semana" style="display:none;">
+              <label class="form-lbl">Semana (lunes)</label>
+              <input class="form-ctrl" type="date" id="inf-semana-ini">
+            </div>
+            <div id="inf-ctrl-mes" style="display:none;">
+              <label class="form-lbl">Mes</label>
+              <input class="form-ctrl" type="month" id="inf-mes">
+            </div>
+            <div>
+              <label class="form-lbl">Operario</label>
+              <select class="form-ctrl" id="inf-operario">
+                <option value="todos">👷 Todos los operarios</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn-primary" onclick="generarInforme()" style="white-space:nowrap;">🔍 Previsualizar</button>
+            </div>
+          </div>
+          <!-- Botones de exportación -->
+          <div style="display:flex;gap:10px;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:16px;">
+            <button onclick="imprimirInforme()" style="padding:9px 16px;background:var(--blue2);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;">🖨️ Imprimir / PDF digital</button>
+            <button onclick="descargarInformeHTML()" style="padding:9px 16px;background:var(--blue-light);color:var(--blue2);border:1px solid var(--border2);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;">💾 Guardar HTML</button>
+            <span style="font-size:10px;color:var(--text3);align-self:center;">Desde el navegador: Imprimir → Guardar como PDF → listo para inspección</span>
+          </div>
+          <!-- Preview -->
+          <div id="inf-preview-wrap" style="display:none;">
+            <div style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">Vista previa del informe</div>
+            <div id="inf-preview" style="border:1px solid var(--border);border-radius:8px;overflow:auto;background:#fff;max-height:600px;"></div>
+          </div>
+          <div id="inf-empty" style="padding:32px;text-align:center;color:var(--text3);font-size:12px;">Selecciona el tipo de informe, el período y pulsa Previsualizar.</div>
+        </div>
+      </div>
+    </div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -845,7 +907,7 @@ function tick(){const n=new Date();document.getElementById('clock').textContent=
 setInterval(tick,1000);tick();
 
 // ── PÁGINAS ──
-const TITLES={dashboard:'Tablero',jornada:'Resumen de jornada',operarios:'Operarios',alertas:'Alertas',extras:'Horas extras',horas:'Horas trabajadas',tareas:'Tareas',whatsapp:'WhatsApp',gestion:'Alta de operarios',asistente:'Asistente IA',consentimientos:'Consentimientos RGPD',obras:'Obras'};
+const TITLES={dashboard:'Tablero',jornada:'Resumen de jornada',operarios:'Operarios',alertas:'Alertas',extras:'Horas extras',horas:'Horas trabajadas',tareas:'Tareas',whatsapp:'WhatsApp',gestion:'Alta de operarios',asistente:'Asistente IA',consentimientos:'Consentimientos RGPD',obras:'Obras',informes:'📄 Informes de jornada'};
 function showPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -855,6 +917,7 @@ function showPage(name){
   if(name==='operarios')renderWorkers();
   if(name==='jornada')renderJornada();
   if(name==='horas')renderHours();
+  if(name==='informes')initInformes();
   if(name==='tareas')renderTaskLog();
   if(name==='gestion'){renderGestionList();renderPinTable();updateExtraSelect();updateObrasSelect();}
   if(name==='extras')updateExtraSelect();
@@ -2056,6 +2119,299 @@ function fichajeManualDesdeAlerta(docKey, tipo){
 
 let toastTimer;
 function showToast(msg,tipo){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast show ${tipo}`;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3000);}
+
+// ══════════════════════════════════════════════════════════
+// MÓDULO INFORMES DE JORNADA — RD 8/2019
+// ══════════════════════════════════════════════════════════
+let _informeHTML = '';
+
+function initInformes(){
+  // Poblar select de operarios
+  const sel=document.getElementById('inf-operario');
+  if(sel){
+    sel.innerHTML='<option value="todos">👷 Todos los operarios</option>';
+    WORKERS.filter(w=>!w.inactivo).forEach(w=>{
+      const doc=(w.dni||w.nie||'').replace(/[^A-Z0-9]/gi,'').toUpperCase();
+      sel.innerHTML+=`<option value="${doc}">${w.nombre} ${w.apellidos}</option>`;
+    });
+  }
+  // Defaults de fecha
+  const hoy=new Date().toISOString().split('T')[0];
+  const mes=hoy.substring(0,7);
+  if(document.getElementById('inf-fecha'))document.getElementById('inf-fecha').value=hoy;
+  if(document.getElementById('inf-semana-ini'))document.getElementById('inf-semana-ini').value=getLunes(new Date()).toISOString().split('T')[0];
+  if(document.getElementById('inf-mes'))document.getElementById('inf-mes').value=mes;
+  document.getElementById('inf-preview-wrap').style.display='none';
+  document.getElementById('inf-empty').style.display='block';
+}
+
+function getLunes(d){
+  const day=d.getDay();const diff=d.getDate()-day+(day===0?-6:1);
+  return new Date(d.setDate(diff));
+}
+
+function onChangeTipoInforme(){
+  const tipo=document.getElementById('inf-tipo').value;
+  document.getElementById('inf-ctrl-fecha').style.display=tipo==='diario'?'':'none';
+  document.getElementById('inf-ctrl-semana').style.display=tipo==='semanal'?'':'none';
+  document.getElementById('inf-ctrl-mes').style.display=tipo==='mensual'?'':'none';
+}
+
+function getFechasRango(){
+  const tipo=document.getElementById('inf-tipo').value;
+  let fechas=[];
+  if(tipo==='diario'){
+    const f=document.getElementById('inf-fecha').value;
+    if(f)fechas=[f];
+  } else if(tipo==='semanal'){
+    const ini=new Date(document.getElementById('inf-semana-ini').value+'T12:00:00');
+    for(let i=0;i<7;i++){const d=new Date(ini);d.setDate(ini.getDate()+i);fechas.push(d.toISOString().split('T')[0]);}
+  } else {
+    const mes=document.getElementById('inf-mes').value;
+    if(mes){
+      const [y,m]=mes.split('-').map(Number);
+      const dias=new Date(y,m,0).getDate();
+      for(let i=1;i<=dias;i++){const d=new Date(y,m-1,i);fechas.push(d.toISOString().split('T')[0]);}
+    }
+  }
+  return fechas;
+}
+
+async function generarInforme(){
+  const fechas=getFechasRango();
+  if(!fechas.length){showToast('⚠️ Selecciona un período válido','err');return;}
+  const filtroDoc=document.getElementById('inf-operario').value;
+  const tipo=document.getElementById('inf-tipo').value;
+  showToast('⏳ Cargando datos...','inf');
+
+  // Cargar fichajes de todas las fechas en paralelo
+  const resultados=await Promise.all(fechas.map(fecha=>
+    fetch(`${FB_URL}/fichajes/${fecha}.json`).then(r=>r.json()).then(d=>({fecha,data:d})).catch(()=>({fecha,data:null}))
+  ));
+
+  // También cargar operarios_activos para el día de hoy (si está en el rango)
+  const hoy=new Date().toISOString().split('T')[0];
+
+  // Agrupar por fecha y por operario
+  // estructura: {fecha: {doc: {nombre,dni,obra,fichajes:[{tipo,hora,lat,lng,ciudad,en_zona,dist_obra,manual}], entrada, salida, horas}}}
+  const porFecha={};
+  resultados.forEach(({fecha,data})=>{
+    if(!data)return;
+    porFecha[fecha]={};
+    Object.values(data).forEach(f=>{
+      if(!f||!f.doc)return;
+      const doc=f.doc.replace(/[^A-Z0-9]/gi,'').toUpperCase();
+      if(filtroDoc!=='todos'&&doc!==filtroDoc)return;
+      if(!porFecha[fecha][doc])porFecha[fecha][doc]={
+        nombre:f.nombre||doc,doc,dni:f.doc||'',
+        obra:f.obra||'',fichajes:[],entrada:null,salida:null,horas:0,
+        en_zona:null,ciudad:''
+      };
+      const op=porFecha[fecha][doc];
+      op.fichajes.push(f);
+      if(f.tipo==='entrada'){op.entrada=f.hora||null;op.en_zona=f.en_zona;op.ciudad=f.ciudad||'';}
+      if(f.tipo==='salida'){op.salida=f.hora||null;}
+    });
+    // Calcular horas para cada operario del día
+    Object.values(porFecha[fecha]).forEach(op=>{
+      if(op.entrada&&op.salida){
+        const[eh,em]=op.entrada.split(':').map(Number);
+        const[sh,sm]=op.salida.split(':').map(Number);
+        const mins=(sh*60+sm)-(eh*60+em);
+        op.horas=mins>0?(mins/60).toFixed(2)*1:0;
+      } else if(op.entrada&&fecha===hoy){
+        const[eh,em]=op.entrada.split(':').map(Number);
+        const now=new Date();
+        const mins=(now.getHours()*60+now.getMinutes())-(eh*60+em);
+        op.horas=mins>0?(mins/60).toFixed(2)*1:0;
+      }
+    });
+  });
+
+  // Construir HTML del informe
+  const empresa='Construcciones Lance 2024 SL';
+  const cif='';
+  const encargado='Luis Campaña';
+  const genDate=new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
+  const periodoLabel=getTipoPeriodoLabel();
+
+  // Calcular totales globales
+  let totalHorasGlobal=0;
+  let totalRegistrosGlobal=0;
+  const acumPorOperario={};
+
+  Object.entries(porFecha).forEach(([fecha,ops])=>{
+    Object.values(ops).forEach(op=>{
+      totalHorasGlobal+=op.horas;
+      totalRegistrosGlobal++;
+      if(!acumPorOperario[op.doc])acumPorOperario[op.doc]={nombre:op.nombre,dni:op.dni,total:0,dias:0};
+      acumPorOperario[op.doc].total+=op.horas;
+      acumPorOperario[op.doc].dias++;
+    });
+  });
+
+  const css=`
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:Arial,sans-serif;font-size:11px;color:#1a2840;background:#fff;padding:20px;}
+    .cabecera{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #1B4F8C;padding-bottom:12px;margin-bottom:16px;}
+    .logo-empresa{font-family:'Arial Black',Arial,sans-serif;font-size:16px;font-weight:900;color:#1B4F8C;}
+    .sub-empresa{font-size:10px;color:#666;margin-top:3px;}
+    .meta-informe{text-align:right;font-size:10px;color:#444;}
+    .meta-informe strong{color:#1B4F8C;font-size:13px;display:block;margin-bottom:4px;}
+    .resumen-global{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;}
+    .kpi-box{border:1px solid #D0DDF0;border-radius:6px;padding:8px 14px;background:#F4F7FC;min-width:100px;}
+    .kpi-val{font-size:18px;font-weight:900;color:#1B4F8C;font-family:'Arial Black',Arial,sans-serif;}
+    .kpi-lbl{font-size:9px;color:#666;text-transform:uppercase;letter-spacing:1px;}
+    h2{font-size:12px;color:#1B4F8C;border-left:4px solid #1B4F8C;padding-left:8px;margin:16px 0 8px;text-transform:uppercase;letter-spacing:1px;}
+    h3{font-size:11px;color:#333;margin:12px 0 6px;font-weight:700;}
+    table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:10px;}
+    th{background:#1B4F8C;color:#fff;padding:6px 8px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:0.8px;}
+    td{padding:5px 8px;border-bottom:1px solid #E8EDF5;vertical-align:top;}
+    tr:nth-child(even) td{background:#F9FAFB;}
+    .pill-ok{background:#DCFCE7;color:#16A34A;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:700;}
+    .pill-out{background:#FEE2E2;color:#DC2626;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:700;}
+    .pill-pend{background:#FEF3C7;color:#D97706;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:700;}
+    .pill-man{background:#EDE9FE;color:#7C3AED;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:700;}
+    .total-row td{font-weight:700;background:#EBF0FA;color:#1B4F8C;}
+    .acum-section{margin-top:16px;}
+    .pie{text-align:center;margin-top:20px;padding-top:10px;border-top:1px solid #eee;font-size:9px;color:#aaa;}
+    .dia-header{background:#EBF0FA;padding:6px 8px;font-weight:700;color:#1B4F8C;font-size:10px;border-radius:4px;margin:10px 0 4px;}
+    .sin-datos{color:#aaa;font-style:italic;font-size:10px;padding:6px 8px;}
+    @media print{
+      body{padding:10px;}
+      button{display:none!important;}
+      .no-print{display:none!important;}
+    }
+  `;
+
+  // Construir secciones de días
+  let seccionesDias='';
+  const fechasConDatos=Object.keys(porFecha).sort();
+  
+  if(fechasConDatos.length===0){
+    seccionesDias='<div class="sin-datos">No se encontraron fichajes en el período seleccionado.</div>';
+  } else {
+    fechasConDatos.forEach(fecha=>{
+      const ops=Object.values(porFecha[fecha]);
+      const fechaFmt=new Date(fecha+'T12:00:00').toLocaleDateString('es-ES',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+      const totalDia=ops.reduce((a,v)=>a+v.horas,0).toFixed(2);
+      ops.sort((a,b)=>(a.entrada||'99:99').localeCompare(b.entrada||'99:99'));
+      seccionesDias+=`<div class="dia-header">📅 ${fechaFmt.charAt(0).toUpperCase()+fechaFmt.slice(1)} — ${ops.length} operario${ops.length!==1?'s':''} · ${totalDia}h total</div>`;
+      if(ops.length===0){seccionesDias+='<div class="sin-datos">Sin fichajes registrados.</div>';return;}
+      seccionesDias+=`<table>
+        <thead><tr>
+          <th>#</th><th>Operario</th><th>DNI/NIE</th><th>Obra</th>
+          <th>Entrada</th><th>Salida</th><th>Horas</th>
+          <th>GPS entrada</th><th>Zona</th><th>Registro</th>
+        </tr></thead><tbody>`;
+      ops.forEach((op,i)=>{
+        const zonaLabel=op.en_zona===true?'<span class="pill-ok">En zona</span>':op.en_zona===false?'<span class="pill-out">Fuera zona</span>':'<span class="pill-pend">—</span>';
+        const manualLabel=op.fichajes.some(f=>f.manual)?'<span class="pill-man">Manual</span>':'<span class="pill-ok">App</span>';
+        const gpsLabel=op.ciudad||'—';
+        const salidaLabel=op.salida||'<span class="pill-pend">En curso</span>';
+        seccionesDias+=`<tr>
+          <td style="font-weight:700;color:#aaa">${i+1}</td>
+          <td style="font-weight:600">${op.nombre}</td>
+          <td style="font-size:9px">${op.dni||'—'}</td>
+          <td style="font-size:9px">${op.obra||'—'}</td>
+          <td style="font-weight:700;color:#1B4F8C">${op.entrada||'—'}</td>
+          <td style="color:#DC2626">${salidaLabel}</td>
+          <td style="font-weight:900;color:#1B4F8C">${op.horas>0?op.horas.toFixed(2)+'h':'—'}</td>
+          <td style="font-size:9px">${gpsLabel}</td>
+          <td>${zonaLabel}</td>
+          <td>${manualLabel}</td>
+        </tr>`;
+      });
+      seccionesDias+=`<tr class="total-row"><td colspan="6" style="text-align:right;">TOTAL DÍA:</td><td>${totalDia}h</td><td colspan="3"></td></tr>`;
+      seccionesDias+='</tbody></table>';
+    });
+  }
+
+  // Tabla acumulado por operario
+  let tablaAcum='';
+  const opAcumList=Object.values(acumPorOperario).sort((a,b)=>b.total-a.total);
+  if(opAcumList.length>0){
+    tablaAcum=`<h2>Resumen acumulado por operario</h2>
+    <table><thead><tr><th>#</th><th>Operario</th><th>DNI/NIE</th><th>Días trabajados</th><th>Total horas</th><th>Media h/día</th></tr></thead><tbody>`;
+    opAcumList.forEach((op,i)=>{
+      const media=op.dias>0?(op.total/op.dias).toFixed(2):0;
+      tablaAcum+=`<tr><td>${i+1}</td><td style="font-weight:600">${op.nombre}</td><td style="font-size:9px">${op.dni||'—'}</td><td style="text-align:center">${op.dias}</td><td style="font-weight:900;color:#1B4F8C">${op.total.toFixed(2)}h</td><td>${media}h</td></tr>`;
+    });
+    tablaAcum+=`<tr class="total-row"><td colspan="3">TOTAL PERÍODO:</td><td style="text-align:center">${fechasConDatos.length} días</td><td>${totalHorasGlobal.toFixed(2)}h</td><td>—</td></tr>`;
+    tablaAcum+='</tbody></table>';
+  }
+
+  _informeHTML=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Informe Jornada — ${empresa}</title><style>${css}</style></head><body>
+    <div class="cabecera">
+      <div>
+        <div class="logo-empresa">${empresa}</div>
+        <div class="sub-empresa">Registro de jornada laboral · RD Ley 8/2019</div>
+        ${encargado?'<div class="sub-empresa">Responsable: '+encargado+'</div>':''}
+      </div>
+      <div class="meta-informe">
+        <strong>INFORME ${tipo.toUpperCase()}</strong>
+        Período: ${periodoLabel}<br>
+        Generado: ${genDate}<br>
+        ${filtroDoc!=='todos'?'Operario: '+( WORKERS.find(w=>(w.dni||w.nie||'').replace(/[^A-Z0-9]/gi,'').toUpperCase()===filtroDoc)||{nombre:filtroDoc}).nombre:'Todos los operarios'}
+      </div>
+    </div>
+    <div class="resumen-global">
+      <div class="kpi-box"><div class="kpi-val">${totalHorasGlobal.toFixed(1)}h</div><div class="kpi-lbl">Total horas</div></div>
+      <div class="kpi-box"><div class="kpi-val">${fechasConDatos.length}</div><div class="kpi-lbl">Días con fichajes</div></div>
+      <div class="kpi-box"><div class="kpi-val">${opAcumList.length}</div><div class="kpi-lbl">Operarios</div></div>
+      <div class="kpi-box"><div class="kpi-val">${totalRegistrosGlobal}</div><div class="kpi-lbl">Registros totales</div></div>
+    </div>
+    <h2>Detalle por días</h2>
+    ${seccionesDias}
+    ${tablaAcum}
+    <div class="pie">Documento generado automáticamente por ObraControl GPS · Construcciones Lance 2024 SL · ${genDate} · Cumplimiento RD Ley 8/2019 art. 34.9</div>
+  </body></html>`;
+
+  // Mostrar preview
+  const iframe=document.createElement('iframe');
+  iframe.style.cssText='width:100%;height:560px;border:none;border-radius:8px;';
+  const wrap=document.getElementById('inf-preview');
+  wrap.innerHTML='';wrap.appendChild(iframe);
+  iframe.srcdoc=_informeHTML;
+  document.getElementById('inf-preview-wrap').style.display='block';
+  document.getElementById('inf-empty').style.display='none';
+  showToast(`✅ Informe generado — ${totalRegistrosGlobal} registros, ${totalHorasGlobal.toFixed(1)}h`,'ok');
+}
+
+function getTipoPeriodoLabel(){
+  const tipo=document.getElementById('inf-tipo').value;
+  if(tipo==='diario'){
+    const f=document.getElementById('inf-fecha').value;
+    return f?new Date(f+'T12:00:00').toLocaleDateString('es-ES',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}):'—';
+  } else if(tipo==='semanal'){
+    const ini=document.getElementById('inf-semana-ini').value;
+    if(!ini)return '—';
+    const fin=new Date(ini+'T12:00:00');fin.setDate(fin.getDate()+6);
+    return new Date(ini+'T12:00:00').toLocaleDateString('es-ES',{day:'2-digit',month:'short'})+' – '+fin.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
+  } else {
+    const m=document.getElementById('inf-mes').value;
+    return m?new Date(m+'-01T12:00:00').toLocaleDateString('es-ES',{month:'long',year:'numeric'}):'—';
+  }
+}
+
+function imprimirInforme(){
+  if(!_informeHTML){showToast('⚠️ Primero genera el informe','err');return;}
+  const w=window.open('','_blank','width=900,height=700');
+  w.document.write(_informeHTML);
+  w.document.close();
+  setTimeout(()=>w.print(),600);
+}
+
+function descargarInformeHTML(){
+  if(!_informeHTML){showToast('⚠️ Primero genera el informe','err');return;}
+  const tipo=document.getElementById('inf-tipo').value;
+  const fecha=new Date().toISOString().split('T')[0];
+  const nombre=`informe-jornada-lance-${tipo}-${fecha}.html`;
+  const blob=new Blob([_informeHTML],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nombre;a.click();
+  showToast('✅ Archivo descargado','ok');
+}
+
 </script>
 </body>
 </html>
