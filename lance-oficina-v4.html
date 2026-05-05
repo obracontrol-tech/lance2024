@@ -916,7 +916,10 @@ function showPage(name){
   document.getElementById('topbar-title').textContent=TITLES[name]||name;
   // ✅ Scroll al top siempre al cambiar de página
   window.scrollTo({top:0,behavior:'instant'});
+  document.documentElement.scrollTop=0;
+  document.body.scrollTop=0;
   document.querySelector('.main-content')&&(document.querySelector('.main-content').scrollTop=0);
+  setTimeout(()=>{window.scrollTo(0,0);document.documentElement.scrollTop=0;},50);
   if(name==='operarios')renderWorkers();
   if(name==='jornada')renderJornada();
   if(name==='horas')renderHours();
