@@ -510,20 +510,20 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
             <input type="hidden" id="obra-edit-id">
             <div class="form-g">
               <label class="form-lbl">Nombre de la obra</label>
-              <input class="form-ctrl" id="obra-nombre" type="text" oninput="capitalizarCampo(this)" placeholder="">
+              <input class="form-ctrl" id="obra-nombre" type="text" oninput="capitalizarCampo(this)" placeholder="Ej: Nave Industrial Almacelles">
             </div>
             <div class="form-g">
               <label class="form-lbl">Cliente / Empresa</label>
-              <input class="form-ctrl" id="obra-cliente" type="text" oninput="capitalizarCampo(this)" placeholder="">
+              <input class="form-ctrl" id="obra-cliente" type="text" oninput="capitalizarCampo(this)" placeholder="Ej: Excavaciones Barroso SL">
             </div>
             <div class="form-g">
               <label class="form-lbl">Descripción / Referencia</label>
-              <input class="form-ctrl" id="obra-direccion" type="text" placeholder="">
+              <input class="form-ctrl" id="obra-direccion" type="text" placeholder="Ej: Nave Polígono Industrial, Almacelles">
             </div>
             <div class="form-g">
               <label class="form-lbl">📍 Coordenadas GPS <span style="font-weight:400;color:var(--text3)">(copia desde Google Maps)</span></label>
               <div style="display:flex;gap:8px;align-items:center;">
-                <input class="form-ctrl" id="obra-coords" type="text" placeholder="" oninput="parsearCoordsObra(this.value)" style="flex:1;font-family:'Montserrat',sans-serif;letter-spacing:0.5px;">
+                <input class="form-ctrl" id="obra-coords" type="text" placeholder="37.3201432, -5.4067291" oninput="parsearCoordsObra(this.value)" style="flex:1;font-family:'Montserrat',sans-serif;letter-spacing:0.5px;">
                 <button type="button" onclick="abrirGoogleMaps()" style="padding:10px 10px;background:var(--blue-light);border:1px solid var(--border2);border-radius:9px;cursor:pointer;font-size:11px;white-space:nowrap;">🌍 Maps</button>
               </div>
               <div id="geo-obra-result" style="font-size:10px;margin-top:5px;display:none;"></div>
@@ -563,7 +563,7 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
     <div class="page" id="page-gestion">
       <div class="row-3">
         <div class="card">
-          <div class="card-hdr"><div class="card-title" id="gestion-title">➕ Alta de operario</div><div style="display:flex;gap:8px;"><button onclick="resetForm()" style="font-size:10px;color:var(--text3);background:none;border:none;cursor:pointer;font-weight:600;">✕ Limpiar</button><button onclick="resetTotalPanel()" style="font-size:10px;color:#fff;background:var(--red);border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-weight:700;font-family:'Montserrat',sans-serif;">🗑️ BORRAR TODO</button></div></div>
+          <div class="card-hdr"><div class="card-title" id="gestion-title">➕ Alta de operario</div><button onclick="resetForm()" style="font-size:10px;color:var(--text3);background:none;border:none;cursor:pointer;font-weight:600;">✕ Limpiar</button></div>
           <div class="card-body">
             <input type="hidden" id="edit-id">
             <div class="form-row">
@@ -670,7 +670,21 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
         </div>
       </div>
     </div>
-  
+  </div>
+</div>
+
+<div class="overlay" id="wp-overlay">
+  <div class="modal">
+    <div class="modal-hdr"><span style="font-size:24px">💬</span><div><div class="modal-title">ENVIAR WHATSAPP</div></div></div>
+    <div class="modal-body">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--text3)">Para: <strong style="color:var(--text)" id="wp-name"></strong></div>
+      <label class="form-lbl">Mensaje</label>
+      <textarea class="form-ctrl" id="wp-ta" style="min-height:110px;"></textarea>
+      <div class="modal-foot"><button class="btn-cancel" onclick="closeWP()">Cancelar</button><button class="btn-send-wp" onclick="sendWP()">📱 Enviar</button></div>
+    </div>
+  </div>
+</div>
+
     <!-- CONSENTIMIENTOS -->
     <div class="page" id="page-consentimientos">
       <div class="card">
@@ -745,8 +759,6 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
       </div>
     </div>
   </div>
-</div>
-</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -833,7 +845,7 @@ function loadFirebaseData(){
       const hoyStr2=new Date().toISOString().split('T')[0];
       const esDeFechaAnterior=op.fecha&&op.fecha!==hoyStr2;
       if(op.tipo==='entrada'){w.arrival=op.hora;w.dep=null;if(op.hora&&!esDeFechaAnterior){const[eh,em]=op.hora.split(':').map(Number);const now=new Date();const mins=(now.getHours()*60+now.getMinutes())-(eh*60+em);w.h=mins>0?redondearMediaHora(mins/60):0;}else if(esDeFechaAnterior){w.h=0;}}
-      else if(op.tipo==='salida'){w.dep=op.hora;const at=op.hora_entrada||w.arrival;if(at&&op.hora){w.arrival=at;const[eh,em]=at.split(':').map(Number);const[sh,sm]=op.hora.split(':').map(Number);const mins=(sh*60+sm)-(eh*60+em);w.h=mins>0?redondearMediaHora(mins/60):0;}}
+      else if(op.tipo==='salida'){w.dep=op.hora;if(esDeFechaAnterior){w.h=0;}else{const at=op.hora_entrada||w.arrival;if(at&&op.hora){w.arrival=at;const[eh,em]=at.split(':').map(Number);const[sh,sm]=op.hora.split(':').map(Number);const mins=(sh*60+sm)-(eh*60+em);w.h=mins>0?redondearMediaHora(mins/60):0;}}}
       if(op.ciudad) w.ciudad_gps=op.ciudad+(op.provincia?', '+op.provincia:'');
       // Coordenadas para botón Google Maps
       if(op.lat&&op.lng){w._lat=parseFloat(op.lat);w._lng=parseFloat(op.lng);}
@@ -1277,49 +1289,6 @@ function editWorker(id){
   document.getElementById('g-btn').textContent='💾 Guardar cambios';
   document.getElementById('gestion-title').textContent='✏️ Editar operario';
   showPage('gestion');
-}
-
-function resetTotalPanel(){
-  if(!confirm('⚠️ ¿Borrar TODOS los operarios, fichajes y estadísticas? Esta acción no se puede deshacer.'))return;
-  if(!confirm('🔴 ÚLTIMA CONFIRMACIÓN — ¿Seguro que quieres dejar el panel en cero?'))return;
-
-  showToast('⏳ Limpiando Firebase...','inf');
-
-  // Borrar todo en Firebase
-  const rutas=['operarios_registro','operarios_activos','fichajes','tareas','consentimientos'];
-  const promises=rutas.map(r=>
-    fetch(`${FB_URL}/${r}.json`,{method:'DELETE'}).catch(()=>{})
-  );
-
-  Promise.all(promises).then(()=>{
-    // Limpiar localStorage
-    localStorage.removeItem('lance_workers_v2');
-    localStorage.removeItem('lance_deleted_keys');
-    // Limpiar array local
-    WORKERS=[];
-    extras=[];
-    window._zonaAlertas={};
-    window._horarioAlertasGeneradas={};
-    // Resetear KPIs
-    animKPI('kv-total',0);
-    animKPI('kv-in',0);
-    animKPI('kv-alerts',0);
-    animKPI('kv-extras',0);
-    // Resetear alertas
-    const alertList=document.getElementById('alerts-list');
-    if(alertList)alertList.innerHTML='<div style="padding:32px;text-align:center;color:var(--text3);font-size:13px;">✅ No hay alertas activas hoy.</div>';
-    const alertHdr=document.getElementById('alertas-hdr-status');
-    if(alertHdr){alertHdr.textContent='✅ Sin alertas activas';alertHdr.style.color='var(--green)';}
-    const alertCnt=document.getElementById('alert-count');
-    if(alertCnt)alertCnt.style.display='none';
-    const dashPreview=document.getElementById('dashboard-alerts-preview');
-    if(dashPreview)dashPreview.innerHTML='<div style="padding:24px;text-align:center;color:var(--text3);font-size:12px;">✅ Sin alertas activas hoy.</div>';
-    // Renderizar tablas vacías
-    renderGestionList();renderPinTable();renderWorkers();renderJornada();
-    const taskLog=document.getElementById('task-log');
-    if(taskLog)taskLog.innerHTML='<div style="padding:24px;text-align:center;color:var(--text3);font-size:12px">Sin tareas enviadas aún.</div>';
-    showToast('✅ Panel limpio y listo para datos reales','ok');
-  });
 }
 
 function deleteWorker(id){
@@ -1804,7 +1773,9 @@ function renderJornada(){
         ?`<span class="pill p-out">⚠️ ${Math.round(w.dist_obra||0)}m${ciudad?' · '+ciudad:''}</span>`
         :w.en_zona===false
           ?`<span class="pill p-pend" title="Zona no definida">📍 ${ciudad||'—'}</span>`
-          :'<span class="pill p-pend">—</span>';
+          :ciudad
+            ?`<span class="pill p-pend">📍 ${ciudad}</span>`
+            :'<span class="pill p-pend" title="Sin coordenadas de obra configuradas">—</span>';
     let estadoLabel;
     if(w.status==='pending')estadoLabel='<span style="font-size:10px;color:var(--red);font-weight:600">Sin fichar</span>';
     else if(w.status==='in')estadoLabel='<span style="font-size:10px;color:var(--green);font-weight:600">En obra</span>';
@@ -1878,8 +1849,8 @@ function renderObrasList(){
     <div style="padding:14px 16px;border-bottom:1px solid var(--border);">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
         <div>
-          <div style="font-weight:700;font-size:13px;color:var(--text)">${o.cliente||'—'}</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:1px;">${o.nombre||'Sin nombre'}</div>
+          <div style="font-weight:700;font-size:13px;color:var(--text)">${o.nombre||'Sin nombre'}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:1px;">${o.cliente||'—'}</div>
         </div>
         <span class="pill ${colEstado[o.estado]||'p-pend'}">${txtEstado[o.estado]||o.estado}</span>
       </div>
