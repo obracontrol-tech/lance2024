@@ -424,6 +424,11 @@ function checkRGPD(){
           setupVerifyCompanyPin();showScreen('s-pin');
         } else if(savedPin){
           myPin=savedPin;setupLoginPin();showScreen('s-pin');
+        } else if(data.pin_personal){
+          // ✅ FIX SAFARI: recuperar PIN personal desde Firebase si localStorage está vacío
+          myPin=data.pin_personal;
+          localStorage.setItem('pin_'+savedDoc,myPin);
+          setupLoginPin();showScreen('s-pin');
         } else {
           setupVerifyCompanyPin();showScreen('s-pin');
         }
@@ -581,7 +586,8 @@ function spp(d){
   if(setPinVal.length>=4)return;
   setPinVal+=d;updateSetDots();
   if(setPinVal.length===4){setTimeout(()=>{myPin=setPinVal;localStorage.setItem('pin_'+workerDoc,myPin);
-    fetch(`${FB_URL}/operarios_registro/${workerDoc}/pin_reset.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:'false'}).catch(()=>{});
+    // ✅ FIX SAFARI: guardar PIN personal en Firebase para recuperarlo si Safari borra localStorage
+    fetch(`${FB_URL}/operarios_registro/${workerDoc}.json`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin_personal:myPin,pin_reset:false})}).catch(()=>{});
     showToast(t('toast_pin'),'ok');if(changingPin){goTo('s-app');}else{setupLoginPin();goTo('s-pin');}},180);}
 }
 function sppDel(){setPinVal=setPinVal.slice(0,-1);updateSetDots();}
