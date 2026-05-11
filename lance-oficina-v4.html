@@ -1638,57 +1638,6 @@ function abrirWAManual(tel, msg){
   const telLimpio = tel.startsWith('+') ? tel.slice(1) : tel;
   window.open('https://wa.me/' + telLimpio + '?text=' + encodeURIComponent(msg), '_blank');
 }
-  if(!w.tel) return; // Sin teléfono, no se puede enviar
-
-  const nombre = w.nombre + ' ' + w.apellidos;
-  const ahora = new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
-  const obra = w.obra || 'la obra';
-
-  let msg = '';
-  if(tipo === 'entrada'){
-    msg = `🚨 *AVISO DE FICHAJE — ObraControl GPS*\n\n`
-        + `⏰ Son las *${ahora}*\n\n`
-        + `Hola *${nombre}*,\n\n`
-        + `❗ Debías fichar entrada a las *${horaEsperada}* en *${obra}* y aún no lo has hecho.\n\n`
-        + `📱 *Ficha ahora mismo* abriendo la app:\n`
-        + `${APP_URL}\n\n`
-        + `Si ya estás en la obra, ficha inmediatamente para registrar tu jornada.\n\n`
-        + `_ObraControl GPS — Construcciones Lance 2024_`;
-  } else {
-    msg = `🔴 *AVISO DE SALIDA — ObraControl GPS*\n\n`
-        + `⏰ Son las *${ahora}*\n\n`
-        + `Hola *${nombre}*,\n\n`
-        + `❗ Debías fichar salida a las *${horaEsperada}* y aún no lo has hecho.\n\n`
-        + `📱 *Ficha tu salida ahora* en la app:\n`
-        + `${APP_URL}\n\n`
-        + `_ObraControl GPS — Construcciones Lance 2024_`;
-  }
-
-  const tel = w.tel.replace(/[\s\-\(\)]/g,'');
-  const waUrl = `https://wa.me/${tel.startsWith('+')?tel.slice(1):tel}?text=${encodeURIComponent(msg)}`;
-
-  // Abrir en pestaña nueva (la oficina envía el WA)
-  window.open(waUrl, '_blank');
-
-  // También guardar en Firebase el aviso enviado
-  const docKey = (w.dni||w.nie||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
-  if(docKey){
-    const avisoData = {
-      tipo, horaEsperada,
-      horaAviso: new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}),
-      fecha: new Date().toISOString().split('T')[0],
-      timestamp: Date.now(),
-      enviado: true
-    };
-    fetch(`${FB_URL}/avisos_horario/${docKey}_${Date.now()}.json`,{
-      method:'PUT',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(avisoData)
-    }).catch(()=>{});
-  }
-
-  showToast(`📱 WhatsApp enviado a ${w.nombre}: aviso de ${tipo}`, 'ok');
-}
 
 
 
