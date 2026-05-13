@@ -211,8 +211,8 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
 /* ═══ SIDEBAR TOGGLE ═══ */
 .sidebar-hidden .sidebar{transform:translateX(-240px);}
 .sidebar-hidden .main-content{margin-left:0;}
-.sb-toggle-btn{position:fixed;top:14px;left:16px;z-index:200;width:36px;height:36px;background:var(--blue);border:none;border-radius:8px;cursor:pointer;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.2);transition:left .25s ease;}
-.sidebar-hidden .sb-toggle-btn{left:12px;background:var(--blue2);}
+.sb-toggle-btn{width:36px;height:36px;background:var(--blue-light);border:1.5px solid var(--border2);border-radius:8px;cursor:pointer;color:var(--blue2);font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
+.sb-toggle-btn:hover{background:var(--blue2);color:#fff;}
 /* ═══ TABLE WRAP ═══ */
 .table-wrap{overflow-x:auto;width:100%;-webkit-overflow-scrolling:touch;}
 /* ═══ PAGE ═══ */
@@ -256,7 +256,6 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
 </div>
 
 <div id="app">
-  <button class="sb-toggle-btn" id="sb-toggle" onclick="toggleNav()" title="Mostrar/ocultar menú">☰</button>
   <aside class="sidebar">
     <div class="sb-logo">
       <svg class="sb-logo-svg" viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg">
@@ -341,7 +340,10 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
   <div class="main-content" id="main-content">
     <button class="btn-toggle-sidebar" id="btn-toggle-sidebar" onclick="toggleSidebar()" title="Mostrar/ocultar menú">☰</button>
     <div class="topbar">
-      <div class="topbar-title" id="topbar-title">Tablero</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="sb-toggle-btn" id="sb-toggle" onclick="toggleNav()" title="Mostrar/ocultar menú">☰</button>
+        <div class="topbar-title" id="topbar-title">Tablero</div>
+      </div>
       <div class="topbar-right">
         <div class="live-pill"><div class="live-dot"></div>EN VIVO</div>
         <div id="fb-live-badge" style="font-size:10px;color:var(--green);font-weight:600;display:none;"></div>
