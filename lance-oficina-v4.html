@@ -9,7 +9,7 @@
 <style>
 :root{--blue:#1B4F8C;--blue2:#2563AE;--blue3:#3B82C4;--blue-light:#E8F1FB;--blue-pale:#F0F6FF;--orange:#E8621A;--orange2:#FF7A35;--orange-l:#FFF3EC;--bg:#F4F7FC;--white:#FFFFFF;--card:#FFFFFF;--border:#E2EAF4;--border2:#D0DDF0;--text:#1A2840;--text2:#4A6080;--text3:#8FA5C0;--green:#16A34A;--green-l:#DCFCE7;--red:#DC2626;--red-l:#FEE2E2;--amber:#D97706;--amber-l:#FEF3C7;--purple:#7C3AED;--purple-l:#EDE9FE;--shadow:0 1px 3px rgba(27,79,140,.08),0 4px 16px rgba(27,79,140,.06);--shadow-lg:0 4px 24px rgba(27,79,140,.12),0 1px 4px rgba(27,79,140,.06);}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:auto;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(27,79,140,.04) 1px,transparent 0);background-size:28px 28px;pointer-events:none;z-index:0;}
 #login-screen{position:fixed;inset:0;z-index:100;background:linear-gradient(135deg,#0A1628 0%,#1B3A6B 50%,#0A1628 100%);display:flex;align-items:center;justify-content:center;padding:24px;}
 .login-card{background:rgba(255,255,255,.97);border-radius:24px;padding:40px 36px;width:100%;max-width:400px;box-shadow:0 32px 80px rgba(0,0,0,.4);position:relative;z-index:1;text-align:center;}
@@ -51,7 +51,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .sb-user-role{font-size:10px;color:rgba(255,255,255,.5);}
 .sb-logout{margin-top:8px;width:100%;padding:8px;background:transparent;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.5);font-size:11px;cursor:pointer;transition:all .18s;font-family:'Inter',sans-serif;}
 .sb-logout:hover{background:rgba(255,71,87,.2);border-color:rgba(255,71,87,.4);color:#fca5a5;}
-.main-content{margin-left:240px;padding:0;min-height:100vh;transition:margin-left .3s ease;overflow-x:hidden;box-sizing:border-box;width:calc(100% - 240px);}
+.main-content{margin-left:240px;padding:0;min-height:100vh;box-sizing:border-box;width:calc(100% - 240px);overflow:auto;}
 .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;box-shadow:0 1px 0 var(--border);}
 .topbar-title{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:700;color:var(--text);}
 .topbar-right{display:flex;align-items:center;gap:12px;}
@@ -60,7 +60,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 @keyframes lp{0%,100%{opacity:1}50%{opacity:.3}}
 .tb-clock{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:var(--blue2);letter-spacing:1px;}
 .tb-date{font-size:11px;color:var(--text3);}
-.page{padding:20px 20px;display:none;box-sizing:border-box;width:100%;max-width:100%;overflow-x:auto;}
+.page{padding:20px;display:none;box-sizing:border-box;width:100%;overflow:visible;}
 .page.active{display:block;box-sizing:border-box;}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
 .kpi-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;}
@@ -109,6 +109,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .extra-item{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--border);}
 .extra-item:last-child{border-bottom:none;}
 .extra-badge{background:var(--purple-l);border:1px solid rgba(124,58,237,.2);color:var(--purple);padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;font-family:'Montserrat',sans-serif;}
+.table-wrap{overflow-x:auto;width:100%;-webkit-overflow-scrolling:touch;display:block;}
 .wtbl{width:100%;border-collapse:collapse;}
 .wtbl thead th{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);padding:10px 14px;border-bottom:1px solid var(--border);text-align:left;background:var(--bg);}
 .wtbl tbody td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:12px;}
@@ -197,6 +198,15 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
 #inf-preview iframe{width:100%!important;max-width:100%!important;box-sizing:border-box;}
 /* Fix topbar */
 .topbar{box-sizing:border-box;width:100%;}
+/* ═══ LAYOUT FIXES DEFINITIVOS ═══ */
+.table-wrap{overflow-x:auto;width:100%;-webkit-overflow-scrolling:touch;display:block;}
+@media(max-width:900px){.sidebar{display:none!important;}.main-content{margin-left:0!important;width:100%!important;}}
+@media(max-width:1200px){.btn-toggle-sidebar{display:flex!important;}}
+.sidebar.collapsed{transform:translateX(-240px);}
+.main-content.expanded{margin-left:0!important;width:100%!important;}
+#inf-preview{overflow:auto;width:100%;box-sizing:border-box;}
+.topbar{box-sizing:border-box;width:100%;}
+.btn-toggle-sidebar{display:none;position:fixed;top:14px;left:8px;z-index:60;width:34px;height:34px;background:var(--blue);border:none;border-radius:8px;cursor:pointer;color:#fff;font-size:16px;align-items:center;justify-content:center;}
 </style>
 </head>
 <body>
@@ -424,7 +434,7 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
           </div>
           <div style="margin-top:8px;font-size:10px;color:var(--text3);">ℹ️ El fichaje manual sobreescribe el fichaje del operario en Firebase para hoy.</div>
         </div>
-        <div style="overflow-x:auto;width:100%;"><table class="jornada-table" style="min-width:600px;">
+        <div class="table-wrap"><table class="jornada-table" style="min-width:600px;">
           <thead><tr><th style="min-width:180px;">Operario</th><th>Entrada</th><th>Salida</th><th>Horas</th><th>Zona</th><th>Estado</th></tr></thead>
           <tbody id="jornada-tbody"></tbody>
         </table></div>
@@ -441,7 +451,7 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
             <input class="search-inp" id="op-search" placeholder="Buscar por nombre, DNI o NIE..." oninput="renderWorkers()">
           </div>
         </div>
-        <div style="overflow-x:auto;width:100%;"><table class="wtbl" style="min-width:700px;">
+        <div class="table-wrap"><table class="wtbl" style="min-width:700px;">
           <thead><tr><th>#</th><th style="min-width:160px;">Nombre</th><th>DNI/NIE</th><th>Obra</th><th>PIN</th><th>Estado</th><th>Zona GPS</th><th>Acción</th></tr></thead>
           <tbody id="op-tbody"></tbody>
         </table></div>
