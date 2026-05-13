@@ -521,7 +521,6 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
           </div>
         </div>
         <div id="horas-resumen" style="display:flex;gap:10px;padding:12px 16px;flex-wrap:wrap;border-bottom:1px solid var(--border);"></div>
-        <div id="hours-list"></div>
       </div>
       <div class="card">
         <div class="card-hdr">
@@ -544,12 +543,14 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
             <button onclick="renderCalendario()" style="padding:5px 10px;background:var(--blue-light);border:1px solid var(--border2);border-radius:7px;font-size:11px;cursor:pointer;">🔄</button>
           </div>
         </div>
-        <div style="display:flex;gap:16px;padding:10px 16px;flex-wrap:wrap;font-size:10px;color:var(--text3);">
-          <span>🟢 Completo</span>
-          <span>🟡 Parcial (solo entrada o salida)</span>
+        <div style="display:flex;gap:12px;padding:10px 16px;flex-wrap:wrap;font-size:10px;color:var(--text3);border-bottom:1px solid var(--border);">
+          <span>🟢 Fichaje completo</span>
+          <span>🟡 Solo entrada o salida</span>
           <span>🔴 No fichó</span>
-          <span>⚪ Fin de semana</span>
-          <span>🔵 Hoy</span>
+          <span style="background:#F0F4FF;padding:1px 6px;border-radius:3px;">⬜ Sábado</span>
+          <span style="background:#FEE2E2;padding:1px 6px;border-radius:3px;">🔴 Domingo/Festivo</span>
+          <span style="background:var(--blue2);color:#fff;padding:1px 6px;border-radius:3px;">● Hoy</span>
+          <span>⬜ Días futuros</span>
         </div>
         <div id="cal-container" style="padding:0 16px 16px;overflow-x:auto;"></div>
       </div>
@@ -804,10 +805,12 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
             <button onclick="borrarTodosConsentimientos()" style="font-size:10px;color:var(--red);background:none;border:none;cursor:pointer;font-weight:600;">🗑️ Borrar todos</button>
           </div>
         </div>
-        <table class="wtbl">
+        <div style="overflow-x:auto;">
+        <table class="wtbl" style="min-width:700px;">
           <thead><tr><th>Operario</th><th>DNI/NIE</th><th>Fecha</th><th>Hora</th><th>Idioma</th><th>RGPD</th><th>GPS</th><th>Acción</th></tr></thead>
           <tbody id="consent-tbody"></tbody>
         </table>
+        </div>
       </div>
     </div>
 
@@ -2579,6 +2582,15 @@ async function cargarFichaOperario(){
     </table>`;
 }
 
+
+// Festivos nacionales España 2026
+const FESTIVOS_ES = new Set([
+  '2026-01-01','2026-01-06','2026-04-02','2026-04-03',
+  '2026-05-01','2026-08-15','2026-10-12','2026-11-01',
+  '2026-12-06','2026-12-08','2026-12-25'
+]);
+function esFestivo(fechaStr){ return FESTIVOS_ES.has(fechaStr); }
+
 // ══════════════════════════════════════════════════════════
 // MÓDULO CALENDARIO DE ASISTENCIA
 // ══════════════════════════════════════════════════════════
@@ -2722,7 +2734,9 @@ async function renderCalendario(){
         const esHoy=fecha===hoyStr;
         const fData=porFechaOp[fecha]?.[doc];
         let bg,contenido,title;
-        if(esFS){bg='var(--bg)';contenido='';title='Fin de semana';}
+        const esDom=dow===0; const esSab=dow===6; const esFest2=esFestivo(fecha);
+        if(esDom||esFest2){bg='#FEE2E2';contenido=`<div style="font-size:9px;color:#DC2626">${esFest2?'Festivo':'Dom'}</div>`;title=esFest2?'Festivo':'Domingo';}
+        else if(esSab){bg='#F0F4FF';contenido='<div style="font-size:9px;color:#6B7280">Sáb</div>';title='Sábado';}
         else if(esFutura){bg='var(--white)';contenido='';title='';}
         else if(!fData||(!fData.entrada&&!fData.salida)){
           bg='#FEE2E2';diasNo++;
@@ -2780,7 +2794,11 @@ async function renderCalendario(){
         const esHoy=fecha===hoyStr;
         const fData=porFechaOp[fecha]?.[doc];
         let color,emoji,title;
-        if(esFS){color='var(--bg)';emoji='';title='Fin de semana';}
+        const esDomingo=dow===0;
+        const esSabado=dow===6;
+        const esFest=esFestivo(fecha);
+        if(esDomingo||esFest){color='#FEE2E2';emoji='';title=esFest?'Festivo':'Domingo';}
+        else if(esSabado){color='#F0F4FF';emoji='';title='Sábado';}
         else if(esFutura){color='var(--white)';emoji='';title='';}
         else if(!fData||(!fData.entrada&&!fData.salida)){
           color='#FEE2E2';emoji='🔴';title='No fichó';diasSinFichar++;
@@ -2819,7 +2837,8 @@ async function renderCalendario(){
       const fData=porFechaOp[fecha]?.[doc];
       let bg,border,txt='',subtxt='';
       if(esHoy){bg='var(--blue2)';border='var(--blue2)';txt='color:#fff';}
-      else if(esFS){bg='var(--bg)';border='var(--border)';}
+      else if(dow===0||esFestivo(fecha)){bg='#FEE2E2';border='#FCA5A5';txt='';subtxt=esFestivo(fecha)?'Festivo':'Dom';}
+      else if(dow===6){bg='#F0F4FF';border='#D0DDF0';subtxt='Sáb';}
       else if(esFutura){bg='var(--white)';border='var(--border)';}
       else if(!fData||(!fData.entrada&&!fData.salida)){bg='#FEE2E2';border='#FCA5A5';subtxt='No fichó';}
       else if(fData.entrada&&fData.salida){bg='#DCFCE7';border='#86EFAC';subtxt=`${fData.entrada}-${fData.salida}`;}
