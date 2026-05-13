@@ -32,7 +32,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(5px)}}
 .shake{animation:shake .4s ease;}
 #app{display:none;position:relative;z-index:1;min-height:100vh;}
-.sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--blue);display:flex;flex-direction:column;z-index:50;box-shadow:4px 0 20px rgba(27,79,140,.2);}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--blue);display:flex;flex-direction:column;z-index:50;box-shadow:4px 0 20px rgba(27,79,140,.2);transition:transform .3s ease;}
 .sb-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
 .sb-logo-svg{width:160px;height:auto;display:block;margin-bottom:8px;}
 .sb-tagline{font-family:'Montserrat',sans-serif;font-size:8px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5);}
@@ -51,7 +51,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .sb-user-role{font-size:10px;color:rgba(255,255,255,.5);}
 .sb-logout{margin-top:8px;width:100%;padding:8px;background:transparent;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.5);font-size:11px;cursor:pointer;transition:all .18s;font-family:'Inter',sans-serif;}
 .sb-logout:hover{background:rgba(255,71,87,.2);border-color:rgba(255,71,87,.4);color:#fca5a5;}
-.main-content{margin-left:240px;padding:0;min-height:100vh;}
+.main-content{margin-left:240px;padding:0;min-height:100vh;transition:margin-left .3s ease;overflow-x:hidden;}
 .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;box-shadow:0 1px 0 var(--border);}
 .topbar-title{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:700;color:var(--text);}
 .topbar-right{display:flex;align-items:center;gap:12px;}
@@ -184,6 +184,11 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
 .wp-m{font-size:10px;color:var(--text3);margin-top:1px;}
 .wp-t{font-size:10px;color:var(--text3);margin-left:auto;flex-shrink:0;}
 @media(max-width:900px){.sidebar{display:none;}.main-content{margin-left:0;}.kpi-grid,.row-2,.row-2-eq,.row-3{grid-template-columns:1fr 1fr;}.page{padding:14px;}}
+.sidebar.collapsed{transform:translateX(-240px);}
+.main-content.expanded{margin-left:0;}
+.btn-toggle-sidebar{display:none;position:fixed;top:14px;left:8px;z-index:60;width:34px;height:34px;background:var(--blue);border:none;border-radius:8px;cursor:pointer;color:#fff;font-size:16px;align-items:center;justify-content:center;}
+@media(max-width:1100px){.btn-toggle-sidebar{display:flex;}}
+.page{overflow-x:auto;}
 </style>
 </head>
 <body>
@@ -299,7 +304,8 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
     </div>
   </aside>
 
-  <div class="main-content">
+  <div class="main-content" id="main-content">
+    <button class="btn-toggle-sidebar" id="btn-toggle-sidebar" onclick="toggleSidebar()" title="Mostrar/ocultar menú">☰</button>
     <div class="topbar">
       <div class="topbar-title" id="topbar-title">Tablero</div>
       <div class="topbar-right">
@@ -471,6 +477,58 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
           <select id="ficha-mes-sel" class="form-ctrl" style="font-size:11px;padding:5px 10px;width:auto;" onchange="cargarFichaOperario()"></select>
         </div>
         <div id="ficha-historial" style="max-height:500px;overflow-y:auto;"></div>
+      </div>
+    </div>
+
+    <!-- FICHA OBRA -->
+    <div class="page" id="page-ficha-obra">
+      <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+        <button onclick="showPage('obras')" style="padding:8px 16px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;font-size:12px;cursor:pointer;">← Volver a obras</button>
+        <div id="ficha-obra-titulo" style="font-family:'Montserrat',sans-serif;font-size:16px;font-weight:800;color:var(--text);"></div>
+      </div>
+      <!-- KPIs obra -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;" id="ficha-obra-kpis"></div>
+      <!-- Tabs -->
+      <div style="display:flex;gap:4px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0;">
+        <button onclick="switchObraTab('operarios')" id="obra-tab-operarios" class="obra-tab active-tab" style="padding:8px 16px;background:var(--blue2);color:#fff;border:none;border-radius:8px 8px 0 0;font-size:12px;font-weight:700;cursor:pointer;">👷 Operarios y Horas</button>
+        <button onclick="switchObraTab('historial')" id="obra-tab-historial" class="obra-tab" style="padding:8px 16px;background:var(--bg);color:var(--text2);border:none;border-radius:8px 8px 0 0;font-size:12px;cursor:pointer;">📋 Historial Diario</button>
+        <button onclick="switchObraTab('incidencias')" id="obra-tab-incidencias" class="obra-tab" style="padding:8px 16px;background:var(--bg);color:var(--text2);border:none;border-radius:8px 8px 0 0;font-size:12px;cursor:pointer;">⚠️ Incidencias</button>
+      </div>
+      <!-- Tab operarios -->
+      <div id="obra-panel-operarios" class="obra-panel">
+        <div class="card"><div id="ficha-obra-operarios" style="max-height:500px;overflow-y:auto;"></div></div>
+      </div>
+      <!-- Tab historial -->
+      <div id="obra-panel-historial" class="obra-panel" style="display:none;">
+        <div class="card">
+          <div class="card-hdr">
+            <div class="card-title">📋 Fichajes por día</div>
+            <select id="ficha-obra-mes" class="form-ctrl" style="font-size:11px;padding:5px 10px;width:auto;" onchange="cargarFichaObra()"></select>
+          </div>
+          <div id="ficha-obra-historial" style="max-height:500px;overflow-y:auto;"></div>
+        </div>
+      </div>
+      <!-- Tab incidencias -->
+      <div id="obra-panel-incidencias" class="obra-panel" style="display:none;">
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">⚠️ Registrar incidencia</div></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-g"><label class="form-lbl">Tipo</label>
+                <select class="form-ctrl" id="inc-tipo">
+                  <option>🔴 Accidente</option>
+                  <option>🟡 Retraso</option>
+                  <option>🟠 Problema material</option>
+                  <option>🔵 Otro</option>
+                </select>
+              </div>
+              <div class="form-g"><label class="form-lbl">Fecha</label><input class="form-ctrl" type="date" id="inc-fecha"></div>
+            </div>
+            <div class="form-g"><label class="form-lbl">Descripción</label><textarea class="form-ctrl" id="inc-desc" placeholder="Describe la incidencia..."></textarea></div>
+            <button class="btn-primary" onclick="guardarIncidencia()">+ Registrar incidencia</button>
+          </div>
+          <div id="ficha-obra-incidencias" style="max-height:400px;overflow-y:auto;"></div>
+        </div>
       </div>
     </div>
 
@@ -797,7 +855,7 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
     <!-- CONSENTIMIENTOS -->
     <div class="page" id="page-consentimientos">
       <div class="card">
-        <div class="card-hdr">
+        <div class="card-hdr" style="flex-wrap:wrap;gap:8px;">
           <div class="card-title">📋 Registro de consentimientos RGPD</div>
           <div style="display:flex;gap:8px;">
             <button onclick="cargarConsentimientos()" style="font-size:10px;color:var(--blue2);background:none;border:none;cursor:pointer;font-weight:600;">🔄 Actualizar</button>
@@ -1031,7 +1089,14 @@ function tick(){const n=new Date();document.getElementById('clock').textContent=
 setInterval(tick,1000);tick();
 
 // ── PÁGINAS ──
-const TITLES={dashboard:'Tablero',jornada:'Resumen de jornada',operarios:'Operarios','ficha-operario':'👷 Ficha del operario',alertas:'Alertas',extras:'Horas extras',horas:'Horas trabajadas',tareas:'Tareas',whatsapp:'WhatsApp',gestion:'Alta de operarios',asistente:'Asistente IA',consentimientos:'Consentimientos RGPD',obras:'Obras',informes:'📄 Informes de jornada'};
+function toggleSidebar(){
+  const sb=document.querySelector('.sidebar');
+  const mc=document.getElementById('main-content');
+  sb.classList.toggle('collapsed');
+  mc.classList.toggle('expanded');
+}
+
+const TITLES={dashboard:'Tablero',jornada:'Resumen de jornada',operarios:'Operarios','ficha-operario':'👷 Ficha del operario','ficha-obra':'🏗️ Detalle de obra',alertas:'Alertas',extras:'Horas extras',horas:'Horas trabajadas',tareas:'Tareas',whatsapp:'WhatsApp',gestion:'Alta de operarios',asistente:'Asistente IA',consentimientos:'Consentimientos RGPD',obras:'Obras',informes:'📄 Informes de jornada'};
 function showPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -2054,7 +2119,7 @@ function renderObrasList(){
     <div style="padding:14px 16px;border-bottom:1px solid var(--border);">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
         <div>
-          <div style="font-weight:700;font-size:13px;color:var(--text)">${o.nombre||'Sin nombre'}</div>
+          <div style="font-weight:700;font-size:13px;color:var(--blue2);cursor:pointer;text-decoration:underline dotted;" onclick="abrirFichaObra('${o.id}')">${o.nombre||'Sin nombre'}</div>
           <div style="font-size:10px;color:var(--text3);margin-top:1px;">${o.cliente||'—'}</div>
         </div>
         <span class="pill ${colEstado[o.estado]||'p-pend'}">${txtEstado[o.estado]||o.estado}</span>
@@ -2386,6 +2451,208 @@ function fichajeManualDesdeAlerta(docKey, tipo){
 let toastTimer;
 function showToast(msg,tipo){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast show ${tipo}`;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3000);}
 
+
+
+// ══════════════════════════════════════════════════════════
+// FICHA COMPLETA DE OBRA
+// ══════════════════════════════════════════════════════════
+let _fichaObraId = null;
+
+function switchObraTab(tab){
+  document.querySelectorAll('.obra-panel').forEach(p=>p.style.display='none');
+  document.querySelectorAll('.obra-tab').forEach(b=>{
+    b.style.background='var(--bg)';b.style.color='var(--text2)';b.style.fontWeight='400';
+  });
+  document.getElementById('obra-panel-'+tab).style.display='block';
+  const btn=document.getElementById('obra-tab-'+tab);
+  if(btn){btn.style.background='var(--blue2)';btn.style.color='#fff';btn.style.fontWeight='700';}
+}
+
+function abrirFichaObra(id){
+  _fichaObraId=id;
+  // Poblar selector de meses
+  const sel=document.getElementById('ficha-obra-mes');
+  if(sel){
+    sel.innerHTML='';
+    const hoy=new Date();
+    for(let i=0;i<6;i++){
+      let m=hoy.getMonth()-i,y=hoy.getFullYear();
+      while(m<0){m+=12;y--;}
+      const val=`${y}-${String(m+1).padStart(2,'0')}`;
+      const lbl=new Date(y,m,1).toLocaleDateString('es-ES',{month:'long',year:'numeric'});
+      sel.innerHTML+=`<option value="${val}"${i===0?' selected':''}>${lbl.charAt(0).toUpperCase()+lbl.slice(1)}</option>`;
+    }
+  }
+  // Añadir ni-ficha-obra al nav si no existe
+  if(!document.getElementById('ni-ficha-obra')){
+    const ni=document.createElement('div');
+    ni.id='ni-ficha-obra';ni.style.display='none';
+    document.querySelector('.sb-nav').appendChild(ni);
+  }
+  showPage('ficha-obra');
+  cargarFichaObra();
+}
+
+async function cargarFichaObra(){
+  const o=OBRAS.find(x=>x.id===_fichaObraId);
+  if(!o)return;
+  const mes=document.getElementById('ficha-obra-mes')?.value||new Date().toISOString().slice(0,7);
+  const[y,m]=mes.split('-').map(Number);
+  const diasMes=new Date(y,m,0).getDate();
+  const hoyStr=`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}-${String(new Date().getDate()).padStart(2,'0')}`;
+
+  // Cabecera
+  document.getElementById('ficha-obra-titulo').textContent=`🏗️ ${o.nombre} · ${o.cliente||''}`;
+
+  // Generar fechas del mes
+  const fechas=[];
+  for(let i=1;i<=diasMes;i++){
+    const fecha=`${mes}-${String(i).padStart(2,'0')}`;
+    fechas.push(fecha);
+  }
+
+  // Cargar fichajes del mes
+  const resultados=await Promise.all(fechas.map(fecha=>
+    fetch(`${FB_URL}/fichajes/${fecha}.json`).then(r=>r.json()).then(d=>({fecha,data:d})).catch(()=>({fecha,data:null}))
+  ));
+
+  // Filtrar solo fichajes de esta obra
+  const obraNombre=(o.nombre||'').toLowerCase();
+  const porOperario={}; // {doc: {nombre,dias,horas,fichajes:[]}}
+  const porDia={};      // {fecha: [{doc,nombre,entrada,salida,horas}]}
+  let totalHoras=0, totalOperarios=new Set(), totalDias=new Set();
+
+  resultados.forEach(({fecha,data})=>{
+    if(!data)return;
+    Object.values(data).forEach(f=>{
+      if(!f||!f.doc)return;
+      // Filtrar por obra — comparar nombre de obra en el fichaje
+      const fichajeObra=(f.obra||f.ciudad||'').toLowerCase();
+      const enEstaObra=fichajeObra.includes(obraNombre)||obraNombre.includes(fichajeObra.split(',')[0].trim());
+      if(!enEstaObra&&obraNombre)return; // Si la obra tiene nombre, filtrar
+      const doc=f.doc.replace(/[^A-Z0-9]/gi,'').toUpperCase();
+      if(!porOperario[doc])porOperario[doc]={nombre:f.nombre||doc,doc,dias:new Set(),horas:0,fichajes:[]};
+      if(!porDia[fecha])porDia[fecha]=[];
+      // Acumular
+      const pOp=porOperario[doc];
+      pOp.fichajes.push(f);
+      totalOperarios.add(doc);
+      if(f.tipo==='salida'&&f.hora&&f.hora_entrada){
+        const[eh,em]=f.hora_entrada.split(':').map(Number);
+        const[sh,sm]=f.hora.split(':').map(Number);
+        const mins=(sh*60+sm)-(eh*60+em);
+        if(mins>0){
+          const h=redondearMediaHora(mins/60);
+          pOp.horas+=h;pOp.dias.add(fecha);
+          totalHoras+=h;totalDias.add(fecha);
+          porDia[fecha].push({doc,nombre:f.nombre||doc,entrada:f.hora_entrada,salida:f.hora,horas:h,manual:f.manual});
+        }
+      } else if(f.tipo==='entrada'){
+        if(!porDia[fecha].find(x=>x.doc===doc))
+          porDia[fecha].push({doc,nombre:f.nombre||doc,entrada:f.hora,salida:null,horas:0,manual:f.manual});
+      }
+    });
+  });
+
+  // KPIs
+  document.getElementById('ficha-obra-kpis').innerHTML=`
+    <div class="kpi-card kc-blue"><div class="kpi-header"><span class="kpi-label">Total horas</span></div><div class="kpi-val" style="font-size:36px">${formatH(totalHoras)}</div><div class="kpi-sub">Este mes</div></div>
+    <div class="kpi-card kc-green"><div class="kpi-header"><span class="kpi-label">Operarios</span></div><div class="kpi-val" style="font-size:36px">${totalOperarios.size}</div><div class="kpi-sub">Han trabajado</div></div>
+    <div class="kpi-card kc-orange"><div class="kpi-header"><span class="kpi-label">Días activa</span></div><div class="kpi-val" style="font-size:36px">${totalDias.size}</div><div class="kpi-sub">Con fichajes</div></div>
+    <div class="kpi-card kc-purple"><div class="kpi-header"><span class="kpi-label">Radio GPS</span></div><div class="kpi-val" style="font-size:28px">${o.radio||500}m</div><div class="kpi-sub">Zona configurada</div></div>`;
+
+  // Tab operarios y horas
+  const opList=Object.values(porOperario).sort((a,b)=>b.horas-a.horas);
+  document.getElementById('ficha-obra-operarios').innerHTML=opList.length
+    ?`<table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead><tr style="background:var(--bg);">
+        <th style="padding:8px 12px;text-align:left;">Operario</th>
+        <th style="padding:8px 12px;text-align:center;">Días</th>
+        <th style="padding:8px 12px;text-align:center;">Total horas</th>
+        <th style="padding:8px 12px;text-align:center;">Media/día</th>
+      </tr></thead>
+      <tbody>${opList.map((op,i)=>`<tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:10px 12px;font-weight:600;">${op.nombre}</td>
+        <td style="padding:10px 12px;text-align:center;">${op.dias.size}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Montserrat';font-weight:800;color:var(--blue2);">${formatH(op.horas)}h</td>
+        <td style="padding:10px 12px;text-align:center;color:var(--text3);">${op.dias.size>0?formatH(redondearMediaHora(op.horas/op.dias.size))+'h':'—'}</td>
+      </tr>`).join('')}
+      <tr style="background:var(--bg);font-weight:700;">
+        <td style="padding:10px 12px;">TOTAL</td>
+        <td style="padding:10px 12px;text-align:center;">${totalDias.size}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Montserrat';font-weight:900;color:var(--blue2);">${formatH(totalHoras)}h</td>
+        <td></td>
+      </tr></tbody></table>`
+    :'<div style="padding:20px;text-align:center;color:var(--text3);">Sin fichajes en este período.</div>';
+
+  // Tab historial por día
+  const diasOrdenados=Object.keys(porDia).sort((a,b)=>b.localeCompare(a));
+  document.getElementById('ficha-obra-historial').innerHTML=diasOrdenados.length
+    ?diasOrdenados.map(fecha=>{
+      const fmtFecha=new Date(fecha+'T12:00:00').toLocaleDateString('es-ES',{weekday:'long',day:'2-digit',month:'short'});
+      const ops=porDia[fecha];
+      const totalDia=ops.reduce((a,v)=>a+v.horas,0);
+      return `<div style="border-bottom:1px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;padding:8px 16px;background:var(--bg);font-size:11px;font-weight:700;text-transform:capitalize;">
+          <span>${fmtFecha}</span><span style="color:var(--blue2)">${formatH(totalDia)}h total · ${ops.length} operarios</span>
+        </div>
+        ${ops.map(op=>`<div style="display:flex;gap:16px;padding:6px 24px;font-size:11px;border-top:1px solid var(--border);">
+          <span style="flex:2;font-weight:600;">${op.nombre}</span>
+          <span style="color:var(--blue2)">${op.entrada||'—'}</span>
+          <span>→</span>
+          <span style="color:var(--red)">${op.salida||'En curso'}</span>
+          <span style="font-family:'Montserrat';font-weight:700;color:var(--blue2)">${op.horas>0?formatH(op.horas)+'h':'—'}</span>
+          ${op.manual?'<span style="font-size:9px;background:#EDE9FE;color:#7C3AED;padding:1px 5px;border-radius:3px;">Manual</span>':''}
+        </div>`).join('')}
+      </div>`;
+    }).join('')
+    :'<div style="padding:20px;text-align:center;color:var(--text3);">Sin fichajes en este período.</div>';
+
+  // Cargar incidencias
+  cargarIncidencias();
+}
+
+function cargarIncidencias(){
+  const el=document.getElementById('ficha-obra-incidencias');
+  if(!el||!_fichaObraId)return;
+  fetch(`${FB_URL}/incidencias/${_fichaObraId}.json`)
+    .then(r=>r.json())
+    .then(data=>{
+      if(!data||!Object.keys(data).length){
+        el.innerHTML='<div style="padding:16px;text-align:center;color:var(--text3);font-size:12px;">Sin incidencias registradas.</div>';
+        return;
+      }
+      const lista=Object.values(data).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+      el.innerHTML=lista.map(inc=>`<div style="padding:12px 16px;border-bottom:1px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-weight:700;font-size:12px;">${inc.tipo||'Incidencia'}</span>
+          <span style="font-size:10px;color:var(--text3);">${inc.fecha||''}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text2);">${inc.desc||''}</div>
+      </div>`).join('');
+    }).catch(()=>{el.innerHTML='<div style="padding:16px;text-align:center;color:var(--text3);">Sin incidencias.</div>';});
+  // Poner fecha de hoy por defecto
+  const hoy=`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}-${String(new Date().getDate()).padStart(2,'0')}`;
+  const incFecha=document.getElementById('inc-fecha');
+  if(incFecha)incFecha.value=hoy;
+}
+
+function guardarIncidencia(){
+  if(!_fichaObraId)return;
+  const tipo=document.getElementById('inc-tipo')?.value;
+  const fecha=document.getElementById('inc-fecha')?.value;
+  const desc=document.getElementById('inc-desc')?.value.trim();
+  if(!desc){showToast('Escribe la descripción','err');return;}
+  const key='inc_'+Date.now();
+  const data={tipo,fecha,desc,obraId:_fichaObraId,ts:Date.now()};
+  fetch(`${FB_URL}/incidencias/${_fichaObraId}/${key}.json`,{
+    method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)
+  }).then(()=>{
+    showToast('✅ Incidencia registrada','ok');
+    document.getElementById('inc-desc').value='';
+    cargarIncidencias();
+  }).catch(()=>showToast('⚠️ Error','err'));
+}
 
 // ══════════════════════════════════════════════════════════
 // FICHA COMPLETA DEL OPERARIO
