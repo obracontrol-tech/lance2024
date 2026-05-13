@@ -208,6 +208,9 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
 .topbar{box-sizing:border-box;width:100%;}
 .btn-toggle-sidebar{display:none;position:fixed;top:14px;left:8px;z-index:60;width:34px;height:34px;background:var(--blue);border:none;border-radius:8px;cursor:pointer;color:#fff;font-size:16px;align-items:center;justify-content:center;}
 
+.inf-tab{transition:all .15s;font-family:'Montserrat',sans-serif;letter-spacing:.5px;}
+.inf-panel{margin-top:0;}
+
 /* ═══ SIDEBAR TOGGLE ═══ */
 .sidebar-hidden .sidebar{transform:translateX(-240px);}
 .sidebar-hidden .main-content{margin-left:0;}
@@ -919,56 +922,82 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
 
     <!-- INFORMES DE JORNADA -->
     <div class="page" id="page-informes">
+      <!-- Cabecera con selector de período global -->
       <div class="card" style="margin-bottom:16px;">
-        <div class="card-hdr">
-          <div class="card-title">📄 Informes de jornada</div>
-          <div style="font-size:10px;color:var(--text3);">Cumplimiento RD 8/2019 — Registro de jornada</div>
+        <div class="card-hdr" style="flex-wrap:wrap;gap:8px;">
+          <div>
+            <div class="card-title">📊 Panel de Informes</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:2px;">RD Ley 8/2019 · Registro de jornada laboral</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <select class="form-ctrl" id="inf-periodo-global" style="font-size:11px;padding:5px 10px;width:auto;" onchange="onChangeInfPeriodo()">
+              <option value="diario">📅 Hoy</option>
+              <option value="semanal">📆 Esta semana</option>
+              <option value="mensual" selected>🗓️ Este mes</option>
+            </select>
+            <div id="inf-ctrl-fecha"><input class="form-ctrl" type="date" id="inf-fecha" style="font-size:11px;padding:5px 10px;width:auto;"></div>
+            <div id="inf-ctrl-semana" style="display:none;"><input class="form-ctrl" type="date" id="inf-semana-ini" style="font-size:11px;padding:5px 10px;width:auto;"></div>
+            <div id="inf-ctrl-mes" style="display:none;"><input class="form-ctrl" type="month" id="inf-mes" style="font-size:11px;padding:5px 10px;width:auto;"></div>
+            <select class="form-ctrl" id="inf-operario" style="font-size:11px;padding:5px 10px;width:auto;">
+              <option value="todos">👷 Todos</option>
+            </select>
+            <button onclick="cargarTodoInforme()" style="padding:6px 14px;background:var(--blue2);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">🔄 Actualizar</button>
+          </div>
         </div>
-        <div class="card-body">
-          <!-- Controles -->
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end;margin-bottom:16px;">
-            <div>
-              <label class="form-lbl">Tipo de informe</label>
-              <select class="form-ctrl" id="inf-tipo" onchange="onChangeTipoInforme()">
-                <option value="diario">📅 Diario</option>
-                <option value="semanal">📆 Semanal</option>
-                <option value="mensual">🗓️ Mensual</option>
-              </select>
-            </div>
-            <div id="inf-ctrl-fecha">
-              <label class="form-lbl">Fecha</label>
-              <input class="form-ctrl" type="date" id="inf-fecha">
-            </div>
-            <div id="inf-ctrl-semana" style="display:none;">
-              <label class="form-lbl">Semana (lunes)</label>
-              <input class="form-ctrl" type="date" id="inf-semana-ini">
-            </div>
-            <div id="inf-ctrl-mes" style="display:none;">
-              <label class="form-lbl">Mes</label>
-              <input class="form-ctrl" type="month" id="inf-mes">
-            </div>
-            <div>
-              <label class="form-lbl">Operario</label>
-              <select class="form-ctrl" id="inf-operario">
-                <option value="todos">👷 Todos los operarios</option>
-              </select>
-            </div>
-            <div style="display:flex;gap:8px;">
-              <button class="btn-primary" onclick="generarInforme()" style="white-space:nowrap;">🔍 Previsualizar</button>
-            </div>
+        <!-- KPIs resumen período -->
+        <div id="inf-kpis-resumen" style="display:flex;gap:12px;padding:12px 20px;flex-wrap:wrap;border-top:1px solid var(--border);"></div>
+      </div>
+
+      <!-- Pestañas -->
+      <div style="display:flex;gap:4px;margin-bottom:0;border-bottom:2px solid var(--border);">
+        <button onclick="switchInfTab('jornada')" id="inf-tab-jornada" class="inf-tab" style="padding:9px 18px;background:var(--blue2);color:#fff;border:none;border-radius:8px 8px 0 0;font-size:12px;font-weight:700;cursor:pointer;">📋 Jornada diaria</button>
+        <button onclick="switchInfTab('obras')" id="inf-tab-obras" class="inf-tab" style="padding:9px 18px;background:var(--bg);color:var(--text2);border:none;border-radius:8px 8px 0 0;font-size:12px;cursor:pointer;">🏗️ Por obra</button>
+        <button onclick="switchInfTab('horas')" id="inf-tab-horas" class="inf-tab" style="padding:9px 18px;background:var(--bg);color:var(--text2);border:none;border-radius:8px 8px 0 0;font-size:12px;cursor:pointer;">⏱ Horas resumen</button>
+        <button onclick="switchInfTab('pdf')" id="inf-tab-pdf" class="inf-tab" style="padding:9px 18px;background:var(--bg);color:var(--text2);border:none;border-radius:8px 8px 0 0;font-size:12px;cursor:pointer;">📄 Generar PDF</button>
+      </div>
+
+      <!-- TAB 1: Jornada diaria -->
+      <div id="inf-panel-jornada" class="inf-panel">
+        <div class="card" style="border-radius:0 8px 8px 8px;">
+          <div id="inf-jornada-content" style="max-height:600px;overflow-y:auto;">
+            <div style="padding:24px;text-align:center;color:var(--text3);">Pulsa Actualizar para cargar los datos.</div>
           </div>
-          <!-- Botones de exportación -->
-          <div style="display:flex;gap:10px;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:16px;">
-            <button onclick="imprimirInforme()" style="padding:9px 16px;background:var(--blue2);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;">🖨️ Imprimir / PDF digital</button>
-            <button onclick="descargarInformeHTML()" style="padding:9px 16px;background:var(--blue-light);color:var(--blue2);border:1px solid var(--border2);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;">💾 Guardar HTML</button>
-            <span style="font-size:10px;color:var(--text3);align-self:center;">Desde el navegador: Imprimir → Guardar como PDF → listo para inspección</span>
+        </div>
+      </div>
+
+      <!-- TAB 2: Por obra -->
+      <div id="inf-panel-obras" class="inf-panel" style="display:none;">
+        <div class="card" style="border-radius:0 8px 8px 8px;">
+          <div id="inf-obras-content" style="max-height:600px;overflow-y:auto;">
+            <div style="padding:24px;text-align:center;color:var(--text3);">Pulsa Actualizar para cargar los datos.</div>
           </div>
-          <!-- Preview -->
-          <div id="inf-preview-wrap" style="display:none;">
-            <div style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">Vista previa del informe</div>
-            <div id="inf-preview" style="border:1px solid var(--border);border-radius:8px;overflow:auto;background:#fff;max-height:600px;"></div>
+        </div>
+      </div>
+
+      <!-- TAB 3: Horas resumen -->
+      <div id="inf-panel-horas" class="inf-panel" style="display:none;">
+        <div class="card" style="border-radius:0 8px 8px 8px;">
+          <div id="inf-horas-content" style="max-height:600px;overflow-y:auto;">
+            <div style="padding:24px;text-align:center;color:var(--text3);">Pulsa Actualizar para cargar los datos.</div>
           </div>
-          <div id="inf-empty" style="padding:32px;text-align:center;color:var(--text3);font-size:12px;">Selecciona el tipo de informe, el período y pulsa Previsualizar.</div>
+        </div>
+      </div>
+
+      <!-- TAB 4: Generar PDF -->
+      <div id="inf-panel-pdf" class="inf-panel" style="display:none;">
+        <div class="card" style="border-radius:0 8px 8px 8px;">
+          <div class="card-body">
+            <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+              <button onclick="generarInforme()" style="padding:10px 20px;background:var(--blue2);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🔍 Previsualizar informe</button>
+              <button onclick="imprimirInforme()" style="padding:10px 20px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🖨️ Imprimir / PDF</button>
+              <button onclick="descargarInformeHTML()" style="padding:10px 20px;background:var(--blue-light);color:var(--blue2);border:1px solid var(--border2);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">💾 Guardar HTML</button>
+            </div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:16px;">El informe usa el período y operario seleccionados arriba · Cumplimiento RD 8/2019 art. 34.9</div>
+            <div id="inf-preview-wrap" style="display:none;">
+              <div id="inf-preview" style="border:1px solid var(--border);border-radius:8px;overflow:auto;background:#fff;max-height:600px;"></div>
+            </div>
+            <div id="inf-empty" style="padding:32px;text-align:center;color:var(--text3);font-size:12px;">Selecciona período y pulsa Previsualizar.</div>
+          </div>
         </div>
       </div>
     </div>
@@ -3171,28 +3200,270 @@ async function renderCalendario(){
 }
 
 // ══════════════════════════════════════════════════════════
-// MÓDULO INFORMES DE JORNADA — RD 8/2019
+// MÓDULO INFORMES DE JORNADA — RD 8/2019 — PANEL CON PESTAÑAS
+// ══════════════════════════════════════════════════════════
+
+function switchInfTab(tab){
+  document.querySelectorAll('.inf-panel').forEach(p=>p.style.display='none');
+  document.querySelectorAll('.inf-tab').forEach(b=>{
+    b.style.background='var(--bg)';b.style.color='var(--text2)';b.style.fontWeight='400';
+  });
+  document.getElementById('inf-panel-'+tab).style.display='block';
+  const btn=document.getElementById('inf-tab-'+tab);
+  if(btn){btn.style.background='var(--blue2)';btn.style.color='#fff';btn.style.fontWeight='700';}
+}
+
+function onChangeInfPeriodo(){
+  const tipo=document.getElementById('inf-periodo-global').value;
+  document.getElementById('inf-ctrl-fecha').style.display=tipo==='diario'?'block':'none';
+  document.getElementById('inf-ctrl-semana').style.display=tipo==='semanal'?'block':'none';
+  document.getElementById('inf-ctrl-mes').style.display=tipo==='mensual'?'block':'none';
+}
+
+async function cargarTodoInforme(){
+  const tipo=document.getElementById('inf-periodo-global').value;
+  // Sincronizar selector antiguo con el nuevo
+  const infTipo=document.getElementById('inf-tipo');
+  if(infTipo)infTipo.value=tipo;
+
+  const fechas=getFechasRango();
+  if(!fechas.length)return;
+  const filtroDoc=document.getElementById('inf-operario').value;
+  const hoy=`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}-${String(new Date().getDate()).padStart(2,'0')}`;
+
+  // Mostrar loading
+  ['inf-jornada-content','inf-obras-content','inf-horas-content'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.innerHTML='<div style="padding:24px;text-align:center;color:var(--text3);">⏳ Cargando...</div>';
+  });
+
+  // Cargar fichajes
+  const resultados=await Promise.all(fechas.filter(f=>f<=hoy).map(fecha=>
+    fetch(`${FB_URL}/fichajes/${fecha}.json`).then(r=>r.json()).then(d=>({fecha,data:d})).catch(()=>({fecha,data:null}))
+  ));
+
+  // Procesar datos
+  const porFecha={};   // {fecha:{doc:{nombre,entrada,salida,horas,obra,ciudad,manual}}}
+  const porOperario={}; // {doc:{nombre,total,dias,obras:Set}}
+  const porObra={};    // {obra:{horas,operarios:Set,dias:Set}}
+  let totalHorasGlobal=0, totalRegistros=0;
+
+  resultados.forEach(({fecha,data})=>{
+    if(!data)return;
+    if(!porFecha[fecha])porFecha[fecha]={};
+    Object.values(data).forEach(f=>{
+      if(!f||!f.doc)return;
+      const doc=f.doc.replace(/[^A-Z0-9]/gi,'').toUpperCase();
+      if(filtroDoc!=='todos'&&doc!==filtroDoc)return;
+      if(!porFecha[fecha][doc])porFecha[fecha][doc]={nombre:f.nombre||doc,doc,entrada:null,salida:null,horas:0,obra:f.obra||f.ciudad||'—',ciudad:f.ciudad||'',manual:false};
+      const fd=porFecha[fecha][doc];
+      if(f.tipo==='entrada')fd.entrada=f.hora;
+      if(f.tipo==='salida')fd.salida=f.hora;
+      if(f.hora_entrada&&!fd.entrada)fd.entrada=f.hora_entrada;
+      if(f.manual)fd.manual=true;
+      if(f.obra)fd.obra=f.obra;
+    });
+    // Calcular horas
+    Object.values(porFecha[fecha]).forEach(fd=>{
+      if(fd.entrada&&fd.salida){
+        const[eh,em]=fd.entrada.split(':').map(Number);
+        const[sh,sm]=fd.salida.split(':').map(Number);
+        const mins=(sh*60+sm)-(eh*60+em);
+        if(mins>0){
+          fd.horas=redondearMediaHora(mins/60);
+          totalHorasGlobal+=fd.horas;
+          totalRegistros++;
+          // Acumular por operario
+          if(!porOperario[fd.doc])porOperario[fd.doc]={nombre:fd.nombre,total:0,dias:new Set(),obras:new Set()};
+          porOperario[fd.doc].total+=fd.horas;
+          porOperario[fd.doc].dias.add(fecha);
+          if(fd.obra&&fd.obra!=='—')porOperario[fd.doc].obras.add(fd.obra);
+          // Acumular por obra
+          const obraKey=fd.obra||'Sin obra';
+          if(!porObra[obraKey])porObra[obraKey]={horas:0,operarios:new Set(),dias:new Set()};
+          porObra[obraKey].horas+=fd.horas;
+          porObra[obraKey].operarios.add(fd.doc);
+          porObra[obraKey].dias.add(fecha);
+        }
+      }
+    });
+  });
+
+  const diasConFichaje=Object.keys(porFecha).filter(f=>Object.keys(porFecha[f]).length>0).length;
+
+  // ── KPIs globales ──
+  const kpisEl=document.getElementById('inf-kpis-resumen');
+  if(kpisEl)kpisEl.innerHTML=`
+    <div style="background:var(--blue-pale);border-radius:8px;padding:8px 16px;">
+      <div style="font-family:'Montserrat';font-weight:900;font-size:22px;color:var(--blue2)">${formatH(totalHorasGlobal)}h</div>
+      <div style="font-size:10px;color:var(--text3)">Total horas</div>
+    </div>
+    <div style="background:var(--bg);border-radius:8px;padding:8px 16px;">
+      <div style="font-family:'Montserrat';font-weight:900;font-size:22px;color:var(--text)">${diasConFichaje}</div>
+      <div style="font-size:10px;color:var(--text3)">Días con fichajes</div>
+    </div>
+    <div style="background:var(--bg);border-radius:8px;padding:8px 16px;">
+      <div style="font-family:'Montserrat';font-weight:900;font-size:22px;color:var(--green)">${Object.keys(porOperario).length}</div>
+      <div style="font-size:10px;color:var(--text3)">Operarios activos</div>
+    </div>
+    <div style="background:var(--bg);border-radius:8px;padding:8px 16px;">
+      <div style="font-family:'Montserrat';font-weight:900;font-size:22px;color:var(--orange)">${Object.keys(porObra).length}</div>
+      <div style="font-size:10px;color:var(--text3)">Obras con actividad</div>
+    </div>`;
+
+  // ── TAB 1: Jornada diaria ──
+  const jorEl=document.getElementById('inf-jornada-content');
+  if(jorEl){
+    const diasOrdenados=Object.keys(porFecha).filter(f=>Object.keys(porFecha[f]).length>0).sort((a,b)=>b.localeCompare(a));
+    if(!diasOrdenados.length){jorEl.innerHTML='<div style="padding:24px;text-align:center;color:var(--text3);">Sin fichajes en este período.</div>';return;}
+    jorEl.innerHTML=diasOrdenados.map(fecha=>{
+      const ops=Object.values(porFecha[fecha]).sort((a,b)=>(a.entrada||'99:99').localeCompare(b.entrada||'99:99'));
+      const totalDia=ops.reduce((a,v)=>a+v.horas,0);
+      const fechaFmt=new Date(fecha+'T12:00:00').toLocaleDateString('es-ES',{weekday:'long',day:'2-digit',month:'short',year:'numeric'});
+      return `<div style="border-bottom:2px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;padding:10px 16px;background:var(--blue-pale);cursor:pointer;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+          <span style="font-family:'Montserrat';font-weight:700;font-size:12px;text-transform:capitalize;color:var(--blue)">${fechaFmt}</span>
+          <span style="font-family:'Montserrat';font-weight:800;color:var(--blue2)">${formatH(totalDia)}h · ${ops.length} operarios</span>
+        </div>
+        <div>
+          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <thead><tr style="background:var(--bg);">
+              <th style="padding:6px 12px;text-align:left;">Operario</th>
+              <th style="padding:6px 12px;text-align:center;">Entrada</th>
+              <th style="padding:6px 12px;text-align:center;">Salida</th>
+              <th style="padding:6px 12px;text-align:center;">Horas</th>
+              <th style="padding:6px 12px;text-align:left;">Obra/Ubicación</th>
+              <th style="padding:6px 12px;text-align:center;">Tipo</th>
+            </tr></thead>
+            <tbody>${ops.map(op=>`<tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:7px 12px;font-weight:600;">${op.nombre}</td>
+              <td style="padding:7px 12px;text-align:center;font-weight:700;color:var(--blue2);">${op.entrada||'—'}</td>
+              <td style="padding:7px 12px;text-align:center;color:var(--red);">${op.salida||'—'}</td>
+              <td style="padding:7px 12px;text-align:center;font-family:'Montserrat';font-weight:800;color:${op.horas>0?'var(--green)':'var(--text3)'};">${op.horas>0?formatH(op.horas)+'h':'—'}</td>
+              <td style="padding:7px 12px;font-size:10px;color:var(--text3);">${op.obra}</td>
+              <td style="padding:7px 12px;text-align:center;">${op.manual?'<span style="background:#EDE9FE;color:#7C3AED;padding:1px 6px;border-radius:3px;font-size:9px;">Manual</span>':'<span style="background:#DCFCE7;color:#16A34A;padding:1px 6px;border-radius:3px;font-size:9px;">App</span>'}</td>
+            </tr>`).join('')}
+            <tr style="background:var(--bg);font-weight:700;">
+              <td colspan="3" style="padding:7px 12px;text-align:right;font-size:10px;">TOTAL:</td>
+              <td style="padding:7px 12px;text-align:center;font-family:'Montserrat';font-weight:900;color:var(--blue2);">${formatH(totalDia)}h</td>
+              <td colspan="2"></td>
+            </tr></tbody>
+          </table>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── TAB 2: Por obra ──
+  const obrasEl=document.getElementById('inf-obras-content');
+  if(obrasEl){
+    const obrasLista=Object.entries(porObra).sort((a,b)=>b[1].horas-a[1].horas);
+    if(!obrasLista.length){obrasEl.innerHTML='<div style="padding:24px;text-align:center;color:var(--text3);">Sin datos de obras.</div>';return;}
+    obrasEl.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead><tr style="background:var(--bg);">
+        <th style="padding:10px 16px;text-align:left;">Obra / Ubicación</th>
+        <th style="padding:10px 16px;text-align:center;">Días activa</th>
+        <th style="padding:10px 16px;text-align:center;">Operarios</th>
+        <th style="padding:10px 16px;text-align:center;">Total horas</th>
+        <th style="padding:10px 16px;text-align:center;">% del total</th>
+      </tr></thead>
+      <tbody>${obrasLista.map(([obra,d],i)=>{
+        const pct=totalHorasGlobal>0?Math.round(d.horas/totalHorasGlobal*100):0;
+        return `<tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px 16px;font-weight:700;">🏗️ ${obra}</td>
+          <td style="padding:10px 16px;text-align:center;">${d.dias.size}</td>
+          <td style="padding:10px 16px;text-align:center;">${d.operarios.size}</td>
+          <td style="padding:10px 16px;text-align:center;font-family:'Montserrat';font-weight:900;color:var(--blue2);">${formatH(d.horas)}h</td>
+          <td style="padding:10px 16px;text-align:center;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+                <div style="width:${pct}%;height:100%;background:var(--blue2);border-radius:3px;"></div>
+              </div>
+              <span style="font-size:10px;font-weight:700;color:var(--blue2);width:30px;">${pct}%</span>
+            </div>
+          </td>
+        </tr>`;
+      }).join('')}
+      <tr style="background:var(--bg);font-weight:700;">
+        <td style="padding:10px 16px;">TOTAL</td>
+        <td style="padding:10px 16px;text-align:center;">${diasConFichaje}</td>
+        <td style="padding:10px 16px;text-align:center;">${Object.keys(porOperario).length}</td>
+        <td style="padding:10px 16px;text-align:center;font-family:'Montserrat';font-weight:900;color:var(--blue2);">${formatH(totalHorasGlobal)}h</td>
+        <td style="padding:10px 16px;text-align:center;font-weight:700;">100%</td>
+      </tr></tbody>
+    </table>`;
+  }
+
+  // ── TAB 3: Horas resumen por operario ──
+  const horasEl=document.getElementById('inf-horas-content');
+  if(horasEl){
+    const opLista=Object.values(porOperario).sort((a,b)=>b.total-a.total);
+    if(!opLista.length){horasEl.innerHTML='<div style="padding:24px;text-align:center;color:var(--text3);">Sin datos.</div>';return;}
+    horasEl.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead><tr style="background:var(--bg);">
+        <th style="padding:10px 16px;text-align:left;">#</th>
+        <th style="padding:10px 16px;text-align:left;">Operario</th>
+        <th style="padding:10px 16px;text-align:center;">Días</th>
+        <th style="padding:10px 16px;text-align:center;">Total horas</th>
+        <th style="padding:10px 16px;text-align:center;">Media/día</th>
+        <th style="padding:10px 16px;text-align:left;">Obras</th>
+      </tr></thead>
+      <tbody>${opLista.map((op,i)=>{
+        const media=op.dias.size>0?formatH(redondearMediaHora(op.total/op.dias.size)):0;
+        const obras=[...op.obras].join(', ')||'—';
+        return `<tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px 16px;font-weight:700;color:var(--text3);">${i+1}</td>
+          <td style="padding:10px 16px;font-weight:600;">${op.nombre}</td>
+          <td style="padding:10px 16px;text-align:center;">${op.dias.size}</td>
+          <td style="padding:10px 16px;text-align:center;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
+                <div style="width:${totalHorasGlobal>0?Math.min(100,Math.round(op.total/totalHorasGlobal*100*opLista.length)):0}%;height:100%;background:linear-gradient(90deg,var(--blue2),var(--blue3));border-radius:4px;"></div>
+              </div>
+              <span style="font-family:'Montserrat';font-weight:800;color:var(--blue2);width:36px;">${formatH(op.total)}h</span>
+            </div>
+          </td>
+          <td style="padding:10px 16px;text-align:center;color:var(--text3);">${media}h</td>
+          <td style="padding:10px 16px;font-size:10px;color:var(--text3);">${obras}</td>
+        </tr>`;
+      }).join('')}
+      <tr style="background:var(--bg);font-weight:700;">
+        <td colspan="3" style="padding:10px 16px;text-align:right;">TOTAL PERÍODO:</td>
+        <td style="padding:10px 16px;text-align:center;font-family:'Montserrat';font-weight:900;font-size:14px;color:var(--blue2);">${formatH(totalHorasGlobal)}h</td>
+        <td colspan="2"></td>
+      </tr></tbody>
+    </table>`;
+  }
+
+  showToast(`✅ ${totalRegistros} registros · ${formatH(totalHorasGlobal)}h totales`,'ok');
+}
 // ══════════════════════════════════════════════════════════
 let _informeHTML = '';
 
 function initInformes(){
-  // Poblar select de operarios
   const sel=document.getElementById('inf-operario');
   if(sel){
-    sel.innerHTML='<option value="todos">👷 Todos los operarios</option>';
+    sel.innerHTML='<option value="todos">👷 Todos</option>';
     WORKERS.filter(w=>!w.inactivo).forEach(w=>{
       const doc=(w.dni||w.nie||'').replace(/[^A-Z0-9]/gi,'').toUpperCase();
       sel.innerHTML+=`<option value="${doc}">${w.nombre} ${w.apellidos}</option>`;
     });
   }
-  // Defaults de fecha
-  const hoy=new Date().toISOString().split('T')[0];
-  const mes=hoy.substring(0,7);
-  if(document.getElementById('inf-fecha'))document.getElementById('inf-fecha').value=hoy;
-  if(document.getElementById('inf-semana-ini'))document.getElementById('inf-semana-ini').value=getLunes(new Date()).toISOString().split('T')[0];
+  const hoy=new Date();
+  const hoyStr=`${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-${String(hoy.getDate()).padStart(2,'0')}`;
+  const mes=hoyStr.substring(0,7);
+  if(document.getElementById('inf-fecha'))document.getElementById('inf-fecha').value=hoyStr;
+  if(document.getElementById('inf-semana-ini')){
+    const lunes=getLunes(new Date());
+    const lunesStr=`${lunes.getFullYear()}-${String(lunes.getMonth()+1).padStart(2,'0')}-${String(lunes.getDate()).padStart(2,'0')}`;
+    document.getElementById('inf-semana-ini').value=lunesStr;
+  }
   if(document.getElementById('inf-mes'))document.getElementById('inf-mes').value=mes;
-  document.getElementById('inf-preview-wrap').style.display='none';
-  document.getElementById('inf-empty').style.display='block';
+  // Seleccionar mes por defecto y cargar
+  const periodoSel=document.getElementById('inf-periodo-global');
+  if(periodoSel)periodoSel.value='mensual';
+  onChangeInfPeriodo();
+  setTimeout(()=>cargarTodoInforme(),500);
 }
 
 function getLunes(d){
