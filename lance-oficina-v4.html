@@ -32,7 +32,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(5px)}}
 .shake{animation:shake .4s ease;}
 #app{display:none;position:relative;z-index:1;min-height:100vh;}
-.sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--blue);display:flex;flex-direction:column;z-index:50;box-shadow:4px 0 20px rgba(27,79,140,.2);transition:transform .3s ease;}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--blue);display:flex;flex-direction:column;z-index:50;box-shadow:4px 0 20px rgba(27,79,140,.2);transition:width .25s ease,transform .25s ease;}
 .sb-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
 .sb-logo-svg{width:160px;height:auto;display:block;margin-bottom:8px;}
 .sb-tagline{font-family:'Montserrat',sans-serif;font-size:8px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5);}
@@ -51,7 +51,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .sb-user-role{font-size:10px;color:rgba(255,255,255,.5);}
 .sb-logout{margin-top:8px;width:100%;padding:8px;background:transparent;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.5);font-size:11px;cursor:pointer;transition:all .18s;font-family:'Inter',sans-serif;}
 .sb-logout:hover{background:rgba(255,71,87,.2);border-color:rgba(255,71,87,.4);color:#fca5a5;}
-.main-content{margin-left:240px;padding:0;min-height:100vh;box-sizing:border-box;width:calc(100% - 240px);overflow:auto;}
+.main-content{margin-left:240px;padding:0;min-height:100vh;box-sizing:border-box;transition:margin-left .25s ease;}
 .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;box-shadow:0 1px 0 var(--border);}
 .topbar-title{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:700;color:var(--text);}
 .topbar-right{display:flex;align-items:center;gap:12px;}
@@ -207,6 +207,21 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
 #inf-preview{overflow:auto;width:100%;box-sizing:border-box;}
 .topbar{box-sizing:border-box;width:100%;}
 .btn-toggle-sidebar{display:none;position:fixed;top:14px;left:8px;z-index:60;width:34px;height:34px;background:var(--blue);border:none;border-radius:8px;cursor:pointer;color:#fff;font-size:16px;align-items:center;justify-content:center;}
+
+/* ═══ SIDEBAR TOGGLE ═══ */
+.sidebar-hidden .sidebar{transform:translateX(-240px);}
+.sidebar-hidden .main-content{margin-left:0;}
+.sb-toggle-btn{position:fixed;top:14px;left:16px;z-index:200;width:36px;height:36px;background:var(--blue);border:none;border-radius:8px;cursor:pointer;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.2);transition:left .25s ease;}
+.sidebar-hidden .sb-toggle-btn{left:12px;background:var(--blue2);}
+/* ═══ TABLE WRAP ═══ */
+.table-wrap{overflow-x:auto;width:100%;-webkit-overflow-scrolling:touch;}
+/* ═══ PAGE ═══ */
+.page{padding:20px 24px;display:none;box-sizing:border-box;width:100%;}
+.page.active{display:block;}
+@media(max-width:900px){
+  .sidebar{transform:translateX(-240px);}
+  .main-content{margin-left:0;}
+}
 </style>
 </head>
 <body>
@@ -241,6 +256,7 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
 </div>
 
 <div id="app">
+  <button class="sb-toggle-btn" id="sb-toggle" onclick="toggleNav()" title="Mostrar/ocultar menú">☰</button>
   <aside class="sidebar">
     <div class="sb-logo">
       <svg class="sb-logo-svg" viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg">
@@ -1116,12 +1132,16 @@ function tick(){const n=new Date();document.getElementById('clock').textContent=
 setInterval(tick,1000);tick();
 
 // ── PÁGINAS ──
-function toggleSidebar(){
-  const sb=document.querySelector('.sidebar');
-  const mc=document.getElementById('main-content');
-  sb.classList.toggle('collapsed');
-  mc.classList.toggle('expanded');
+function toggleNav(){
+  const hidden = document.body.classList.toggle('sidebar-hidden');
+  localStorage.setItem('sb_hidden', hidden?'1':'0');
 }
+// Restaurar estado al cargar
+(function(){
+  if(localStorage.getItem('sb_hidden')==='1'){
+    document.body.classList.add('sidebar-hidden');
+  }
+})();
 
 const TITLES={dashboard:'Tablero',jornada:'Resumen de jornada',operarios:'Operarios','ficha-operario':'👷 Ficha del operario','ficha-obra':'🏗️ Detalle de obra',alertas:'Alertas',extras:'Horas extras',horas:'Horas trabajadas',tareas:'Tareas',whatsapp:'WhatsApp',gestion:'Alta de operarios',asistente:'Asistente IA',consentimientos:'Consentimientos RGPD',obras:'Obras',informes:'📄 Informes de jornada'};
 function showPage(name){
