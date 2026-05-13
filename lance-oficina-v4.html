@@ -938,7 +938,10 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
             <div id="inf-ctrl-fecha" style="display:none;"><input class="form-ctrl" type="date" id="inf-fecha" style="font-size:11px;padding:5px 10px;width:140px;"></div>
             <div id="inf-ctrl-semana" style="display:none;"><input class="form-ctrl" type="date" id="inf-semana-ini" style="font-size:11px;padding:5px 10px;width:140px;"></div>
             <div id="inf-ctrl-mes"><input class="form-ctrl" type="month" id="inf-mes" style="font-size:11px;padding:5px 10px;width:140px;"></div>
-            <select class="form-ctrl" id="inf-operario" style="font-size:11px;padding:5px 10px;width:180px;">
+            <select class="form-ctrl" id="inf-obra-filtro" style="font-size:11px;padding:5px 10px;width:160px;" onchange="cargarTodoInforme()">
+              <option value="todas">🏗️ Todas las obras</option>
+            </select>
+            <select class="form-ctrl" id="inf-operario" style="font-size:11px;padding:5px 10px;width:160px;">
               <option value="todos">👷 Todos</option>
             </select>
             <button onclick="cargarTodoInforme()" style="padding:7px 16px;background:var(--blue2);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">🔄 Actualizar</button>
@@ -3245,6 +3248,31 @@ async function cargarTodoInforme(){
   const fechas=getFechasRango();
   if(!fechas.length)return;
   const filtroDoc=document.getElementById('inf-operario').value;
+  const filtroObraId=document.getElementById('inf-obra-filtro')?.value||'todas';
+  // Determinar qué operarios pertenecen a la obra seleccionada
+  let docsDeObra=null; // null = todos
+  if(filtroObraId!=='todas'){
+    if(filtroObraId==='sin_obra'){
+      docsDeObra=new Set(WORKERS.filter(w=>!w.obra).map(w=>(w.dni||w.nie||'').replace(/[^A-Z0-9]/gi,'').toUpperCase()));
+    } else {
+      const obraSelec=OBRAS.find(o=>o.id===filtroObraId);
+      if(obraSelec){
+        // Operarios asignados a esta obra
+        docsDeObra=new Set(
+          WORKERS.filter(w=>w.obra&&(
+            w.obra===obraSelec.nombre||
+            w.obra===obraSelec.direccion||
+            (w.obra_lat&&obraSelec.lat&&Math.abs(w.obra_lat-obraSelec.lat)<0.01)
+          )).map(w=>(w.dni||w.nie||'').replace(/[^A-Z0-9]/gi,'').toUpperCase())
+        );
+        // Si no hay operarios asignados explícitamente, mostrar aviso
+        if(docsDeObra.size===0){
+          // Buscar por nombre de obra en fichajes
+          docsDeObra='por_fichaje'; // flag para filtrar por nombre en fichajes
+        }
+      }
+    }
+  }
   const hoy=`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}-${String(new Date().getDate()).padStart(2,'0')}`;
 
   // Mostrar loading
@@ -3271,6 +3299,13 @@ async function cargarTodoInforme(){
       if(!f||!f.doc)return;
       const doc=f.doc.replace(/[^A-Z0-9]/gi,'').toUpperCase();
       if(filtroDoc!=='todos'&&doc!==filtroDoc)return;
+      // ✅ Filtro real por obra
+      if(docsDeObra==='por_fichaje'){
+        const obraSelec=OBRAS.find(o=>o.id===filtroObraId);
+        const obraNombre=(obraSelec?.nombre||'').toLowerCase();
+        const fichajeObra=(f.obra||f.ciudad||'').toLowerCase();
+        if(obraNombre&&!fichajeObra.includes(obraNombre)&&!obraNombre.includes(fichajeObra.split(',')[0]?.trim()))return;
+      } else if(docsDeObra instanceof Set&&!docsDeObra.has(doc))return;
       if(!porFecha[fecha][doc])porFecha[fecha][doc]={nombre:f.nombre||doc,doc,entrada:null,salida:null,horas:0,obra:f.obra||f.ciudad||'—',ciudad:f.ciudad||'',manual:false};
       const fd=porFecha[fecha][doc];
       if(f.tipo==='entrada')fd.entrada=f.hora;
@@ -3306,6 +3341,15 @@ async function cargarTodoInforme(){
   });
 
   const diasConFichaje=Object.keys(porFecha).filter(f=>Object.keys(porFecha[f]).length>0).length;
+
+  // ── Título obra seleccionada ──
+  const obraFiltroId=document.getElementById('inf-obra-filtro')?.value||'todas';
+  const obraFiltroObj=OBRAS.find(o=>o.id===obraFiltroId);
+  const tituloObra=obraFiltroObj?`<div style="padding:10px 20px;background:var(--blue-pale);border-bottom:1px solid var(--border);"><span style="font-family:'Montserrat';font-weight:800;font-size:14px;color:var(--blue)">🏗️ ${obraFiltroObj.nombre}</span>${obraFiltroObj.cliente?`<span style="font-size:11px;color:var(--text3);margin-left:8px;">· ${obraFiltroObj.cliente}</span>`:''}<span style="font-size:10px;color:var(--text3);margin-left:8px;">${obraFiltroObj.direccion||''}</span></div>`:'';
+  ['inf-jornada-content','inf-obras-content','inf-horas-content'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el&&tituloObra)el.insertAdjacentHTML('afterbegin',tituloObra);
+  });
 
   // ── KPIs globales ──
   const kpisEl=document.getElementById('inf-kpis-resumen');
@@ -3464,6 +3508,17 @@ function initInformes(){
       const doc=(w.dni||w.nie||'').replace(/[^A-Z0-9]/gi,'').toUpperCase();
       sel.innerHTML+=`<option value="${doc}">${w.nombre} ${w.apellidos}</option>`;
     });
+  }
+  // Poblar selector de obras
+  const selObra=document.getElementById('inf-obra-filtro');
+  if(selObra){
+    selObra.innerHTML='<option value="todas">🏗️ Todas las obras</option>';
+    if(OBRAS&&OBRAS.length){
+      OBRAS.filter(o=>o.estado!=='terminada').forEach(o=>{
+        selObra.innerHTML+=`<option value="${o.id}">${o.nombre}${o.cliente?' · '+o.cliente:''}</option>`;
+      });
+    }
+    selObra.innerHTML+='<option value="sin_obra">— Sin obra asignada</option>';
   }
   const hoy=new Date();
   const hoyStr=`${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-${String(hoy.getDate()).padStart(2,'0')}`;
