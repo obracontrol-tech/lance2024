@@ -3211,6 +3211,11 @@ function switchInfTab(tab){
   document.getElementById('inf-panel-'+tab).style.display='block';
   const btn=document.getElementById('inf-tab-'+tab);
   if(btn){btn.style.background='var(--blue2)';btn.style.color='#fff';btn.style.fontWeight='700';}
+  // Si cambia a PDF no recargar, el resto sí
+  if(tab!=='pdf'){
+    const jornEl=document.getElementById('inf-jornada-content');
+    if(jornEl&&jornEl.innerHTML.includes('Pulsa Actualizar'))cargarTodoInforme();
+  }
 }
 
 function onChangeInfPeriodo(){
@@ -3472,14 +3477,19 @@ function getLunes(d){
 }
 
 function onChangeTipoInforme(){
-  const tipo=document.getElementById('inf-tipo').value;
-  document.getElementById('inf-ctrl-fecha').style.display=tipo==='diario'?'':'none';
-  document.getElementById('inf-ctrl-semana').style.display=tipo==='semanal'?'':'none';
-  document.getElementById('inf-ctrl-mes').style.display=tipo==='mensual'?'':'none';
+  const sel=document.getElementById('inf-tipo')||document.getElementById('inf-periodo-global');
+  if(!sel)return;
+  const tipo=sel.value;
+  const fc=document.getElementById('inf-ctrl-fecha');
+  const fs=document.getElementById('inf-ctrl-semana');
+  const fm=document.getElementById('inf-ctrl-mes');
+  if(fc)fc.style.display=tipo==='diario'?'block':'none';
+  if(fs)fs.style.display=tipo==='semanal'?'block':'none';
+  if(fm)fm.style.display=tipo==='mensual'?'block':'none';
 }
 
 function getFechasRango(){
-  const tipo=document.getElementById('inf-tipo').value;
+  const tipo=(document.getElementById('inf-periodo-global')||document.getElementById('inf-tipo')||{value:'mensual'}).value;
   let fechas=[];
   if(tipo==='diario'){
     const f=document.getElementById('inf-fecha').value;
@@ -3509,7 +3519,7 @@ async function generarInforme(){
   const fechas=getFechasRango();
   if(!fechas.length){showToast('⚠️ Selecciona un período válido','err');return;}
   const filtroDoc=document.getElementById('inf-operario').value;
-  const tipo=document.getElementById('inf-tipo').value;
+  const tipo=(document.getElementById('inf-periodo-global')||document.getElementById('inf-tipo')||{value:'mensual'}).value;
   showToast('⏳ Cargando datos...','inf');
 
   // Cargar fichajes de todas las fechas en paralelo
@@ -3714,7 +3724,7 @@ async function generarInforme(){
 }
 
 function getTipoPeriodoLabel(){
-  const tipo=document.getElementById('inf-tipo').value;
+  const tipo=(document.getElementById('inf-periodo-global')||document.getElementById('inf-tipo')||{value:'mensual'}).value;
   if(tipo==='diario'){
     const f=document.getElementById('inf-fecha').value;
     return f?new Date(f+'T12:00:00').toLocaleDateString('es-ES',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}):'—';
