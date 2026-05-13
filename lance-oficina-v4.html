@@ -60,7 +60,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 @keyframes lp{0%,100%{opacity:1}50%{opacity:.3}}
 .tb-clock{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:var(--blue2);letter-spacing:1px;}
 .tb-date{font-size:11px;color:var(--text3);}
-.page{padding:24px 28px;display:none;box-sizing:border-box;width:100%;max-width:100%;overflow-x:auto;}
+.page{padding:20px 20px;display:none;box-sizing:border-box;width:100%;max-width:100%;overflow-x:hidden;}
 .page.active{display:block;box-sizing:border-box;}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
 .kpi-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;}
@@ -88,7 +88,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .kpi-sub{font-size:11px;color:var(--text3);margin-top:4px;}
 .kpi-trend{font-size:10px;font-weight:600;margin-top:8px;display:flex;align-items:center;gap:3px;}
 .t-up{color:var(--green);}.t-dn{color:var(--red);}.t-ne{color:var(--amber);}
-.card{background:var(--white);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:20px;}
+.card{background:var(--white);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);overflow:visible;margin-bottom:20px;box-sizing:border-box;}
 .card-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 .card-title{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;gap:8px;}
 .card-body{padding:20px;}
@@ -426,10 +426,10 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
           </div>
           <div style="margin-top:8px;font-size:10px;color:var(--text3);">ℹ️ El fichaje manual sobreescribe el fichaje del operario en Firebase para hoy.</div>
         </div>
-        <table class="jornada-table">
-          <thead><tr><th>Operario</th><th>Entrada</th><th>Salida</th><th>Horas</th><th>Zona</th><th>Estado</th></tr></thead>
+        <div style="overflow-x:auto;width:100%;"><table class="jornada-table" style="min-width:600px;">
+          <thead><tr><th style="min-width:180px;">Operario</th><th>Entrada</th><th>Salida</th><th>Horas</th><th>Zona</th><th>Estado</th></tr></thead>
           <tbody id="jornada-tbody"></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -443,10 +443,10 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
             <input class="search-inp" id="op-search" placeholder="Buscar por nombre, DNI o NIE..." oninput="renderWorkers()">
           </div>
         </div>
-        <table class="wtbl">
-          <thead><tr><th>#</th><th>Nombre</th><th>DNI/NIE</th><th>Obra</th><th>PIN</th><th>Estado</th><th>Zona GPS</th><th>Acción</th></tr></thead>
+        <div style="overflow-x:auto;width:100%;"><table class="wtbl" style="min-width:700px;">
+          <thead><tr><th>#</th><th style="min-width:160px;">Nombre</th><th>DNI/NIE</th><th>Obra</th><th>PIN</th><th>Estado</th><th>Zona GPS</th><th>Acción</th></tr></thead>
           <tbody id="op-tbody"></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -873,9 +873,18 @@ textarea.form-ctrl{resize:vertical;min-height:80px;}
             <button onclick="borrarTodosConsentimientos()" style="font-size:10px;color:var(--red);background:none;border:none;cursor:pointer;font-weight:600;">🗑️ Borrar todos</button>
           </div>
         </div>
-        <div style="overflow-x:auto;">
-        <table class="wtbl" style="min-width:700px;">
-          <thead><tr><th>Operario</th><th>DNI/NIE</th><th>Fecha</th><th>Hora</th><th>Idioma</th><th>RGPD</th><th>GPS</th><th>Acción</th></tr></thead>
+        <div style="overflow-x:auto;width:100%;">
+        <table class="wtbl" style="min-width:650px;width:100%;">
+          <thead><tr>
+            <th style="min-width:160px;">Operario</th>
+            <th>DNI/NIE</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Idioma</th>
+            <th>RGPD</th>
+            <th>GPS</th>
+            <th>Acción</th>
+          </tr></thead>
           <tbody id="consent-tbody"></tbody>
         </table>
         </div>
